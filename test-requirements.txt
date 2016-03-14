@@ -1,0 +1,9 @@
+coverage>=4.0.3
+pytest>=2.8.7
+pytest-cov>=2.2.1
+pytest-env>=0.6.0
+pytest-timeout>=1.0.0
+pytest-xdist>=1.14
+pyflakes>=1.1.0
+flake8-string-format>=0.2.1
+pep8-naming>=0.3.3
