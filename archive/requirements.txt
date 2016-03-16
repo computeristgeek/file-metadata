@@ -1,0 +1,6 @@
+py_w3c
+colormath
+pycolorname
+music21
+mlpy
+zbar

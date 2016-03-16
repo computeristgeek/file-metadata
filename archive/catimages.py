@@ -43,7 +43,7 @@ X                    http://toolserver.org/~daniel/WikiSense/UntaggedImages.php
 #
 # Distributed under the terms of the MIT license.
 #
-__version__ = '$Id: dbb4a8f64bf9dcf85dad72855edfc668bc0965a9 $'
+# __version__ = '$Id: dbb4a8f64bf9dcf85dad72855edfc668bc0965a9 $'
 #
 
 # python default packages
@@ -95,11 +95,12 @@ except:
     pass
 
 # pywikipedia framework python packages
-import wikipedia as pywikibot
-import pagegenerators
-import catlib
-import checkimages
-import externals                    # allow import from externals
+# import wikipedia as pywikibot
+import pywikibot
+from pywikibot import pagegenerators
+from pywikibot.compat import catlib
+import checkimages  # This is imported from scripts
+
 
 # additional python packages (more exotic and problematic ones)
 # modules needing compilation are imported later on request:
@@ -112,19 +113,26 @@ import externals                    # allow import from externals
 #   python-djvulibre or python-djvu for djvu support
 
 # check for and install needed 'externals' modules
-externals.check_setup('colormath')
-externals.check_setup('jseg')
-externals.check_setup('jseg/jpeg-6b')
-##externals.check_setup('_mlpy')
-externals.check_setup('_music21')
-externals.check_setup('opencv/haarcascades')
-externals.check_setup('pydmtx')  # <<< !!! test OS package management here !!!
-externals.check_setup('py_w3c')
-externals.check_setup('_zbar')
+
+# TODO
+
+# - How to install jseg easily in python ?
+# JSEG and JPEG-6b: http://old.vision.ece.ucsb.edu/segmentation/jseg/software/
+# externals.check_setup('jseg')
+# externals.check_setup('jseg/jpeg-6b')
+
+# - How to install :
+# externals.check_setup('pydmtx')  # <<< !!! test OS package management here !!!
+
+# - How to use opencv
+# externals.check_setup('opencv/haarcascades')
+
+# - How to use and install ocropy
+# https://github.com/tmbdev/ocropy
 
 import pycolorname
-##import _mlpy as mlpy
-from colormath.color_objects import RGBColor
+import mlpy  # Was commented before ?
+from colormath.color_objects import sRGBColor
 from py_w3c.validators.html.validator import HTMLValidator, ValidationFault
 ##from pdfminer import pdfparser, pdfinterp, pdfdevice, converter, cmapdb
 ##from pdfminer import layout
@@ -451,7 +459,7 @@ class _JpegFile(_UnknownFile):
             im.convert('RGB').save(self.image_path_JPEG, "JPEG")
 
             self.image_size = im.size
-        except IOError, e:
+        except IOError as e:
             if 'image file is truncated' in str(e):
                 # im object has changed due to exception raised
                 im.convert('RGB').save(self.image_path_JPEG, "JPEG")
@@ -1479,7 +1487,7 @@ class _JpegFile(_UnknownFile):
 
         #print "=== RGB Example: RGB->LAB ==="
         # Instantiate an Lab color object with the given values.
-        rgb = RGBColor(rgb[0], rgb[1], rgb[2], rgb_type='sRGB')
+        rgb = sRGBColor(rgb[0], rgb[1], rgb[2])
         # Show a string representation.
         #print rgb
         # Convert RGB to LAB using a D50 illuminant.
@@ -1496,7 +1504,7 @@ class _JpegFile(_UnknownFile):
         res = (1.E100, '')
         for c in colors:
             rgb = colors[c]
-            rgb = RGBColor(rgb[0], rgb[1], rgb[2], rgb_type='sRGB')
+            rgb = sRGBColor(rgb[0], rgb[1], rgb[2])
             color1 = rgb.convert_to('lab', target_illuminant='D65')
 
             #print "== Delta E Colors =="
@@ -3019,7 +3027,7 @@ class _MidiFile(_OggFile):
                    'Producer': u'-',
                    'Misc':     u'-', }
 
-        import _music21 as music21
+        import music21
         try:
             s = music21.converter.parse(self.file_name)
             if s.metadata:
@@ -3054,7 +3062,7 @@ class _MidiFile(_OggFile):
 
     # midi audio stream/feature extraction, detect streams of notes; parts
     def _detect_Streams(self):
-        import _music21 as music21
+        import music21
 
         # like in '_OggFile' (streams) a nice content listing of MIDI (music21)
         d = self._util_get_DataStreams_MUSIC21()
@@ -3089,7 +3097,7 @@ class _MidiFile(_OggFile):
         if hasattr(self, '_buffer_MUSIC21'):
             return self._buffer_MUSIC21
 
-        import _music21 as music21
+        import music21
 
         #music21.features.jSymbolic.getCompletionStats()
         try:
@@ -4387,7 +4395,7 @@ def main():
         Bot.setParameters(imageName)  # Setting the image for the main class
         try:
             Bot.downloadImage()
-        except IOError, err:
+        except IOError as err:
             # skip if download not possible
             pywikibot.warning(u"%s, skipped..." % err)
             continue
@@ -4478,11 +4486,11 @@ def trainbot(generator, Bot, image_old_namespace, image_namespace):
             Bot.setParameters(imageName)  # Setting the image for the main class
             try:
                 Bot.downloadImage()
-            except IOError, err:
+            except IOError as err:
                 # skip if download not possible
                 pywikibot.warning(u"%s, skipped..." % err)
                 continue
-            except Exception, err:
+            except Exception as err:
                 # skip on any unexpected error, but report it
                 pywikibot.error(u"%s" % err)
                 pywikibot.error(u"was not able to process page %s !!!\n"
