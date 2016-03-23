@@ -73,3 +73,10 @@ target/
 
 # Pyenv
 .python-version
+
+# Virtualenv
+/env
+/venv
+
+# Mediawiki
+/user-config.py
