@@ -13,7 +13,7 @@ dependencies:
 test:
   override:
     - coala-ci
-    - flake8 .
+    - flake8 file_metadata setup.py
     - python -m pytest
     - python3 -m pytest
     - pip install .
