@@ -45,6 +45,7 @@ X                    http://toolserver.org/~daniel/WikiSense/UntaggedImages.php
 #
 # __version__ = '$Id: dbb4a8f64bf9dcf85dad72855edfc668bc0965a9 $'
 #
+from __future__ import absolute_import, unicode_literals
 
 # python default packages
 import re
@@ -138,9 +139,6 @@ from py_w3c.validators.html.validator import HTMLValidator, ValidationFault
 ##from pdfminer import layout
 ##externals.check_setup('_ocropus')
 
-locale.setlocale(locale.LC_ALL, '')
-
-
 ###############################################################################
 # <--------------------------- Change only below! --------------------------->#
 ###############################################################################
@@ -149,22 +147,22 @@ locale.setlocale(locale.LC_ALL, '')
 # will automatically replaced with the bot's nickname.
 
 # Add your project (in alphabetical order) if you want that the bot start
-project_inserted = [u'commons']
+project_inserted = ['commons']
 
 # Ok, that's all. What is below, is the rest of code, now the code is fixed and it will run correctly in your project.
 ################################################################################
 # <--------------------------- Change only above! ---------------------------> #
 ################################################################################
 
-tmpl_FileContentsByBot = u"""}}
+tmpl_FileContentsByBot = """}}
 {{FileContentsByBot
 | botName = ~~~
 |"""
 
 # this list is auto-generated during bot run (may be add notifcation about NEW
 # templates)
-##tmpl_available_spec = [u'Properties', u'ColorRegions', u'Faces',
-##                       u'ColorAverage']
+##tmpl_available_spec = ['Properties', 'ColorRegions', 'Faces',
+##                       'ColorAverage']
 tmpl_available_spec = []    # auto-generated
 
 
@@ -184,7 +182,7 @@ class _UnknownFile(object):
 
         # available file properties and metadata
         self._properties = {
-            'Properties': [{'Format': u'-', 'Length': -1}],
+            'Properties': [{'Format': '-', 'Length': -1}],
             'Metadata': [],
         }
         # available feature to extract
@@ -220,7 +218,7 @@ class _UnknownFile(object):
         return self._properties
 
     def getFeatures(self):
-        pywikibot.warning(u"File format '%s/%s' not supported (yet)!"
+        pywikibot.warning("File format '%s/%s' not supported (yet)!"
                           % tuple(self.file_mime[:2]))
         return self._features
 
@@ -237,18 +235,18 @@ class _UnknownFile(object):
         misc += [exif['DescCreator']] if 'DescCreator' in exif else []
 
         result = {
-            'Software': u'%s' % exif['Software'] if 'Software' in exif else u'-',
-            'Desc':     u'%s' % exif['Desc'] if 'Desc' in exif else u'-',
-            'Comment':  u'%s' % exif['Comment'] if 'Comment' in exif else u'-',
-            'Producer': u'%s' % exif['Producer'] if 'Producer' in exif else u'-',
-            'Misc':     u'\n'.join(misc) if misc else u'-',
+            'Software': '%s' % exif['Software'] if 'Software' in exif else '-',
+            'Desc':     '%s' % exif['Desc'] if 'Desc' in exif else '-',
+            'Comment':  '%s' % exif['Comment'] if 'Comment' in exif else '-',
+            'Producer': '%s' % exif['Producer'] if 'Producer' in exif else '-',
+            'Misc':     '\n'.join(misc) if misc else '-',
         }
-           #'Output_Extension': exif['Output_extension'] if 'Output_extension' in exif else u'-',
-           #'DescProducer':     exif['DescProducer'] if 'DescProducer' in exif else u'-',
-           #'DescCreator':      exif['DescCreator'] if 'DescCreator' in exif else u'-',
-           #'Comments':         exif['Comments'] if 'Comments' in exif else u'-',
-           #'WorkDesc':         exif['WorkDescription'] if 'WorkDescription' in exif else u'-',
-           #'Dimensions':       tuple(exif['ImageSize'].split(u'x')) if 'ImageSize' in exif else (None, None),}
+           #'Output_Extension': exif['Output_extension'] if 'Output_extension' in exif else '-',
+           #'DescProducer':     exif['DescProducer'] if 'DescProducer' in exif else '-',
+           #'DescCreator':      exif['DescCreator'] if 'DescCreator' in exif else '-',
+           #'Comments':         exif['Comments'] if 'Comments' in exif else '-',
+           #'WorkDesc':         exif['WorkDescription'] if 'WorkDescription' in exif else '-',
+           #'Dimensions':       tuple(exif['ImageSize'].split('x')) if 'ImageSize' in exif else (None, None),}
            #'Mode':             exif['ColorType'], }
 
         ## https://pypi.python.org/pypi/hachoir-metadata (needs 'core' and 'parser')
@@ -273,7 +271,7 @@ class _UnknownFile(object):
         #    desc  = parser.description
         #    ptags = parser.getParserTags()
         #except (InputStreamError, AttributeError):
-        #    desc  = u'-'
+        #    desc  = '-'
         #    ptags = {}
         #
         ## Extract metadata
@@ -294,8 +292,8 @@ class _UnknownFile(object):
         ### Display metadatas on stdout
         ##text = metadata.exportPlaintext(priority=None, human=False)
         ##if not text:
-        ##    text = [u"(no metadata, priority may be too small, try priority=999)"]
-        ##print u'\n'.join(text)
+        ##    text = ["(no metadata, priority may be too small, try priority=999)"]
+        ##print '\n'.join(text)
 
         self._properties['Metadata'] = [result]
         #print self._properties['Metadata']
@@ -374,19 +372,19 @@ class _UnknownFile(object):
 
 class _JpegFile(_UnknownFile):
     # for '_detect_Trained'
-    cascade_files = [(u'Legs', 'haarcascade_lowerbody.xml'),
-                     (u'Torsos', 'haarcascade_upperbody.xml'),
-                     (u'Ears', 'haarcascade_mcs_leftear.xml'),
-                     (u'Ears', 'haarcascade_mcs_rightear.xml'),
-                     (u'Eyes', 'haarcascade_lefteye_2splits.xml'),        # (http://yushiqi.cn/research/eyedetection)
-                     (u'Eyes', 'haarcascade_righteye_2splits.xml'),       # (http://yushiqi.cn/research/eyedetection)
+    cascade_files = [('Legs', 'haarcascade_lowerbody.xml'),
+                     ('Torsos', 'haarcascade_upperbody.xml'),
+                     ('Ears', 'haarcascade_mcs_leftear.xml'),
+                     ('Ears', 'haarcascade_mcs_rightear.xml'),
+                     ('Eyes', 'haarcascade_lefteye_2splits.xml'),        # (http://yushiqi.cn/research/eyedetection)
+                     ('Eyes', 'haarcascade_righteye_2splits.xml'),       # (http://yushiqi.cn/research/eyedetection)
                      #externals/opencv/haarcascades/haarcascade_mcs_lefteye.xml
                      #externals/opencv/haarcascades/haarcascade_mcs_righteye.xml
                      # (others include indifferent (left and/or right) and pair)
-                     (u'Automobiles', 'cars3.xml'),                       # http://www.youtube.com/watch?v=c4LobbqeKZc
-                     (u'Hands', '1256617233-2-haarcascade-hand.xml', 300.),]    # http://www.andol.info/
+                     ('Automobiles', 'cars3.xml'),                       # http://www.youtube.com/watch?v=c4LobbqeKZc
+                     ('Hands', '1256617233-2-haarcascade-hand.xml', 300.),]    # http://www.andol.info/
                      # ('Hands' does not behave very well, in fact it detects any kind of skin and other things...)
-                     #(u'Aeroplanes', 'haarcascade_aeroplane.xml'),]      # e.g. for 'Category:Unidentified aircraft'
+                     #('Aeroplanes', 'haarcascade_aeroplane.xml'),]      # e.g. for 'Category:Unidentified aircraft'
 
     def __init__(self, file_name, file_mime, *args, **kwargs):
         _UnknownFile.__init__(self, file_name, file_mime)
@@ -401,7 +399,7 @@ class _JpegFile(_UnknownFile):
         #    os.remove(self.image_path)
         if os.path.exists(self.image_path_JPEG):
             os.remove(self.image_path_JPEG)
-        #image_path_new = self.image_path_JPEG.replace(u"cache/", u"cache/0_DETECTED_")
+        #image_path_new = self.image_path_JPEG.replace("cache/", "cache/0_DETECTED_")
         #if os.path.exists(image_path_new):
         #    os.remove(image_path_new)
 
@@ -488,12 +486,12 @@ class _JpegFile(_UnknownFile):
            as commons does in order to compare if those libraries (ImageMagick,
            ...) are buggy (thus explicitely use other software for independence)"""
 
-        result = {'Format': u'-', 'Length': -1}
+        result = {'Format': '-', 'Length': -1}
 
         try:
             i = Image.open(self.image_path)
         except IOError:
-            pywikibot.warning(u'unknown file type [_JpegFile]')
+            pywikibot.warning('unknown file type [_JpegFile]')
             return
 
         # http://mail.python.org/pipermail/image-sig/1999-May/000740.html
@@ -521,11 +519,11 @@ class _JpegFile(_UnknownFile):
                         'Mode':       i.mode,
                         #'info':       i.info,
                         #'stat':       os.stat(self.image_path),
-                        'Palette':    str(len(i.palette.palette)) if i.palette else u'-',
+                        'Palette':    str(len(i.palette.palette)) if i.palette else '-',
                         'Length':     pc,   # num. of pages
                         'Dimensions': self.image_size,
                         'Filesize':   os.path.getsize(self.file_name),
-                        'MIME':       u'%s/%s' % tuple(self.file_mime[:2]), })
+                        'MIME':       '%s/%s' % tuple(self.file_mime[:2]), })
 
         #self._properties['Properties'] = [result]
         self._properties['Properties'][0].update(result)
@@ -547,42 +545,42 @@ class _JpegFile(_UnknownFile):
         xml = os.path.join(scriptdir, 'externals/opencv/haarcascades/haarcascade_eye_tree_eyeglasses.xml')
         #xml = os.path.join(scriptdir, 'externals/opencv/haarcascades/haarcascade_eye.xml')
         if not os.path.exists(xml):
-            raise IOError(u"No such file: '%s'" % xml)
+            raise IOError("No such file: '%s'" % xml)
         #nestedCascade = cv.Load(
         nestedCascade = cv2.CascadeClassifier(xml)
         # http://tutorial-haartraining.googlecode.com/svn/trunk/data/haarcascades/
         xml = os.path.join(scriptdir, 'externals/opencv/haarcascades/haarcascade_frontalface_alt.xml')
         # MAY BE USE 'haarcascade_frontalface_alt_tree.xml' ALSO / INSTEAD...?!!
         if not os.path.exists(xml):
-            raise IOError(u"No such file: '%s'" % xml)
+            raise IOError("No such file: '%s'" % xml)
         cascade = cv2.CascadeClassifier(xml)
         xml = os.path.join(scriptdir, 'externals/opencv/haarcascades/haarcascade_profileface.xml')
         if not os.path.exists(xml):
-            raise IOError(u"No such file: '%s'" % xml)
+            raise IOError("No such file: '%s'" % xml)
         cascadeprofil = cv2.CascadeClassifier(xml)
         xml = os.path.join(scriptdir, 'externals/opencv/haarcascades/haarcascade_mcs_mouth.xml')
         if not os.path.exists(xml):
-            raise IOError(u"No such file: '%s'" % xml)
+            raise IOError("No such file: '%s'" % xml)
         cascademouth = cv2.CascadeClassifier(xml)
         xml = os.path.join(scriptdir, 'externals/opencv/haarcascades/haarcascade_mcs_nose.xml')
         if not os.path.exists(xml):
-            raise IOError(u"No such file: '%s'" % xml)
+            raise IOError("No such file: '%s'" % xml)
         cascadenose = cv2.CascadeClassifier(xml)
         xml = os.path.join(scriptdir, 'externals/opencv/haarcascades/haarcascade_lefteye_2splits.xml')
         if not os.path.exists(xml):
-            raise IOError(u"No such file: '%s'" % xml)
+            raise IOError("No such file: '%s'" % xml)
         cascadelefteye = cv2.CascadeClassifier(xml)        # (http://yushiqi.cn/research/eyedetection)
         xml = os.path.join(scriptdir, 'externals/opencv/haarcascades/haarcascade_righteye_2splits.xml')
         if not os.path.exists(xml):
-            raise IOError(u"No such file: '%s'" % xml)
+            raise IOError("No such file: '%s'" % xml)
         cascaderighteye = cv2.CascadeClassifier(xml)       # (http://yushiqi.cn/research/eyedetection)
         xml = os.path.join(scriptdir, 'externals/opencv/haarcascades/haarcascade_mcs_leftear.xml')
         if not os.path.exists(xml):
-            raise IOError(u"No such file: '%s'" % xml)
+            raise IOError("No such file: '%s'" % xml)
         cascadeleftear = cv2.CascadeClassifier(xml)
         xml = os.path.join(scriptdir, 'externals/opencv/haarcascades/haarcascade_mcs_rightear.xml')
         if not os.path.exists(xml):
-            raise IOError(u"No such file: '%s'" % xml)
+            raise IOError("No such file: '%s'" % xml)
         cascaderightear = cv2.CascadeClassifier(xml)
 
         scale = 1.
@@ -601,10 +599,10 @@ class _JpegFile(_UnknownFile):
             # how small and how many features are detected as faces (or eyes)
             scale  = max([1., np.average(np.array(img.shape)[0:2]/500.)])
         except IOError:
-            pywikibot.warning(u'unknown file type [_detect_Faces]')
+            pywikibot.warning('unknown file type [_detect_Faces]')
             return
         except AttributeError:
-            pywikibot.warning(u'unknown file type [_detect_Faces]')
+            pywikibot.warning('unknown file type [_detect_Faces]')
             return
 
         #detectAndDraw(image, cascade, nestedCascade, scale);
@@ -730,7 +728,7 @@ class _JpegFile(_UnknownFile):
                 (30, 30)))
             data = {'ID':       (i+1),
                     'Position': tuple(np.int_(r*scale)),
-                    'Type':     u'-',
+                    'Type':     '-',
                     'Eyes':     [],
                     'Mouth':    (),
                     'Nose':     (),
@@ -802,8 +800,8 @@ class _JpegFile(_UnknownFile):
                     rvec = neutral  # reset to neutral pose
                     tvec = np.array([[0.], [0.], [100.]])  # reset to neutral position (same order as max of D3points)
                     pywikibot.warning(
-                        u'Could not calculate pose of face, too big errors. '
-                        u'(looks like neutral pose/position is somehow singular)')
+                        'Could not calculate pose of face, too big errors. '
+                        '(looks like neutral pose/position is somehow singular)')
                 ## debug: draw pose
                 ##rvec *= 0
                 #mat, perp = self._util_getD2coords_calc(np.eye(3), cm, rvec, tvec, hacky=False)
@@ -841,7 +839,7 @@ class _JpegFile(_UnknownFile):
         ## see '_drawRect'
         #if result:
         #    #image_path_new = os.path.join(scriptdir, 'cache/0_DETECTED_' + self.image_filename)
-        #    image_path_new = self.image_path_JPEG.replace(u"cache/", u"cache/0_DETECTED_")
+        #    image_path_new = self.image_path_JPEG.replace("cache/", "cache/0_DETECTED_")
         #    cv2.imwrite(image_path_new, img)
 
         #return faces.tolist()
@@ -882,7 +880,7 @@ class _JpegFile(_UnknownFile):
             err.append(((D2points[i] - nvec[:2]/nvec[2]), D2points[i],
                         nvec[:2] / nvec[2]))
 
-        pywikibot.output(u'result for UN-calibrated camera:\n  rot=%s'
+        pywikibot.output('result for UN-calibrated camera:\n  rot=%s'
                          % rvec.transpose()[0])
 
         return rvec, tvec, np.array(cameraMatrix), (np.array(err)/max_d)
@@ -920,7 +918,7 @@ class _JpegFile(_UnknownFile):
             err.append(((D2points[i] - nvec[:2]/nvec[2]), D2points[i],
                         nvec[:2]/nvec[2]))
 
-##        pywikibot.output(u'result for UN-calibrated camera:\n  rot=%s'
+##        pywikibot.output('result for UN-calibrated camera:\n  rot=%s'
 ##                         % rvec.transpose()[0])
 
         return rvec, tvec, np.array(cameraMatrix), (np.array(err) / 1.0)
@@ -944,10 +942,10 @@ class _JpegFile(_UnknownFile):
             # how small and how many features are detected as faces (or eyes)
             scale  = max([1., np.average(np.array(video[0].shape)[0:2]/750.)])
         except IOError:
-            pywikibot.warning(u'unknown file type [_detect_FaceLandmark_xBOB]')
+            pywikibot.warning('unknown file type [_detect_FaceLandmark_xBOB]')
             return
         except AttributeError:
-            pywikibot.warning(u'unknown file type [_detect_FaceLandmark_xBOB]')
+            pywikibot.warning('unknown file type [_detect_FaceLandmark_xBOB]')
             return
 
         smallImg = np.empty((cv.Round(video[0].shape[1]/scale), cv.Round(video[0].shape[0]/scale)), dtype=np.uint8)
@@ -985,7 +983,7 @@ class _JpegFile(_UnknownFile):
                 #cv2.rectangle(img, tuple(mi.astype(int)), tuple(np.max(mat, axis=0).astype(int)), (0, 255, 0))
                 data = {'ID':       (i+1),
                         'Position': flm['bbox'],
-                        'Type':     u'Landmark',
+                        'Type':     'Landmark',
                         'Eyes':     [leye, reye],
                         'Mouth':    mouth,
                         'Nose':     tuple(np.array(flm['landmark'][7]).astype(int)) + (0, 0),
@@ -1027,10 +1025,10 @@ class _JpegFile(_UnknownFile):
             scale  = max([1., np.average(np.array(img.shape)[0:2]/400.)])
             #scale  = max([1., np.average(np.array(img.shape)[0:2]/300.)])
         except IOError:
-            pywikibot.warning(u'unknown file type [_detect_People]')
+            pywikibot.warning('unknown file type [_detect_People]')
             return
         except AttributeError:
-            pywikibot.warning(u'unknown file type [_detect_People]')
+            pywikibot.warning('unknown file type [_detect_People]')
             return
 
         # similar to face detection
@@ -1069,7 +1067,7 @@ class _JpegFile(_UnknownFile):
         #xml = os.path.join(scriptdir, 'externals/opencv/haarcascades/haarcascade_lowerbody.xml')
         #xml = os.path.join(scriptdir, 'externals/opencv/haarcascades/haarcascade_upperbody.xml')
         if not os.path.exists(xml):
-            raise IOError(u"No such file: '%s'" % xml)
+            raise IOError("No such file: '%s'" % xml)
         cascade       = cv2.CascadeClassifier(xml)
         objects = list(cascade.detectMultiScale(smallImg,
             1.1, 3, 0
@@ -1141,10 +1139,10 @@ class _JpegFile(_UnknownFile):
             # how small and how many features are detected
             scale  = max([1., np.average(np.array(img.shape)[0:2]/500.)])
         except IOError:
-            pywikibot.warning(u'unknown file type [_detect_Geometry]')
+            pywikibot.warning('unknown file type [_detect_Geometry]')
             return self._buffer_Geometry
         except AttributeError:
-            pywikibot.warning(u'unknown file type [_detect_Geometry]')
+            pywikibot.warning('unknown file type [_detect_Geometry]')
             return self._buffer_Geometry
 
         # similar to face or people detection
@@ -1261,7 +1259,7 @@ class _JpegFile(_UnknownFile):
         #data['SVD_Min']  = S[:(i+1)].min()
 
         data['FFT_Peaks'] = float(count)/len(S)
-        #pywikibot.output(u'FFT_Peaks: %s' % data['FFT_Peaks'])
+        #pywikibot.output('FFT_Peaks: %s' % data['FFT_Peaks'])
         # use wavelet transformation (FWT) from e.g. pywt, scipy signal or mlpy
         # (may be other) in addition to FFT and compare the spectra with FFT...
         # confer; "A Practical Guide to Wavelet Analysis" (http://journals.ametsoc.org/doi/pdf/10.1175/1520-0477%281998%29079%3C0061%3AAPGTWA%3E2.0.CO%3B2)
@@ -1358,8 +1356,8 @@ class _JpegFile(_UnknownFile):
         #result = pywt.waverec2(coeffs, 'db1') # Multilevel 2D Inverse Discrete Wavelet Transform
         result = result[:gray.shape[0],:gray.shape[1]]
         # consider 'swt' (2D Stationary Wavelet Transform) instead of 'dwt' too
-        pywikibot.output(u'%s' % coeffs)
-        pywikibot.output(u'%s' % np.abs(result - gray).max())
+        pywikibot.output('%s' % coeffs)
+        pywikibot.output('%s' % np.abs(result - gray).max())
         #data['Wavelet_Comp'] = coeffs
 
         # https://github.com/nigma/pywt/blob/master/demo/image_blender.py
@@ -1388,7 +1386,7 @@ class _JpegFile(_UnknownFile):
             (l, t) = (0, 0)
             i = im
         except IOError:
-            pywikibot.warning(u'unknown file type [_detect_SegmentColors]')
+            pywikibot.warning('unknown file type [_detect_SegmentColors]')
             return
 
         result = []
@@ -1402,7 +1400,7 @@ class _JpegFile(_UnknownFile):
             ##(pic, scale) = self._util_detect_ColorSegments_JSEG(pic)    # (final split)
             #hist = self._util_get_ColorSegmentsHist_PIL(i, pic, scale)  #
         except TypeError:
-            pywikibot.warning(u'unknown file type [_detect_SegmentColors]')
+            pywikibot.warning('unknown file type [_detect_SegmentColors]')
             return
         i = 0
         # (may be do an additional region merge according to same color names...)
@@ -1437,7 +1435,7 @@ class _JpegFile(_UnknownFile):
             i = Image.open(self.image_path_JPEG)
             h = i.histogram()
         except IOError:
-            pywikibot.warning(u'unknown file type [_detect_AverageColor]')
+            pywikibot.warning('unknown file type [_detect_AverageColor]')
             return
 
         result              = self._util_average_Color_colormath(h)
@@ -1537,7 +1535,7 @@ class _JpegFile(_UnknownFile):
             smallImg = im.resize(tuple(np.int_(np.array(im.size)/scale)),
                                  Image.ANTIALIAS)
         except IOError:
-            pywikibot.warning(u'unknown file type [_util_detect_ColorSegments_JSEG]')
+            pywikibot.warning('unknown file type [_util_detect_ColorSegments_JSEG]')
             return
 
         #im.thumbnail(size, Image.ANTIALIAS) # size is 640x480
@@ -1606,7 +1604,7 @@ class _JpegFile(_UnknownFile):
         try:
             smallImg = im.resize(tuple(np.int_(np.array(im.size)/scale)), Image.ANTIALIAS)
         except IOError:
-            pywikibot.warning(u'unknown file type [_util_get_ColorSegmentsHist_PIL]')
+            pywikibot.warning('unknown file type [_util_get_ColorSegmentsHist_PIL]')
             return
 
         imgsize = float(smallImg.size[0]*smallImg.size[1])
@@ -1626,10 +1624,10 @@ class _JpegFile(_UnknownFile):
             #dispImg.paste(smallImg, mask)
             #dispImg.show()
             if (len(h) == 256):
-                pywikibot.output(u"gray scale image, try to fix...")
+                pywikibot.output("gray scale image, try to fix...")
                 h = h*3
             if (len(h) == 256*4):
-                pywikibot.output(u"4-ch. image, try to fix (exclude transparency)...")
+                pywikibot.output("4-ch. image, try to fix (exclude transparency)...")
                 h = h[0:(256*3)]
             hist.append((h, coverage, (center, bbox)))
 
@@ -1707,7 +1705,7 @@ class _JpegFile(_UnknownFile):
         # or own xml files trained onto specific file database/set
         xml = os.path.join(scriptdir, ('externals/opencv/haarcascades/' + cascade_file))
         if not os.path.exists(xml):
-            raise IOError(u"No such file: '%s'" % xml)
+            raise IOError("No such file: '%s'" % xml)
         cascade       = cv2.CascadeClassifier(xml)
 
         scale = 1.
@@ -1720,10 +1718,10 @@ class _JpegFile(_UnknownFile):
             # how small and how many features are detected
             scale  = max([1., np.average(np.array(img.shape)[0:2]/maxdim)])
         except IOError:
-            pywikibot.warning(u'unknown file type [_detect_Trained]')
+            pywikibot.warning('unknown file type [_detect_Trained]')
             return
         except AttributeError:
-            pywikibot.warning(u'unknown file type [_detect_Trained]')
+            pywikibot.warning('unknown file type [_detect_Trained]')
             return
 
         # similar to face detection
@@ -1784,7 +1782,7 @@ class _JpegFile(_UnknownFile):
 
             scale  = max([1., np.average(np.array(img.size)/200.)])
         except IOError:
-            pywikibot.warning(u'unknown file type [_recognize_OpticalCodes]')
+            pywikibot.warning('unknown file type [_recognize_OpticalCodes]')
             return
 
         smallImg = img.resize((int(img.size[0] / scale),
@@ -1808,7 +1806,7 @@ class _JpegFile(_UnknownFile):
                             #'Data':     dm_read.message(i+1),
                            'Data':     data,
                            'Position': pos,
-                           'Type':     u'DataMatrix',
+                           'Type':     'DataMatrix',
                            'Quality':  10})
 
         self._features['OpticalCodes'] = result
@@ -1823,7 +1821,7 @@ class _JpegFile(_UnknownFile):
             img = Image.open(self.image_path_JPEG).convert('L')
             width, height = img.size
         except IOError:
-            pywikibot.warning(u'unknown file type [_recognize_OpticalCodes]')
+            pywikibot.warning('unknown file type [_recognize_OpticalCodes]')
             return
 
         scanner = zbar.ImageScanner()
@@ -1841,7 +1839,7 @@ class _JpegFile(_UnknownFile):
             result.append({#'components': symbol.components,
                            'ID':         (i+1),
                             #'Count':      symbol.count,         # 'ID'?
-                           'Data':       symbol.data or u'-',
+                           'Data':       symbol.data or '-',
                            'Position':   p,                    # (left, top, width, height)
                            'Quality':    symbol.quality,       # usable for 'Confidence'
                            'Type':       symbol.type})
@@ -1871,10 +1869,10 @@ class _JpegFile(_UnknownFile):
             #scale  = max([1., np.average(np.array(im.shape)[0:2]/500.)])
             #scale  = max([1., np.average(np.array(im.shape)[0:2]/450.)])
         except IOError:
-            pywikibot.warning(u'unknown file type [_detect_Chessboard]')
+            pywikibot.warning('unknown file type [_detect_Chessboard]')
             return
         except AttributeError:
-            pywikibot.warning(u'unknown file type [_detect_Chessboard]')
+            pywikibot.warning('unknown file type [_detect_Chessboard]')
             return
 
         smallImg = np.empty((cv.Round(im.shape[1]/scale), cv.Round(im.shape[0]/scale)), dtype=np.uint8)
@@ -1964,7 +1962,7 @@ class _JpegFile(_UnknownFile):
             d = shelve.open(os.path.join(scriptdir, 'externals/opencv/camera_virtual_default'))
             if ('retval' not in d):
                 # http://commons.wikimedia.org/wiki/File:Mutilated_checkerboard_3.jpg
-                pywikibot.output(u"Doing (virtual) camera calibration onto reference image 'File:Mutilated_checkerboard_3.jpg'")
+                pywikibot.output("Doing (virtual) camera calibration onto reference image 'File:Mutilated_checkerboard_3.jpg'")
                 im3 = cv2.imread('Mutilated_checkerboard_3.jpg', cv2.CV_LOAD_IMAGE_GRAYSCALE)
                 im3 = cv2.resize(im3, (cv.Round(im3.shape[1]/scale), cv.Round(im3.shape[0]/scale)), interpolation=cv2.INTER_LINEAR)
                 # Compute the the three dimensional world-coordinates
@@ -2036,8 +2034,8 @@ class _JpegFile(_UnknownFile):
             #self._util_drawAxes(mat, 50, 50, im)
 
 # TODO: compare face and chessboard pose estimations and unify them, then document everything (template in wiki, ...)
-            pywikibot.output(u'result for calibrated camera:\n  rot=%s\n  perp=%s\n  perp2D=%s' % (rot.transpose()[0], perp[:,2], ortho))
-            pywikibot.output(u'nice would be to do the same for uncalibrated/default cam settings')
+            pywikibot.output('result for calibrated camera:\n  rot=%s\n  perp=%s\n  perp2D=%s' % (rot.transpose()[0], perp[:,2], ortho))
+            pywikibot.output('nice would be to do the same for uncalibrated/default cam settings')
 
             result.update({ 'Rotation':    tuple(rot.transpose()[0]),
                             'Perp_Dir' :   tuple(perp[:,2]),
@@ -2132,11 +2130,11 @@ class _JpegFile(_UnknownFile):
 
         if 'ImageWidth' in res:
             (width, height) = (str(res['ImageWidth']), str(res['ImageHeight']))
-            (width, height) = (re.sub(u'p[tx]', u'', width), re.sub(u'p[tx]', u'', height))
+            (width, height) = (re.sub('p[tx]', '', width), re.sub('p[tx]', '', height))
             try:
                 (width, height) = (int(float(width)+0.5), int(float(height)+0.5))
             except ValueError:
-                pywikibot.warning(u'%s contains incompatible unit(s), skipped' % ((width, height),))
+                pywikibot.warning('%s contains incompatible unit(s), skipped' % ((width, height),))
                 return
         else:
             (width, height) = self.image_size
@@ -2244,7 +2242,7 @@ class _JpegFile(_UnknownFile):
                         buf_w = [int(res['AFAreaWidth'])]  * len(buf_x)
                         buf_h = [int(res['AFAreaHeight'])] * len(buf_x)
                     else:
-                        pywikibot.output(u'No AF area size')
+                        pywikibot.output('No AF area size')
                     # conversion to positive coordinates
                     buf_x = [int(x) + width/2. for x in buf_x]
                     buf_y = [int(y) + height/2. for y in buf_y]
@@ -2261,8 +2259,8 @@ class _JpegFile(_UnknownFile):
             available = [item in res for item in ['FacesDetected', 'ValidAFPoints']]
             unknown   = ['face' in item.lower() for item in res.keys()]
             if make and (True in (available+unknown)):
-                pywikibot.warning(u"skipped '%s' since not supported (yet) [_detect_Faces_EXIF]" % make)
-                pywikibot.warning(u"FacesDetected: %s - ValidAFPoints: %s" % tuple(available))
+                pywikibot.warning("skipped '%s' since not supported (yet) [_detect_Faces_EXIF]" % make)
+                pywikibot.warning("FacesDetected: %s - ValidAFPoints: %s" % tuple(available))
 
         # finally, rotate face coordinates if image was rotated
         if wasRotated:
@@ -2291,7 +2289,7 @@ class _JpegFile(_UnknownFile):
 
             data[i] = { 'Position': tuple(map(int, data[i]['Position'])),
                         'ID':       (i+1),
-                        'Type':     u'Exif',
+                        'Type':     'Exif',
                         'Eyes':     [],
                         'Mouth':    (),
                         'Nose':     (), }
@@ -2317,10 +2315,10 @@ class _JpegFile(_UnknownFile):
         i = 1
         while (('Xmp.xmpMM.History[%i]' % i) in res):
             data = { 'ID':        i,
-                     'Software':  u'-',
-                     'Timestamp': u'-',
-                     'Action':    u'-',
-                     'Info':      u'-', }
+                     'Software':  '-',
+                     'Timestamp': '-',
+                     'Action':    '-',
+                     'Info':      '-', }
             if   ('Xmp.xmpMM.History[%i]/stEvt:softwareAgent'%i) in res:
                 data['Software']  = res['Xmp.xmpMM.History[%i]/stEvt:softwareAgent'%i].value
                 data['Timestamp'] = res['Xmp.xmpMM.History[%i]/stEvt:when'%i].value
@@ -2446,12 +2444,12 @@ class _XcfFile(_JpegFile):
            as commons does in order to compare if those libraries (ImageMagick,
            ...) are buggy (thus explicitely use other software for independence)"""
 
-        result =      { 'Format':     u'%s' % self.file_mime[1].upper(),
+        result =      { 'Format':     '%s' % self.file_mime[1].upper(),
         # DO NOT use ImageMagick (identify) instead of PIL to get these info !!
                         'Length':     -1,   # pages/layers
                         'Dimensions': self.image_size,
                         'Filesize':   os.path.getsize(self.file_name),
-                        'MIME':       u'%s/%s' % tuple(self.file_mime[:2]), }
+                        'MIME':       '%s/%s' % tuple(self.file_mime[:2]), }
 
         #self._properties['Properties'] = [result]
         self._properties['Properties'][0].update(result)
@@ -2492,7 +2490,7 @@ class _SvgFile(_JpegFile):
            as commons does in order to compare if those libraries (ImageMagick,
            ...) are buggy (thus explicitely use other software for independence)"""
 
-        result = {'Format': u'-', 'Length': -1}
+        result = {'Format': '-', 'Length': -1}
 
         # similar to PDF page count OR use BeautifulSoup
         svgcountpages = re.compile("<page>")
@@ -2503,10 +2501,10 @@ class _SvgFile(_JpegFile):
         # http://validator.w3.org/docs/api.html#libs
         # http://pypi.python.org/pypi/py_w3c/
         vld = HTMLValidator()
-        valid = u'SVG'
+        valid = 'SVG'
         try:
             vld.validate(self.image.fileUrl())
-            valid = (u'Valid SVG' if vld.result.validity == 'true' else u'Invalid SVG')
+            valid = ('Valid SVG' if vld.result.validity == 'true' else 'Invalid SVG')
         except urllib2.URLError:
             pass
         except ValidationFault:
@@ -2516,14 +2514,14 @@ class _SvgFile(_JpegFile):
         #self.image_size = (svg.props.width, svg.props.height)
 
         result.update({ 'Format':     valid,
-                        'Mode':       u'-',
-                        'Palette':    u'-',
+                        'Mode':       '-',
+                        'Palette':    '-',
                         'Length':     pc,   # pages
         # may be set {{validSVG}} also or do something in bot template to
         # recognize 'Format=SVG (valid)' ...
                         'Dimensions': self.image_size,
                         'Filesize':   os.path.getsize(self.file_name),
-                        'MIME':       u'%s/%s' % tuple(self.file_mime[:2]), })
+                        'MIME':       '%s/%s' % tuple(self.file_mime[:2]), })
 
         #self._properties['Properties'] = [result]
         self._properties['Properties'][0].update(result)
@@ -2547,7 +2545,7 @@ class _PdfFile(_JpegFile):
         # http://vermeulen.ca/python-pdf.html
         # http://code.activestate.com/recipes/511465-pure-python-pdf-to-text-converter/
         # http://stackoverflow.com/questions/25665/python-module-for-converting-pdf-to-text
-        if os.path.splitext(self.image_filename)[1].lower() == u'.pdf':
+        if os.path.splitext(self.image_filename)[1].lower() == '.pdf':
             pass
 
     # MIME: 'application/pdf; charset=binary'
@@ -2561,13 +2559,13 @@ class _PdfFile(_JpegFile):
         rxcountpages = re.compile(r"/Type\s*/Page([^s]|$)", re.MULTILINE|re.DOTALL)    # PDF v. 1.3,1.4,1.5,1.6
         pc = len(rxcountpages.findall(file(self.image_path,"rb").read()))
 
-        result =      { 'Format':     u'PDF',
-                        'Mode':       u'-',
-                        'Palette':    u'-',
+        result =      { 'Format':     'PDF',
+                        'Mode':       '-',
+                        'Palette':    '-',
                         'Length':     pc,   # pages
                         'Dimensions': self.image_size,
                         'Filesize':   os.path.getsize(self.file_name),
-                        'MIME':       u'%s/%s' % tuple(self.file_mime[:2]), }
+                        'MIME':       '%s/%s' % tuple(self.file_mime[:2]), }
 
         #self._properties['Properties'] = [result]
         self._properties['Properties'][0].update(result)
@@ -2662,7 +2660,7 @@ class _PdfFile(_JpegFile):
         os.remove(self.image_path+'.txt')
 
 #        self._content_text = data
-        (s1, l1) = (len(u''.join(data)), len(data))
+        (s1, l1) = (len(''.join(data)), len(data))
 
         tmp_path = os.path.join(os.environ.get('TMP', '/tmp'), 'DrTrigonBot/')
         os.mkdir(tmp_path)
@@ -2704,24 +2702,24 @@ class _PdfFile(_JpegFile):
         #    pdfinterp.process_pdf(rsrcmgr, device, fp, set(), maxpages=0, password='',
         #                caching=True, check_extractable=False)
         #except AssertionError:
-        #    pywikibot.warning(u'pdfminer missed, may be corrupt [_detect_EmbeddedText]')
+        #    pywikibot.warning('pdfminer missed, may be corrupt [_detect_EmbeddedText]')
         #    return
         #except TypeError:
-        #    pywikibot.warning(u'pdfminer missed, may be corrupt [_detect_EmbeddedText]')
+        #    pywikibot.warning('pdfminer missed, may be corrupt [_detect_EmbeddedText]')
         #    return
         #fp.close()
         #device.close()
         #data = outfp.getvalue().splitlines(True)
         #
-        #(s2, l2) = (len(u''.join(data)), len(data))
+        #(s2, l2) = (len(''.join(data)), len(data))
 
         result = { 'Size':     s1,
                    'Lines':    l1,
                    #'Data':     data,
                    #'Position': pos,
-#                   'Images':   u'%s (on %s page(s))' % (len(images), len(list(pages))),  # pages containing images
-                   'Images':   u'%s' % len(images),
-                   'Type':     u'-', }  # 'Type' could be u'OCR' above...
+#                   'Images':   '%s (on %s page(s))' % (len(images), len(list(pages))),  # pages containing images
+                   'Images':   '%s' % len(images),
+                   'Type':     '-', }  # 'Type' could be 'OCR' above...
 
         self._features['Text'] = [result]
         return
@@ -2753,11 +2751,11 @@ class _OggFile(_JpegFile):
 
         #print self._util_get_DataTags_EXIF()['Duration']
 
-        result =      { 'Format':     u'%s' % d['format']['format_name'].upper(),
+        result =      { 'Format':     '%s' % d['format']['format_name'].upper(),
                         'Length':     float(d['format']['duration']),   # secs/frames
                         'Dimensions': self.image_size,
                         'Filesize':   os.path.getsize(self.file_name),
-                        'MIME':       u'%s/%s' % tuple(self.file_mime[:2]), }
+                        'MIME':       '%s/%s' % tuple(self.file_mime[:2]), }
 
         #self._properties['Properties'] = [result]
         self._properties['Properties'][0].update(result)
@@ -2778,15 +2776,15 @@ class _OggFile(_JpegFile):
                 #asp  = s["display_aspect_ratio"]
             elif (s["codec_type"] == "audio"):
 # switch this part off since 'ffprobe' (on toolserver) is too old
-#                rate = u'%s/%s/%s' % (s["channels"], s["sample_fmt"], s["sample_rate"])
-                rate = u'%s/%s/%s' % (s["channels"], u'-', int(float(s["sample_rate"])))
+#                rate = '%s/%s/%s' % (s["channels"], s["sample_fmt"], s["sample_rate"])
+                rate = '%s/%s/%s' % (s["channels"], '-', int(float(s["sample_rate"])))
                 dim  = None
             elif (s["codec_type"] == "data"):
                 rate = None
                 dim  = None
 
             result.append({ 'ID':         int(s["index"]) + 1,
-                            'Format':     u'%s/%s' % (s["codec_type"], s.get("codec_name",u'?')),
+                            'Format':     '%s/%s' % (s["codec_type"], s.get("codec_name",'?')),
                             'Rate':       rate or None,
                             'Dimensions': dim or (None, None),
                             'Duration':   None if (s['duration'].lower() == 'n/a')
@@ -2894,7 +2892,7 @@ class _OggFile(_JpegFile):
 
         # Load important components
         if (yaafe.loadComponentLibrary('yaafe-io')!=0):
-            pywikibot.warning(u'cannot load yaafe-io component library !')   # ! needed, else it will crash !
+            pywikibot.warning('cannot load yaafe-io component library !')   # ! needed, else it will crash !
 
         # Build a DataFlow object using FeaturePlan
         fp = yaafe.FeaturePlan(sample_rate=44100, normalize=0.98, resample=False)
@@ -2972,9 +2970,9 @@ class _OggFile(_JpegFile):
                 d = tuple(np.average(d, axis=0))
                 pywikibot.output(ext)
                 #if ext in ['ess', 'sss', 'tss']:
-                #    pywikibot.output(u"centroid: %s\nspread: %s\nskewness: %s\nkurtosis: %s\n" % d)
+                #    pywikibot.output("centroid: %s\nspread: %s\nskewness: %s\nkurtosis: %s\n" % d)
                 #elif ext in ['zcr']:
-                #    pywikibot.output(u"zero-crossing rate: %s\n" % d)
+                #    pywikibot.output("zero-crossing rate: %s\n" % d)
                 data[ext.upper()] = d
             os.remove(fn)
             # remove folder too...
@@ -3006,8 +3004,8 @@ class _MidiFile(_OggFile):
                 if ba[e] != 0:  # length match with string end (00)?
                     e = ba.find('\x00', (i+3+ba[i+2]))
                 res[key].append(ba[i+3:e].decode('latin-1').strip())
-            #res[key] = u'\n'.join(res[key])
-        res['Desc'] = u'\n'.join(res['Desc'])
+            #res[key] = '\n'.join(res[key])
+        res['Desc'] = '\n'.join(res['Desc'])
 
         ## find specific info in extracted data
         #print [item.strip() for item in re.findall('Generated .*?\n', result['Text'])]
@@ -3021,11 +3019,11 @@ class _MidiFile(_OggFile):
         #        pass
         #print dates
 
-        result = { 'Software': u'-',
-                   'Desc':     res['Desc'] if res['Desc'] else u'-',
-                   'Comment':  u'-',
-                   'Producer': u'-',
-                   'Misc':     u'-', }
+        result = { 'Software': '-',
+                   'Desc':     res['Desc'] if res['Desc'] else '-',
+                   'Comment':  '-',
+                   'Producer': '-',
+                   'Misc':     '-', }
 
         import music21
         try:
@@ -3050,11 +3048,11 @@ class _MidiFile(_OggFile):
         # 'ffprobe' (ffmpeg); audio and video streams files (ogv, oga, ...)
         d = self._util_get_DataStreams_MUSIC21()
 
-        result =      { 'Format':     u'%s' % self.file_mime[1].upper(),
-                        'Length':     d["duration"] if d else u'-',    # secs
+        result =      { 'Format':     '%s' % self.file_mime[1].upper(),
+                        'Length':     d["duration"] if d else '-',    # secs
                         'Dimensions': self.image_size,
                         'Filesize':   os.path.getsize(self.file_name),
-                        'MIME':       u'%s/%s' % tuple(self.file_mime[:2]), }
+                        'MIME':       '%s/%s' % tuple(self.file_mime[:2]), }
 
         #self._properties['Properties'] = [result]
         self._properties['Properties'][0].update(result)
@@ -3084,9 +3082,9 @@ class _MidiFile(_OggFile):
             except music21.stream.StreamException:
                 duration = None
             data.append({'ID':        (i + 1),
-                          'Format':    u'(audio/midi)',
+                          'Format':    '(audio/midi)',
                           # note rate / noteduration ...??
-                          'Rate':      u'%s/-/-' % d["channels"][i],
+                          'Rate':      '%s/-/-' % d["channels"][i],
                           'Dimension': (None, None),
                           'Duration':  duration,})
 
@@ -3105,10 +3103,10 @@ class _MidiFile(_OggFile):
             #s = music21.midi.translate.midiFilePathToStream(self.file_name)
             s = music21.converter.parse(self.file_name)
         except music21.midi.base.MidiException:
-            pywikibot.warning(u'unknown file type [_detect_Streams]')
+            pywikibot.warning('unknown file type [_detect_Streams]')
             return
         except Exception:
-            pywikibot.warning(u'unknown file type [_detect_Streams]')
+            pywikibot.warning('unknown file type [_detect_Streams]')
             return
 
         #fs = music21.features.jSymbolic.extractorsById
@@ -3138,8 +3136,8 @@ class _MidiFile(_OggFile):
 #                    'MostCommonPitch': music21.features.jSymbolic.MostCommonPitchFeature(s).extract().vector[0],
 #                              'Tempo': music21.features.jSymbolic.InitialTempoFeature(s).extract().vector[0],
 #                           #'Duration': s.highestTime,
-#                           #'Metadata': s.metadata if s.metadata else u'',
-#                             'Lyrics': s.lyrics(recurse=True) if s.lyrics(recurse=True) else u'',}]
+#                           #'Metadata': s.metadata if s.metadata else '',
+#                             'Lyrics': s.lyrics(recurse=True) if s.lyrics(recurse=True) else '',}]
         #print music21.text.assembleLyrics(s)
 
         #print s.show('text')
@@ -3170,7 +3168,7 @@ _FILETYPES = {'*': _UnknownFile,
               ('application',      'pdf'): _PdfFile,
 # djvu: python-djvulibre or python-djvu for djvu support
 # http://pypi.python.org/pypi/python-djvulibre/0.3.9
-#              (     'image', 'vnd.djvu'): DjvuFile,
+#              (     'image', 'vnd.djv'): DjvuFile,
               (     'audio',     'midi'): _MidiFile,
               ('application',      'ogg'): _OggFile,}
 #              (         '?',        '?'): _WebMFile,}
@@ -3182,11 +3180,11 @@ def GenericFile(file_name):
     file_mime = re.split('[/;\s]', m.file(file_name))
     file_imgh = ['image', imghdr.what(file_name)]       # alternative MIME ...
     if file_imgh[1] and (not (file_imgh == file_mime[:2])):
-        pywikibot.warning(u'Issue in MIME type detection! Preferring imghdr result %s over libmagic %s!' % (file_imgh, file_mime))
+        pywikibot.warning('Issue in MIME type detection! Preferring imghdr result %s over libmagic %s!' % (file_imgh, file_mime))
         file_mime = file_imgh + file_mime[2:]
     mime = mimetypes.guess_all_extensions('%s/%s' % tuple(file_mime[0:2]))
     if mime and (os.path.splitext(file_name)[1].lower() not in mime):
-        pywikibot.warning(u'File extension does not match MIME type! File extension should be %s.' % mime)
+        pywikibot.warning('File extension does not match MIME type! File extension should be %s.' % mime)
 
     # split detection and extraction according to file types; _JpegFile, ...
     GenericFile = _FILETYPES.get(tuple(file_mime[:2]), _FILETYPES['*'])
@@ -3205,19 +3203,19 @@ class CatImages_Default(object):
     _thrshld_default = 0.75
 
     # for '_detect_Trained'
-    cascade_files = [(u'Legs', 'haarcascade_lowerbody.xml'),
-                     (u'Torsos', 'haarcascade_upperbody.xml'),
-                     (u'Ears', 'haarcascade_mcs_leftear.xml'),
-                     (u'Ears', 'haarcascade_mcs_rightear.xml'),
-                     (u'Eyes', 'haarcascade_lefteye_2splits.xml'),        # (http://yushiqi.cn/research/eyedetection)
-                     (u'Eyes', 'haarcascade_righteye_2splits.xml'),       # (http://yushiqi.cn/research/eyedetection)
+    cascade_files = [('Legs', 'haarcascade_lowerbody.xml'),
+                     ('Torsos', 'haarcascade_upperbody.xml'),
+                     ('Ears', 'haarcascade_mcs_leftear.xml'),
+                     ('Ears', 'haarcascade_mcs_rightear.xml'),
+                     ('Eyes', 'haarcascade_lefteye_2splits.xml'),        # (http://yushiqi.cn/research/eyedetection)
+                     ('Eyes', 'haarcascade_righteye_2splits.xml'),       # (http://yushiqi.cn/research/eyedetection)
                      #externals/opencv/haarcascades/haarcascade_mcs_lefteye.xml
                      #externals/opencv/haarcascades/haarcascade_mcs_righteye.xml
                      # (others include indifferent (left and/or right) and pair)
-                     (u'Automobiles', 'cars3.xml'),                       # http://www.youtube.com/watch?v=c4LobbqeKZc
-                     (u'Hands', '1256617233-2-haarcascade-hand.xml', 300.),]    # http://www.andol.info/
+                     ('Automobiles', 'cars3.xml'),                       # http://www.youtube.com/watch?v=c4LobbqeKZc
+                     ('Hands', '1256617233-2-haarcascade-hand.xml', 300.),]    # http://www.andol.info/
                      # ('Hands' does not behave very well, in fact it detects any kind of skin and other things...)
-                     #(u'Aeroplanes', 'haarcascade_aeroplane.xml'),]      # e.g. for 'Category:Unidentified aircraft'
+                     #('Aeroplanes', 'haarcascade_aeroplane.xml'),]      # e.g. for 'Category:Unidentified aircraft'
 
     # very simple / rought / poor-man's min. thresshold classification
     # (done by guessing, does not need to be trained)
@@ -3228,7 +3226,7 @@ class CatImages_Default(object):
 
         # Faces and eyes (opencv pre-trained haar and extracted EXIF data)
         for i in range(len(self._info['Faces'])):
-            if self._info['Faces'][i]['Type'] == u'Exif':
+            if self._info['Faces'][i]['Type'] == 'Exif':
                 c = self._thrshld_default
             else:
                 c = (len(self._info['Faces'][i]['Eyes']) + 2.) / 4.
@@ -3302,14 +3300,14 @@ class CatImages_Default(object):
     def _cat_people_People(self):
         #relevance = bool(self._info_filter['People'])
         relevance = self._cat_people_Groups()[1]
-        return (u'Unidentified people', relevance)
+        return ('Unidentified people', relevance)
 
     # Category:Unidentified people
     #def _cat_multi_People(self):
     def _cat_face_People(self):
         relevance = bool(self._info_filter['Faces'])
         #relevance = bool(self._info_filter['People']) or relevance
-        return (u'Unidentified people', relevance)
+        return ('Unidentified people', relevance)
 
     # Category:Groups
     def _cat_people_Groups(self):
@@ -3317,7 +3315,7 @@ class CatImages_Default(object):
         relevance = (len(result) >= self._thrhld_group_size) and \
                     (not self._cat_coloraverage_Graphics()[1])
 
-        return (u'Groups', relevance)
+        return ('Groups', relevance)
 
     # Category:Groups
     def _cat_face_Groups(self):
@@ -3328,41 +3326,41 @@ class CatImages_Default(object):
         #else:
         #    relevance = 1 - 1./(len(result)-1)
         relevance = (len(result) >= self._thrhld_group_size)
-        return (u'Groups', relevance)
+        return ('Groups', relevance)
 
     # Category:Faces
     def _cat_face_Faces(self):
         result = self._info_filter['Faces']
-        return (u'Faces',
+        return ('Faces',
                 ((len(result) == 1) and (result[0]['Coverage'] >= .40)))
 
     # Category:Portraits
     def _cat_face_Portraits(self):
         result = self._info_filter['Faces']
-        return (u'Portraits',
+        return ('Portraits',
                 ((len(result) == 1) and (result[0]['Coverage'] >= .20)))
 
     # Category:Barcode
     def _cat_code_Barcode(self):
         relevance = bool(self._info_filter['OpticalCodes'])
 
-        return (u'Barcode', relevance)
+        return ('Barcode', relevance)
 
     # Category:Chessboards
     def _cat_chess_Chessboards(self):
         relevance = bool(self._info_filter['Chessboard'])
 
-        return (u'Chessboards', relevance)
+        return ('Chessboards', relevance)
 
     # Category:Books (literature) in PDF
     def _cat_text_BooksPDF(self):
-        pdf    = u'PDF' in self._info_filter['Properties'][0]['Format']
+        pdf    = 'PDF' in self._info_filter['Properties'][0]['Format']
         result = self._info_filter['Text']
         relevance = pdf and len(result) and \
                     (self._info_filter['Properties'][0]['Length'] >= 10) and \
                     (result[0]['Size'] >= 5E4) and (result[0]['Lines'] >= 1000)
 
-        return (u'Books (literature) in PDF', relevance)
+        return ('Books (literature) in PDF', relevance)
 
     # Category:Animated GIF
     # Category:Animated PNG‎
@@ -3370,35 +3368,35 @@ class CatImages_Default(object):
     def _cat_prop_Animated_general(self):
         result = self._info_filter['Properties']
         relevance = result and (result[0]['Length'] > 1) and \
-                    (result[0]['Format'] in [u'GIF', u'PNG'])
+                    (result[0]['Format'] in ['GIF', 'PNG'])
 
-        return (u'Animated %s' % result[0]['Format'], relevance)
+        return ('Animated %s' % result[0]['Format'], relevance)
 
     # Category:Human ears
     def _cat_ears_HumanEars(self):
         relevance = bool(self._info_filter['Ears'])
 
-        return (u'Human ears', relevance)
+        return ('Human ears', relevance)
 
     # Category:Human eyes
     def _cat_eyes_HumanEyes(self):
         relevance = bool(self._info_filter['Eyes'])
 
-        return (u'Human eyes', relevance)
+        return ('Human eyes', relevance)
 
     # Category:Ogg sound files
     def _cat_streams_OggSoundFiles(self):
         result = self._info_filter['Streams']
 
-        return (u'Ogg sound files', ((len(result) == 1) and
-                                     (u'audio/' in result[0]['Format']) and
-                                     (u'/midi' not in result[0]['Format'])))
+        return ('Ogg sound files', ((len(result) == 1) and
+                                     ('audio/' in result[0]['Format']) and
+                                     ('/midi' not in result[0]['Format'])))
 
     # Category:Videos
     def _cat_streams_Videos(self):
         result = self._info_filter['Streams']
 
-        return (u'Videos', (True in [u'video/' in s['Format'] for s in result]))
+        return ('Videos', (True in ['video/' in s['Format'] for s in result]))
 
     # Category:Graphics
     def _cat_coloraverage_Graphics(self):
@@ -3407,7 +3405,7 @@ class CatImages_Default(object):
                     (0.005 < result[0]['Peaks'] < 0.1)  # black/white texts are below that
                     #(result[0]['FFT_Peaks'] < 0.2)      # has to be tested first !!!
 
-        return (u'Graphics', bool(relevance))
+        return ('Graphics', bool(relevance))
 
     # Category:MIDI files created with GNU LilyPond
     # Category:Bitmap_from_Inkscape (png)
@@ -3440,35 +3438,35 @@ class CatImages_Default(object):
         results = self._info_filter['Metadata'] +\
                   [{'*': item['Software']} for item in self._info_filter['History']]
         cats = set()
-        for key, magic, cat in [('Desc',             u"Generated automatically by: GNU LilyPond", u'MIDI files created with GNU LilyPond'),
-                                ('Software',         u"www.inkscape.org",                         u'Bitmap from Inkscape'),
-                                ('Misc',             u"org.inkscape.output.svg.inkscape",         u'Created with Inkscape'), # 'Output_extension'
-                                ('Software',         u"MATLAB, The Mathworks, Inc.",              u'Created with MATLAB'),
-                                ('Desc',             u"Matlab Figure",                            u'Created with MATLAB'),
-                                ('Desc',             u"Converted by PLOT2SVG",                    u'Created with PLOT2SVG'),
-                                ('Software',         u"ImageMagick",                              u'Created with ImageMagick'),
-                                ('Software',         u"Adobe ImageReady",                         u'Created with Adobe ImageReady'),
-                                ('Software',         u"Adobe Photoshop",                          u'Created with Adobe Photoshop'),
-                                ('Software',         u"Picasa",                                   u'Created with Picasa'),
-                                ('Software',         u"Created with opensource tool Qtpfsgui",    u'Created with Qtpfsgui'),
-                                ('Software',         u"Autopano",                                 u'Created with Autopano'),
-                                ('Software',         u"Grace",                                    u'Created with Xmgrace'),
-                                ('Software',         u"darktable",                                u'Created with darktable'),
-                                ('Software',         u"Tux Paint",                                u'Created with Tux Paint'),
-                                ('Software',         u"Microsoft ICE",                            u'Created with Microsoft Image Composite Editor'),
-                                ('Software',         u"easyHDR",                                  u'Created with easyHDR'),
-                                ('Comment',          u"easyHDR",                                  u'Created with easyHDR'),
-                                ('Software',         u"GIMP",                                     u'Created with GIMP'),
-                                ('Comment',          u"Created with GIMP",                        u'Created with GIMP'),
-                                ('Desc',             u"R SVG",                                    u'Created with R'),
-                                ('Desc',             u"created with VectorFieldPlot",             u'Created with VectorFieldPlot'),
-                                ('Desc',             u"Created with Chemtool",                    u'Created with Chemtool'),
-                                ('Desc',             u"Produced by GNUPLOT",                      u'Created with GNU Octave'),
-                                ('Misc',             u"geogebra.d.W",                             u'Created with GeoGebra'), # 'DescProducer'
-                                ('Comment',          u"Created using Stella4D",                   u'Created with Stella'),
-                                ('Comment',          u"LEAD Technologies Inc.",                   u'Created with PhotoStitch'),
-                                ('Producer',         u"Scribus PDF Library",                      u'Created with Scribus'),
-                                ('Producer',         u"OpenOffice.org",                           u'Created with OpenOffice.org'),]:
+        for key, magic, cat in [('Desc',             "Generated automatically by: GNU LilyPond", 'MIDI files created with GNU LilyPond'),
+                                ('Software',         "www.inkscape.org",                         'Bitmap from Inkscape'),
+                                ('Misc',             "org.inkscape.output.svg.inkscape",         'Created with Inkscape'), # 'Output_extension'
+                                ('Software',         "MATLAB, The Mathworks, Inc.",              'Created with MATLAB'),
+                                ('Desc',             "Matlab Figure",                            'Created with MATLAB'),
+                                ('Desc',             "Converted by PLOT2SVG",                    'Created with PLOT2SVG'),
+                                ('Software',         "ImageMagick",                              'Created with ImageMagick'),
+                                ('Software',         "Adobe ImageReady",                         'Created with Adobe ImageReady'),
+                                ('Software',         "Adobe Photoshop",                          'Created with Adobe Photoshop'),
+                                ('Software',         "Picasa",                                   'Created with Picasa'),
+                                ('Software',         "Created with opensource tool Qtpfsgui",    'Created with Qtpfsgui'),
+                                ('Software',         "Autopano",                                 'Created with Autopano'),
+                                ('Software',         "Grace",                                    'Created with Xmgrace'),
+                                ('Software',         "darktable",                                'Created with darktable'),
+                                ('Software',         "Tux Paint",                                'Created with Tux Paint'),
+                                ('Software',         "Microsoft ICE",                            'Created with Microsoft Image Composite Editor'),
+                                ('Software',         "easyHDR",                                  'Created with easyHDR'),
+                                ('Comment',          "easyHDR",                                  'Created with easyHDR'),
+                                ('Software',         "GIMP",                                     'Created with GIMP'),
+                                ('Comment',          "Created with GIMP",                        'Created with GIMP'),
+                                ('Desc',             "R SVG",                                    'Created with R'),
+                                ('Desc',             "created with VectorFieldPlot",             'Created with VectorFieldPlot'),
+                                ('Desc',             "Created with Chemtool",                    'Created with Chemtool'),
+                                ('Desc',             "Produced by GNUPLOT",                      'Created with GNU Octave'),
+                                ('Misc',             "geogebra.d.W",                             'Created with GeoGebra'), # 'DescProducer'
+                                ('Comment',          "Created using Stella4D",                   'Created with Stella'),
+                                ('Comment',          "LEAD Technologies Inc.",                   'Created with PhotoStitch'),
+                                ('Producer',         "Scribus PDF Library",                      'Created with Scribus'),
+                                ('Producer',         "OpenOffice.org",                           'Created with OpenOffice.org'),]:
             for result in results:
                 relevance = ((key in result) or ('*' in result)) and \
                             (magic in result.get(key, result.get('*')))
@@ -3480,7 +3478,7 @@ class CatImages_Default(object):
     # Category:Categorized by DrTrigonBot
     def _addcat_BOT(self):
         # - ALWAYS -
-        return (u"Categorized by DrTrigonBot", True)
+        return ("Categorized by DrTrigonBot", True)
 
     # (Category:BMP)
     # (Category:PNG)
@@ -3490,19 +3488,19 @@ class CatImages_Default(object):
     # Category:PDF files
     def _addcat_prop_general(self):
         fmt = self._info_filter['Properties'][0]['Format']
-        if   u'TIFF' in fmt:
-            fmt = u'TIFF images'
-        #elif u'SVG' in fmt:
+        if   'TIFF' in fmt:
+            fmt = 'TIFF images'
+        #elif 'SVG' in fmt:
         #    # additional to PIL (rsvg, ...)
         #    # should be added as template instead of category (!)
-        #    fmt = u''
-        elif u'PDF' in fmt:
+        #    fmt = ''
+        elif 'PDF' in fmt:
             # additional to PIL (...)
-            fmt = u'PDF files'
+            fmt = 'PDF files'
         else:
             # disable ALL categorization, except the listed exceptions above
             # (BMP, PNG, JPEG, OGG; no general catgeory available, ...)
-            fmt = u''
+            fmt = ''
         # PIL: http://www.pythonware.com/library/pil/handbook/index.htm
 
         return (fmt, bool(fmt))
@@ -3512,9 +3510,9 @@ class CatImages_Default(object):
 #    # {{ValidSVG}} - {{InvalidSVG}}
 #    def _addtempl_prop_SVN(self):
 #        fmt = self._info_filter['Properties'][0]['Format']
-#        d   = { u'Valid SVG':   u'{{ValidSVG}}',
-#                u'Invalid SVG': u'{{InvalidSVG}}', }
-#        fmt = d.get(fmt, u'')
+#        d   = { 'Valid SVG':   '{{ValidSVG}}',
+#                'Invalid SVG': '{{InvalidSVG}}', }
+#        fmt = d.get(fmt, '')
 #
 #        return (fmt, bool(fmt))
 
@@ -3549,26 +3547,26 @@ class CatImages_Default(object):
     # Category:Human legs
     def _guess_legs_HumanLegs(self):
         result = self._info_filter['Legs']
-        return (u'Human legs',
+        return ('Human legs',
                 ((len(result) == 1) and (result[0]['Coverage'] >= .40)))
 
     # Category:Human torsos
     def _guess_torsos_HumanTorsos(self):
         result = self._info_filter['Torsos']
-        return (u'Human torsos',
+        return ('Human torsos',
                 ((len(result) == 1) and (result[0]['Coverage'] >= .40)))
 
     # Category:Automobiles
     def _guess_automobiles_Automobiles(self):
         result = self._info_filter['Automobiles']
-        return (u'Automobiles',
+        return ('Automobiles',
                 ((len(result) == 1) and (result[0]['Coverage'] >= .40)))
 
     ## Category:Hands
     #def _guess_hands_Hands(self):
     #    result = self._info_filter['Hands']
     #
-    #    return (u'Hands', ((len(result) == 1) and (result[0]['Coverage'] >= .50)))
+    #    return ('Hands', ((len(result) == 1) and (result[0]['Coverage'] >= .50)))
 
     # Category:Black     ( 0,   0,   0)
     # Category:Blue‎      ( 0,   0, 255)
@@ -3586,35 +3584,35 @@ class CatImages_Default(object):
     #def _cat_color_Black(self):
     #    info = self._info_filter['ColorRegions']
     #    for item in info:
-    #        if (u'Black' == item[u'Color']):
-    #            return (u'Black', True)
-    #    return (u'Black', False)
+    #        if ('Black' == item['Color']):
+    #            return ('Black', True)
+    #    return ('Black', False)
 
     def __cat_color_general(self, col):
         info = self._info_filter['ColorRegions']
         for item in info:
-            if (col == item[u'Color']):
+            if (col == item['Color']):
                 return (col, True)
         return (col, False)
 
-    _cat_color_Black     = lambda self: self.__cat_color_general(u'Black')
-    _cat_color_Blue      = lambda self: self.__cat_color_general(u'Blue')
-    _cat_color_Brown     = lambda self: self.__cat_color_general(u'Brown')
-    _cat_color_Green     = lambda self: self.__cat_color_general(u'Green')
-    _cat_color_Orange    = lambda self: self.__cat_color_general(u'Orange')
-    _cat_color_Pink      = lambda self: self.__cat_color_general(u'Pink')
-    _cat_color_Purple    = lambda self: self.__cat_color_general(u'Purple')
-    _cat_color_Red       = lambda self: self.__cat_color_general(u'Red')
-    _cat_color_Turquoise = lambda self: self.__cat_color_general(u'Turquoise')
-    _cat_color_White     = lambda self: self.__cat_color_general(u'White')
-    _cat_color_Yellow    = lambda self: self.__cat_color_general(u'Yellow')
+    _cat_color_Black     = lambda self: self.__cat_color_general('Black')
+    _cat_color_Blue      = lambda self: self.__cat_color_general('Blue')
+    _cat_color_Brown     = lambda self: self.__cat_color_general('Brown')
+    _cat_color_Green     = lambda self: self.__cat_color_general('Green')
+    _cat_color_Orange    = lambda self: self.__cat_color_general('Orange')
+    _cat_color_Pink      = lambda self: self.__cat_color_general('Pink')
+    _cat_color_Purple    = lambda self: self.__cat_color_general('Purple')
+    _cat_color_Red       = lambda self: self.__cat_color_general('Red')
+    _cat_color_Turquoise = lambda self: self.__cat_color_general('Turquoise')
+    _cat_color_White     = lambda self: self.__cat_color_general('White')
+    _cat_color_Yellow    = lambda self: self.__cat_color_general('Yellow')
 
 
 # all classification and categorization methods and definitions - SVM variation
 #  use 'pyml' SVM (libsvm) classifier
 #  may be 'scikit-learn' or 'opencv' (svm, a.o.) could be of some use too
 class CatImages_SVM(CatImages_Default):
-    trained_cat = [u'Human_ears', u'Male faces']
+    trained_cat = ['Human_ears', 'Male faces']
 
     # dummy: deactivated
     def classifyFeatures(self):
@@ -3655,8 +3653,8 @@ class CatImagesBot(checkimages.checkImagesBot, CatImages_Default):
 
     # or may be '__init__' ... ???
     def load_licenses(self):
-        #pywikibot.output(u'\n\t...Listing the procedures available...\n')
-        pywikibot.output(u'\n\t...Listing the procedures used...\n')
+        #pywikibot.output('\n\t...Listing the procedures available...\n')
+        pywikibot.output('\n\t...Listing the procedures used...\n')
 
         self._funcs = {'filter': [], 'cat': [], 'addcat': [], 'guess': []}
 
@@ -3670,7 +3668,7 @@ class CatImagesBot(checkimages.checkImagesBot, CatImages_Default):
 
         self.tmpl_available_spec = tmpl_available_spec
         gen = pagegenerators.PrefixingPageGenerator(
-            prefix=u'Template:FileContentsByBot/')
+            prefix='Template:FileContentsByBot/')
         buf = []
         for item in gen:
             item = item.title()
@@ -3682,16 +3680,16 @@ class CatImagesBot(checkimages.checkImagesBot, CatImages_Default):
             buf.append(item)
         if buf:
             self.tmpl_available_spec = buf
-            pywikibot.output(u'\n\t...Following specialized templates found, '
-                             u'check them since they are used now...\n')
-            pywikibot.output(u'tmpl_available_spec = [%s]\n'
-                             % u", ".join(buf))
+            pywikibot.output('\n\t...Following specialized templates found, '
+                             'check them since they are used now...\n')
+            pywikibot.output('tmpl_available_spec = [%s]\n'
+                             % ", ".join(buf))
 
         return []
 
     def downloadImage(self):
         #print self.image_path
-        pywikibot.output(u'Processing media %s ...' % self.image.title(asLink=True))
+        pywikibot.output('Processing media %s ...' % self.image.title(asLink=True))
 
         image_filename = os.path.split(self.image.fileUrl())[-1]
         self.image_path = urllib2.quote(os.path.join(scriptdir,
@@ -3795,22 +3793,22 @@ class CatImagesBot(checkimages.checkImagesBot, CatImages_Default):
         content = self.image.get()
 
         # check the type of template used on page; Information, Artwork, ...
-        for temp in [u"Information", u"Artwork"]:
-            pos = content.find(u'{{%s' % temp) + 2
+        for temp in ["Information", "Artwork"]:
+            pos = content.find('{{%s' % temp) + 2
             if pos > 1:
                 break
         if pos > 1:
             # cosmetic changes: format the page well to have '\n\n' after the template
-            diff = (content[:(pos - 2)].count(u'{{') -
-                    content[:(pos - 2)].count(u'}}'))
-            while (content[:pos].count(u'{{') -
-                   content[:pos].count(u'}}')) != diff:
-                pos = content.find(u'}}', pos) + 2
-            if content[pos:(pos+2)] != (u"\n" * 2):
-                content = content[:pos] + (u"\n" * 2) + content[pos:].lstrip()
+            diff = (content[:(pos - 2)].count('{{') -
+                    content[:(pos - 2)].count('}}'))
+            while (content[:pos].count('{{') -
+                   content[:pos].count('}}')) != diff:
+                pos = content.find('}}', pos) + 2
+            if content[pos:(pos+2)] != ("\n" * 2):
+                content = content[:pos] + ("\n" * 2) + content[pos:].lstrip()
         else:
-            pywikibot.warning(u'Page layout issue; Information template could '
-                              u'not be found and thus the data not appended!')
+            pywikibot.warning('Page layout issue; Information template could '
+                              'not be found and thus the data not appended!')
             return False
 
         # append template and fill it with data
@@ -3822,13 +3820,13 @@ class CatImagesBot(checkimages.checkImagesBot, CatImages_Default):
             info = self._make_infoblock(key, item)
             if info:
                 content = self._append_to_template(content,
-                                                   u"FileContentsByBot", info)
+                                                   "FileContentsByBot", info)
 
         # append categories
         tags = set([])
         for i, cat in enumerate(list(set(self._result_check +
                                          self._result_add))):
-            tags.add(u"[[:Category:%s]]" % cat)
+            tags.add("[[:Category:%s]]" % cat)
             content = pywikibot.replaceCategoryLinks(content, [cat],
                                                      site=self.site,
                                                      addOnly=True)
@@ -3838,26 +3836,26 @@ class CatImagesBot(checkimages.checkImagesBot, CatImages_Default):
             content,
             list(set(pywikibot.getCategoryLinks(content, site=self.site))),
             site=self.site)
-        content = self._remove_category_or_template(content, u"Uncategorized")  # template
+        content = self._remove_category_or_template(content, "Uncategorized")  # template
         content = self._add_template(content,
-                                     u"Check categories|year={{subst:#time:Y}}|month={{subst:#time:F}}|day={{subst:#time:j}}|category=[[Category:Categorized by DrTrigonBot]]",
+                                     "Check categories|year={{subst:#time:Y}}|month={{subst:#time:F}}|day={{subst:#time:j}}|category=[[Category:Categorized by DrTrigonBot]]",
                                      top=True)
 
         # add category guesses
         for i, cat in enumerate(self._result_guess):
-            content += u"\n<!--DrTrigonBot-guess-- [[Category:%s]] -->" % cat
+            content += "\n<!--DrTrigonBot-guess-- [[Category:%s]] -->" % cat
 
         # verbosely output info about changes and apply them
-        pywikibot.output(u"--- " * 20)
+        pywikibot.output("--- " * 20)
         pywikibot.output(content)
-        pywikibot.output(u"--- " * 20)
+        pywikibot.output("--- " * 20)
         pywikibot.put_throttle()
-        self.image.put(content, comment="bot automatic categorization; adding %s" % u", ".join(tags),
+        self.image.put(content, comment="bot automatic categorization; adding %s" % ", ".join(tags),
                                  botflag=False)
 
 # TODO: (work-a-round if https://bugzilla.wikimedia.org/show_bug.cgi?id=6421 not solved)
 #        if hasattr(self, '_content_text'):
-#            textpage = pywikibot.Page(self.site, os.path.join(self.image.title(), u'Contents/Text'))
+#            textpage = pywikibot.Page(self.site, os.path.join(self.image.title(), 'Contents/Text'))
 #            textpage.put(self._content_text, comment="bot adding content from %s" % textpage.title(asLink=True),
 #                                              botflag=False)
 
@@ -3870,44 +3868,44 @@ class CatImagesBot(checkimages.checkImagesBot, CatImages_Default):
         # information available? AND/OR category available?
         if not (self._existInformation(self._info, ignore=ignore) or
                 self._result_check):
-            return u""
+            return ""
 
         ret = []
-        ret.append(u"")
-        ret.append(u"== [[:%s]] ==" % self.image.title())
-        ret.append(u'{|')
-        ret.append(u'|<div style="position:relative;">')
-        ret.append(u"[[%s|200px]]" % self.image.title())
-        ret.append(self._make_markerblock(self._info[u'Faces'], 200.,
+        ret.append("")
+        ret.append("== [[:%s]] ==" % self.image.title())
+        ret.append('{|')
+        ret.append('|<div style="position:relative;">')
+        ret.append("[[%s|200px]]" % self.image.title())
+        ret.append(self._make_markerblock(self._info['Faces'], 200.,
                                            structure=['Position', 'Eyes', 'Mouth', 'Nose']))
-        ret.append(self._make_markerblock(self._info[u'People'], 200.,
+        ret.append(self._make_markerblock(self._info['People'], 200.,
                                            line='dashed'))
-        ret.append(u"</div>")
-        ret.append(u'|<div style="position:relative;">')
-        ret.append(u"[[%s|200px]]" % self.image.title())
-        ret.append(self._make_markerblock(self._info[u'ColorRegions'], 200.))
-        ret.append(self._make_markerblock(self._info[u'OpticalCodes'], 200.,
+        ret.append("</div>")
+        ret.append('|<div style="position:relative;">')
+        ret.append("[[%s|200px]]" % self.image.title())
+        ret.append(self._make_markerblock(self._info['ColorRegions'], 200.))
+        ret.append(self._make_markerblock(self._info['OpticalCodes'], 200.,
                                            line='dashed'))
-        ret.append(u"</div>")
-        ret.append(u'|<div style="position:relative;">')
-        ret.append(u"[[%s|200px]]" % self.image.title())
-        ret.append(self._make_markerblock(self._info[u'Ears'], 200.))
-        ret.append(self._make_markerblock(self._info[u'Eyes'], 200.))
-        ret.append(self._make_markerblock(self._info[u'Legs'], 200.,
+        ret.append("</div>")
+        ret.append('|<div style="position:relative;">')
+        ret.append("[[%s|200px]]" % self.image.title())
+        ret.append(self._make_markerblock(self._info['Ears'], 200.))
+        ret.append(self._make_markerblock(self._info['Eyes'], 200.))
+        ret.append(self._make_markerblock(self._info['Legs'], 200.,
                                            line='dashed'))
-        ret.append(self._make_markerblock(self._info[u'Torsos'], 200.,
+        ret.append(self._make_markerblock(self._info['Torsos'], 200.,
                                            line='dashed'))
-        ret.append(self._make_markerblock(self._info[u'Automobiles'], 200.,
+        ret.append(self._make_markerblock(self._info['Automobiles'], 200.,
                                            line='dashed'))
-        #ret.append(self._make_markerblock(self._info[u'Hands'], 200.,
+        #ret.append(self._make_markerblock(self._info['Hands'], 200.,
         #                                   line='dashed'))
-        ret.append(u"</div>")
-        ret.append(u'|}')
+        ret.append("</div>")
+        ret.append('|}')
 
         color = {True: "rgb(0,255,0)",
                  False: "rgb(255,0,0)"}[bool(self._result_check +
                                              self._result_guess)]
-        ret.append(u"<div style='background:%s'>'''automatic categorization''': %s</div>" % (color, u", ".join(list(set(self._result_check + self._result_add)))))
+        ret.append("<div style='background:%s'>'''automatic categorization''': %s</div>" % (color, ", ".join(list(set(self._result_check + self._result_add)))))
 
         buf = []
         for i, key in enumerate(self._info):
@@ -3916,16 +3914,16 @@ class CatImagesBot(checkimages.checkImagesBot, CatImages_Default):
             info = self._make_infoblock(key, item, [])
             if info:
                 buf.append(info)
-        ret.append(tmpl_FileContentsByBot[3:] + u"\n" + u"\n".join(buf) + u"\n}}")
+        ret.append(tmpl_FileContentsByBot[3:] + "\n" + "\n".join(buf) + "\n}}")
 
-        return u"\n".join(ret)
+        return "\n".join(ret)
 
     def clean_cache(self):
         if os.path.exists(self.image_path):
             os.remove(self.image_path)
         #if os.path.exists(self.image_path_JPEG):
         #    os.remove(self.image_path_JPEG)
-        ##image_path_new = self.image_path_JPEG.replace(u"cache/", u"cache/0_DETECTED_")
+        ##image_path_new = self.image_path_JPEG.replace("cache/", "cache/0_DETECTED_")
         ##if os.path.exists(image_path_new):
         ##    os.remove(image_path_new)
 
@@ -3940,16 +3938,16 @@ class CatImagesBot(checkimages.checkImagesBot, CatImages_Default):
             available on the wiki.
 
             Nested values are flattened and numbered for output. Invalid or
-            unknown values can be marked e.g. by using u'-' or None.
+            unknown values can be marked e.g. by using '-' or None.
             Values like None, [] (empty list), ... that resolve by bool() to
             False are hidden/omitted and not outputted at all. Unknown values
             should be hidden to save space (make human readable) and be handled
             by the Templates.
-            Unknown values that are NEEDED should be set to u'-' everything
+            Unknown values that are NEEDED should be set to '-' everything
             else (not needed) to None, [] and so on.
         """
         if not res:
-            return u''
+            return ''
 
         if tmpl_available is None:
             tmpl_available = self.tmpl_available_spec
@@ -3957,30 +3955,30 @@ class CatImagesBot(checkimages.checkImagesBot, CatImages_Default):
         generic = (cat not in tmpl_available)
         titles = res[0].keys()
         if not titles:
-            return u''
+            return ''
 
         result = []
-        #result.append(u'{{(!}}style="background:%s;"' % {True: 'green', False: 'red'}[report])
+        #result.append('{{(!}}style="background:%s;"' % {True: 'green', False: 'red'}[report])
         if generic:
-            result.append(u"{{FileContentsByBot/generic|name=%s|" % cat)
+            result.append("{{FileContentsByBot/generic|name=%s|" % cat)
             buf = dict([(key, []) for key in titles])
             for item in res:
                 for key in titles:
                     buf[key].append(self._output_format(item[key]))
             for key in titles:
-                result.append(u"  {{FileContentsByBot/generic|name=%s|value=%s}}" % (key, u"; ".join(buf[key])))
+                result.append("  {{FileContentsByBot/generic|name=%s|value=%s}}" % (key, "; ".join(buf[key])))
         else:
-            result.append(u"{{FileContentsByBot/%s|" % cat)
+            result.append("{{FileContentsByBot/%s|" % cat)
             for item in res:
-                result.append(u"  {{FileContentsByBot/%s" % cat)
+                result.append("  {{FileContentsByBot/%s" % cat)
                 for key in titles:
                     if item[key]:   # hide/omit (work-a-round for empty 'Eyes')
                         result.append(self._output_format_flatten(key,
                                                                   item[key]))
-                result.append(u"  }}")
-        result.append(u"}}")
+                result.append("  }}")
+        result.append("}}")
 
-        return u"\n".join(result)
+        return "\n".join(result)
 
     def _output_format(self, value):
         if (type(value) == type(float())):
@@ -3995,11 +3993,11 @@ class CatImagesBot(checkimages.checkImagesBot, CatImages_Default):
         if (type(value) == type(tuple())) or (type(value) == type(list())):
             buf = []
             for i, t in enumerate(value):
-                buf.append(self._output_format_flatten(key + (u"-%02i" % i), t))
-            return u"\n".join(buf)
+                buf.append(self._output_format_flatten(key + ("-%02i" % i), t))
+            return "\n".join(buf)
         else:
             # end of recursion
-            return u"  | %s = %s" % (key, self._output_format(value))
+            return "  | %s = %s" % (key, self._output_format(value))
 
     def _make_markerblock(self, res, size, structure=['Position'],
                           line='solid'):
@@ -4021,12 +4019,12 @@ class CatImagesBot(checkimages.checkImagesBot, CatImages_Default):
             else:
                 color = list(colors[i % 8])
             color.reverse()
-            color = u"%02x%02x%02x" % tuple(color)
+            color = "%02x%02x%02x" % tuple(color)
 
             scale = self.image_size[0] / size
             f = list(np.array(r[structure[0]]) / scale)
 
-            result.append(u'<div class="%s-marker" style="position:absolute; left:%ipx; top:%ipx; width:%ipx; height:%ipx; border:2px %s #%s;"></div>'
+            result.append('<div class="%s-marker" style="position:absolute; left:%ipx; top:%ipx; width:%ipx; height:%ipx; border:2px %s #%s;"></div>'
                           % tuple([structure[0].lower()] + f + [line, color]))
 
             for ei in range(len(structure) - 1):
@@ -4036,37 +4034,37 @@ class CatImagesBot(checkimages.checkImagesBot, CatImages_Default):
                 for e in data:
                     e = list(np.array(e) / scale)
 
-                    result.append(u'<div class="%s-marker" style="position:absolute; left:%ipx; top:%ipx; width:%ipx; height:%ipx; border:2px solid #%s;"></div>'
+                    result.append('<div class="%s-marker" style="position:absolute; left:%ipx; top:%ipx; width:%ipx; height:%ipx; border:2px solid #%s;"></div>'
                                   % tuple([
                                       structure[ei + 1].lower()] + e + [color]))
 
-        return u"\n".join(result)
+        return "\n".join(result)
 
     # place into 'textlib' (or else e.g. 'catlib'/'templib'...)
     def _remove_category_or_template(self, text, name):
-        text = re.sub(u"[\{\[]{2}%s.*?[\}\]]{2}\n?" % name, u"", text)
+        text = re.sub("[\{\[]{2}%s.*?[\}\]]{2}\n?" % name, "", text)
         return text
 
     # place into 'textlib'
     def _add_template(self, text, name, params={}, top=False, raw=False):
         if top:
-            buf = [(u"{{%s}}" % name), text]
+            buf = [("{{%s}}" % name), text]
         else:
             if raw:
                 buf = [text, name]
             else:
-                buf = [text, (u"{{%s}}" % name)]
-        return u"\n".join(buf)
+                buf = [text, ("{{%s}}" % name)]
+        return "\n".join(buf)
 
     # place into 'textlib' (or else e.g. 'catlib'/'templib'...)
     def _append_to_template(self, text, name, append):
         # mask/search template to append to
-        pattern = re.compile(u"(\{\{%s.*?\n)(\s*\}\}\n{2})" % name, flags=re.S)
+        pattern = re.compile("(\{\{%s.*?\n)(\s*\}\}\n{2})" % name, flags=re.S)
         match = pattern.search(text)
         template = match.groups()
 
         # append to template
-        template = u"".join([template[0], append, u"\n", template[1]])
+        template = "".join([template[0], append, "\n", template[1]])
 
         # apply changes
         #text = pattern.sub(template, text)  # '\number' from e.g. date cause 'sre_constants.error: invalid group reference'
@@ -4103,7 +4101,7 @@ class CatImagesBot(checkimages.checkImagesBot, CatImages_Default):
         #result = self._info['Metadata']
         ok = False
         for item in self._info['Metadata'][0]:
-            ok = ok or (self._info['Metadata'][0][item] != u'-')
+            ok = ok or (self._info['Metadata'][0][item] != '-')
         return {'Metadata': self._info['Metadata'] if ok else []}
 
     def _filter_Faces(self):
@@ -4241,19 +4239,18 @@ class CatImagesBot(checkimages.checkImagesBot, CatImages_Default):
 #        from operator import itemgetter
 #        result = sorted(self._info['Classify'][0].items(), key=itemgetter(1))
 #        result.reverse()
-#        pywikibot.output(u' Best: %s' % result[:3])
-#        pywikibot.output(u'Worst: %s' % result[-3:])
+#        pywikibot.output(' Best: %s' % result[:3])
+#        pywikibot.output('Worst: %s' % result[-3:])
 #
 #        # >>> dummy: drop all (not reliable yet since untrained) <<<
 #        return {'Classify': []}
 
 
 def main():
-    """ Main function """
     global useGuesses
     # Command line configurable parameters
     limit = 150  # How many images to check?
-#    untagged = False # Use the untagged generator
+    # untagged = False # Use the untagged generator
     sendemailActive = False  # Use the send-email
     train = False
     generator = None
@@ -4282,7 +4279,7 @@ def main():
         if arg.startswith('-limit'):
             if len(arg) == 7:
                 limit = int(pywikibot.input(
-                    u'How many files do you want to check?'))
+                    'How many files do you want to check?'))
             else:
                 limit = int(arg[7:])
 #        elif arg == '-sendemail':
@@ -4296,7 +4293,7 @@ def main():
             #generator = pywikibot.getSite().allpages(start=firstPageTitle, namespace=6)
         elif arg.startswith('-cat'):
             if len(arg) == 4:
-                catName = u'Media_needing_categories'
+                catName = 'Media_needing_categories'
             elif len(arg) > 4:
                 catName = str(arg[5:])
             catSelected = catlib.Category(pywikibot.getSite(),
@@ -4306,7 +4303,7 @@ def main():
 #        elif arg.startswith('-untagged'):
 #            untagged = True
 #            if len(arg) == 9:
-#                projectUntagged = str(pywikibot.input(u'In which project should I work?'))
+#                projectUntagged = str(pywikibot.input('In which project should I work?'))
 #            elif len(arg) > 9:
 #                projectUntagged = str(arg[10:])
         elif arg == '-noguesses':
@@ -4324,20 +4321,20 @@ def main():
 
     # Understand if the generator is present or not.
     if not generator:
-        pywikibot.output(u'no generator defined... EXIT.')
+        pywikibot.output('no generator defined... EXIT.')
         sys.exit()
 
     # Define the site.
     site = pywikibot.getSite()
 
     # Block of text to translate the parameters set above.
-    image_old_namespace = u"%s:" % site.image_namespace()
-    image_namespace = u"File:"
+    image_old_namespace = "%s:" % site.image_namespace()
+    image_namespace = "File:"
 
     # A little block-statement to ensure that the bot will not start with en-parameters
     if site.lang not in project_inserted:
-        pywikibot.output(u"Your project is not supported by this script. You "
-                         u"have to edit the script and add it!")
+        pywikibot.output("Your project is not supported by this script. You "
+                         "have to edit the script and add it!")
         return
 
     # Defing the Main Class.
@@ -4360,17 +4357,17 @@ def main():
     for image in generator:
         if firstPageTitle:
             if (image.title() == firstPageTitle):
-                pywikibot.output(u"found last page '%s' ..." % image.title())
+                pywikibot.output("found last page '%s' ..." % image.title())
                 firstPageTitle = None
                 continue
             else:
-                #pywikibot.output(u"skipping page '%s' ..." % image.title())
+                #pywikibot.output("skipping page '%s' ..." % image.title())
                 continue
 
         # recover from hard crash in the run before, thus skip one more page
         if os.path.exists(os.path.join(scriptdir, 'cache/catimages_recovery')):
             pywikibot.output(
-                u"trying to recover from hard crash, skipping page '%s' ..."
+                "trying to recover from hard crash, skipping page '%s' ..."
                 % image.title())
             disable_recovery()
 
@@ -4389,7 +4386,7 @@ def main():
             try:
                 imageName = image.title().split(image_old_namespace)[1]
             except IndexError:
-                pywikibot.output(u"%s is not a file, skipping..."
+                pywikibot.output("%s is not a file, skipping..."
                                  % image.title())
                 continue
         Bot.setParameters(imageName)  # Setting the image for the main class
@@ -4397,12 +4394,12 @@ def main():
             Bot.downloadImage()
         except IOError as err:
             # skip if download not possible
-            pywikibot.warning(u"%s, skipped..." % err)
+            pywikibot.warning("%s, skipped..." % err)
             continue
         except:
             # skip on any unexpected error, but report it
             pywikibot.exception(tb=True)
-            pywikibot.error(u"was not able to process page %s !!!\n"
+            pywikibot.error("was not able to process page %s !!!\n"
                             % image.title(asLink=True))
             continue
         resultCheck = Bot.checkStep()
@@ -4413,7 +4410,7 @@ def main():
                 outresult.append(ret)
         except AttributeError:
             pywikibot.exception(tb=True)
-            pywikibot.error(u"was not able to process page %s !!!\n" %\
+            pywikibot.error("was not able to process page %s !!!\n" %\
                             image.title(asLink=True))
         limit += -1
         if not tagged:
@@ -4428,9 +4425,9 @@ def main():
 
     if outresult:
         outpage = pywikibot.Page(site,
-                                 u"User:DrTrigon/User:DrTrigonBot/logging")
-        outresult = u"\n".join(outresult)
-        pywikibot.output(u"Size of log page data: %s byte(s)" % len(outresult))
+                                 "User:DrTrigon/User:DrTrigonBot/logging")
+        outresult = "\n".join(outresult)
+        pywikibot.output("Size of log page data: %s byte(s)" % len(outresult))
         # work-a-round: write pages mutliple times if content is too large in order to circumvent
         # "HTTPError: 504 Gateway Time-out" leading finally to "MaxTriesExceededError"
         # (why is that...?!?? FIX THIS in the framework core e.g. 'postForm'!)
@@ -4439,19 +4436,19 @@ def main():
         ### ('try ... except' has to be considered just a work-a-round)
         try:
             while tmp:
-                i = np.array([m.start() for m in re.finditer(u"\n\n==", tmp)] +
+                i = np.array([m.start() for m in re.finditer("\n\n==", tmp)] +
                              [len(tmp)])
                 pos = i[np.where((i - 500 * 1024) <= 0)[0][-1]]
-                pywikibot.output(u"Size of bunch to write: %s byte(s)"
+                pywikibot.output("Size of bunch to write: %s byte(s)"
                                  % len(tmp[:pos]))
                 outpage.put(tmp[:pos], comment="bot writing log for last run")
                 tmp = tmp[pos:]
         except:     # catch MaxTriesExceededError, EditConflict and all other
             pywikibot.exception()
-            pywikibot.output(u"Problem writing debug info to wiki, using file instead.")
+            pywikibot.output("Problem writing debug info to wiki, using file instead.")
         if pywikibot.simulate or tmp:
-            #print u"--- " * 20
-            #print u"--- " * 20
+            #print "--- " * 20
+            #print "--- " * 20
             #print outresult
             posfile = open(os.path.join(scriptdir, 'cache/catimages.log'), "a")
             posfile.write(outresult)
@@ -4480,7 +4477,7 @@ def trainbot(generator, Bot, image_old_namespace, image_namespace):
                 try:
                     imageName = image.title().split(image_old_namespace)[1]
                 except IndexError:
-                    pywikibot.output(u"%s is not a file, skipping..."
+                    pywikibot.output("%s is not a file, skipping..."
                                      % image.title())
                     continue
             Bot.setParameters(imageName)  # Setting the image for the main class
@@ -4488,12 +4485,12 @@ def trainbot(generator, Bot, image_old_namespace, image_namespace):
                 Bot.downloadImage()
             except IOError as err:
                 # skip if download not possible
-                pywikibot.warning(u"%s, skipped..." % err)
+                pywikibot.warning("%s, skipped..." % err)
                 continue
             except Exception as err:
                 # skip on any unexpected error, but report it
-                pywikibot.error(u"%s" % err)
-                pywikibot.error(u"was not able to process page %s !!!\n"
+                pywikibot.error("%s" % err)
+                pywikibot.error("was not able to process page %s !!!\n"
                                 % image.title(asLink=True))
                 continue
 
@@ -4568,7 +4565,7 @@ def trainbot(generator, Bot, image_old_namespace, image_namespace):
     plt.show()
 
     linear_svm.save_model('cache/test.csf')
-    pywikibot.output(u'Linear SVM model stored to %s.' % 'cache/test.csf')
+    pywikibot.output('Linear SVM model stored to %s.' % 'cache/test.csf')
 
 
 # for functions in C/C++ that might crash hard without any exception throwed
@@ -4586,18 +4583,13 @@ def disable_recovery():
 
 # Main loop will take all the (name of the) images and then i'll check them.
 if __name__ == "__main__":
-    old = datetime.datetime.strptime(
-        str(datetime.datetime.utcnow()).split('.')[0],
-        "%Y-%m-%d %H:%M:%S")  # timezones are UTC
+    old = datetime.datetime.utcnow()  # timezones are UTC
     if sys.exc_info()[0]:   # re-raise ImportError
         raise               #
     try:
         main()
     finally:
-        final = datetime.datetime.strptime(
-            str(datetime.datetime.utcnow()).split('.')[0],
-            "%Y-%m-%d %H:%M:%S")  # timezones are UTC
-        delta = final - old
-        secs_of_diff = delta.seconds
-        pywikibot.output("Execution time: %s" % secs_of_diff)
+        final = datetime.datetime.utcnow()  # timezones are UTC
+        delta = (final - old).total_seconds()
+        pywikibot.output("Execution time: %s sec" % delta)
         pywikibot.stopme()
