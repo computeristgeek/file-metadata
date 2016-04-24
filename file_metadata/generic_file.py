@@ -2,6 +2,14 @@
 
 from __future__ import absolute_import, unicode_literals
 
+import mimetypes
+import os
+
+try:
+    import magic
+except ImportError as error:
+    magic = error
+
 
 class GenericFile:
     """
@@ -72,3 +80,23 @@ class GenericFile:
         """
         delattr(self, "_file")
         delattr(self, "_metadata")
+
+    def _analyze_os_stat(self):
+        stat_data = os.stat(self.filename)
+        return {"Size of file": str(stat_data.st_size) + " bytes"}
+
+    def _analyze_mimetype(self):
+        if hasattr(magic, "open"):
+            # Use the python-magic library in distro repos from the `file`
+            # command - http://www.darwinsys.com/file/
+            magic_instance = magic.open( magic.MAGIC_MIME )
+            magic_instance.load()
+            mime = magic_instance.file(self.filename)
+        elif hasattr(magic, "from_file"):
+            # Use https://pypi.python.org/pypi/python-magic
+            mime = magic.from_file(self.filename, mime=True)
+        else:
+            # Silently use python's builtin mimetype handler if magic package
+            # was not found or not supported.
+            mime, encoding = mimetypes.guess_type(self.filename)
+        return {"MIME type": mime}
