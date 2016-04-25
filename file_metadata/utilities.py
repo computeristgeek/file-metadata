@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import (division, absolute_import, unicode_literals,
+    print_function)
+
 import os
 import sys
 import tempfile
@@ -8,16 +11,6 @@ from contextlib import contextmanager
 
 
 PROJECT_PATH = os.path.abspath(os.path.dirname(__file__))
-
-
-if sys.version_info < (3,):
-    import codecs
-
-    def u(x):
-        return codecs.unicode_escape_decode(x)[0]
-else:
-    def u(x):
-        return x
 
 
 @contextmanager
