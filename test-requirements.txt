@@ -5,6 +5,7 @@ pytest-cov>=2.2.1
 pytest-env>=0.6.0
 pytest-timeout>=1.0.0
 pytest-xdist>=1.14
+mock>=2.0 ; python_version < '3'
 
 # Static code analysis
 flake8>=2.0
