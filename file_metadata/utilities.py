@@ -23,7 +23,7 @@ else:
 @contextmanager
 def make_temp(suffix="", prefix="tmp", dir=None):
     """
-    Creates a temporary file with a closed stream and deletes it when done.
+    Create a temporary file with a closed stream and deletes it when done.
 
     :return: A contextmanager retrieving the file path.
     """
