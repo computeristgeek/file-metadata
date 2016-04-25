@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from __future__ import (division, absolute_import, unicode_literals,
+                        print_function)
+
 from setuptools import find_packages, setup
 
 import file_metadata
@@ -25,7 +28,9 @@ if __name__ == "__main__":
           install_requires=required,
           tests_require=test_required,
           license="MIT",
-          package_data={'file_metadata': ["VERSION"]},
+          # Setuptools has a bug where they use isinstance(x, str) instead
+          # of basestring. Because of this we convert it to str.
+          package_data={str('file_metadata'): [str("VERSION")]},
           # from http://pypi.python.org/pypi?%3Aaction=list_classifiers
           classifiers=[
               'Development Status :: 4 - Beta',
