@@ -15,8 +15,9 @@ WIKI_DIR = os.path.join(os.path.dirname(__file__), os.pardir)
 
 # PYWIKIBOT_PATH is the pywikibot-core repository. We use the environment
 # variable if that is defined.
-PYWIKIBOT2_DIR = os.environ.get('PYWIKIBOT2_DIR',
-                                os.path.join(REPO_DIR, os.pardir, 'pywikibot-core'))
+PYWIKIBOT2_DIR = os.environ.get(
+    'PYWIKIBOT2_DIR',
+    os.path.abspath(os.path.join(REPO_DIR, os.pardir, 'pywikibot-core')))
 
 PYWIKIBOT_SCRIPTS_DIR = os.path.join(PYWIKIBOT2_DIR, "scripts")
 
