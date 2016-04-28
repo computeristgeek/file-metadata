@@ -68,17 +68,19 @@ except ImportError:
 import imghdr
 #import ImageFilter
 
-scriptdir = os.path.dirname(sys.argv[0])
-if not os.path.isabs(scriptdir):
-    scriptdir = os.path.abspath(os.path.join(os.curdir, scriptdir))
+REPO_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
+sys.path.insert(0, REPO_DIR)
+scriptdir = os.path.join(REPO_DIR, "archive")
+
+import archive  # Path manipulation
 
 # additional python packages (non-default but common)
 import numpy as np
 from scipy import ndimage, fftpack  #, signal
 import cv, cv2
 from gi.repository import Gtk
-from gi.repository import GExiv2
 from gi.repository import Rsvg
+import pyexifinfo
 # import cairo  # Needed to convert svg -> png
 import magic    # python-magic (binding to libmagic)
 
@@ -134,7 +136,7 @@ from py_w3c.validators.html.validator import HTMLValidator, ValidationFault
 # will automatically replaced with the bot's nickname.
 
 # Add your project (in alphabetical order) if you want that the bot start
-project_inserted = ['commons']
+project_inserted = ['commons', 'en']
 
 # Ok, that's all. What is below, is the rest of code, now the code is fixed and it will run correctly in your project.
 ################################################################################
@@ -291,69 +293,17 @@ class _UnknownFile(object):
         pass
 
     def _util_get_DataTags_EXIF(self):
-        # http://tilloy.net/dev/pyexiv2/tutorial.html
-        # (is UNFORTUNATELY NOT ABLE to handle all tags, e.g. 'FacesDetected', ...)
-
+        # Use exiftool :)
         if hasattr(self, '_buffer_EXIF'):
             return self._buffer_EXIF
 
-        res = {}
-        enable_recovery('exif') # enable recovery from hard crash
         try:
-            if hasattr(pyexiv2, 'ImageMetadata'):
-# TODO: find solution to avoid segfaults (error/exit code 139)
-#       file pyexiv2 bug report
-#                metadata = pyexiv2.ImageMetadata(self.file_name)
-#                metadata.read()
-#
-#                for key in metadata.exif_keys:
-#                    res[key] = metadata[key]
-#
-#                for key in metadata.iptc_keys:
-#                    res[key] = metadata[key]
-#
-#                for key in metadata.xmp_keys:
-#                    res[key] = metadata[key]
-                pass
-            else:
-                image = pyexiv2.Image(self.file_name)
-                image.readMetadata()
-
-                for key in image.exifKeys():
-                    res[key] = image[key]
-
-                for key in image.iptcKeys():
-                    res[key] = image[key]
-
-                #for key in image.xmpKeys():
-                #    res[key] = image[key]
-        except IOError:
-            pass
-        except RuntimeError:
-            pass
-        disable_recovery()      # disable since everything worked out fine
-
-
-        # http://www.sno.phy.queensu.ca/~phil/exiftool/
-        # MIGHT BE BETTER TO USE AS PYTHON MODULE; either by wrapper or perlmodule:
-        # http://search.cpan.org/~gaas/pyperl-1.0/perlmodule.pod
-        # (or use C++ with embbedded perl to write a python module)
-        data = Popen("exiftool -j %s" % self.file_name,
-                     shell=True, stdout=PIPE).stdout.read()
-        if not data:
-            raise ImportError("exiftool not found!")
-        try:  # work-a-round for badly encoded exif data (from pywikibot/comms/http.py)
-            data = unicode(data, 'utf-8', errors='strict')
-        except UnicodeDecodeError:
-            data = unicode(data, 'utf-8', errors='replace')
-        #res  = {}
-        data = re.sub("(?<!\")\(Binary data (?P<size>\d*) bytes\)",
-                      "\"(Binary data \g<size> bytes)\"",
-                      data)  # work-a-round some issue
-        for item in json.loads(data):
-            res.update(item)
-        #print res
-        self._buffer_EXIF = res
+            exif_data = pyexifinfo.get_json(self.file_name)
+        except OSError:
+            raise ImportError("Binary file `exiftool` required for library "
+                              "`pyexifinfo` not found.")
+        assert len(exif_data) == 1, "`pyexifinfo` gave more than 1 json."
+        self._buffer_EXIF = exif_data[0]
         return self._buffer_EXIF
 
 
@@ -3162,9 +3112,24 @@ _FILETYPES = {'*': _UnknownFile,
 
 def GenericFile(file_name):
     # 'magic' (libmagic)
-    m = magic.open(magic.MAGIC_MIME)    # or 'magic.MAGIC_NONE'
-    m.load()
-    file_mime = re.split('[/;\s]', m.file(file_name))
+    # m = magic.open(magic.MAGIC_MIME)    # or 'magic.MAGIC_NONE'
+    # m.load()
+    # Use own mime finder method
+    if hasattr(magic, "open"):
+        # Use the python-magic library in distro repos from the `file`
+        # command - http://www.darwinsys.com/file/
+        magic_instance = magic.open( magic.MAGIC_MIME )
+        magic_instance.load()
+        mime = magic_instance.file(file_name)
+    elif hasattr(magic, "from_file"):
+        # Use https://pypi.python.org/pypi/python-magic
+        mime = magic.from_file(file_name, mime=True)
+    else:
+        # Silently use python's builtin mimetype handler if magic package
+        # was not found or not supported.
+        mime, encoding = mimetypes.guess_type(file_name)
+
+    file_mime = re.split('[/;\s]', mime)
     file_imgh = ['image', imghdr.what(file_name)]       # alternative MIME ...
     if file_imgh[1] and (not (file_imgh == file_mime[:2])):
         pywikibot.warning('Issue in MIME type detection! Preferring imghdr result %s over libmagic %s!' % (file_imgh, file_mime))
@@ -3675,15 +3640,14 @@ class CatImagesBot(checkimages.checkImagesBot, CatImages_Default):
         return []
 
     def downloadImage(self):
-        #print self.image_path
         pywikibot.output('Processing media %s ...' % self.image.title(asLink=True))
 
         image_filename = os.path.split(self.image.fileUrl())[-1]
         self.image_path = urllib2.quote(os.path.join(scriptdir,
-                                                     ('cache/' +
-                                                      image_filename[-128:])))
+                                                     'cache',
+                                                     image_filename[-128:]))
 
-        self._wikidata = self.image._latestInfo  # all info wikimedia got from content (mime, sha1, ...)
+        # self._wikidata = self.image._latestInfo  # all info wikimedia got from content (mime, sha1, ...)
         #print self._wikidata
         #print self._wikidata['mime']
         #print self._wikidata['sha1']
@@ -3692,17 +3656,13 @@ class CatImagesBot(checkimages.checkImagesBot, CatImages_Default):
         #    print item['name'], item['value']
 
         if not os.path.exists(self.image_path):
-            pywikibot.get_throttle()
-            f_url, data = self.site.getUrl(self.image.fileUrl(),
-                                           no_hostname=True, back_response=True)
-            # needed patch for 'getUrl' applied upstream in r10441
-            # (allows to re-read from back_response)
-            data = f_url.read()
-            del f_url   # free some memory (no need to keep a copy...)
-
-            f = open(self.image_path, 'wb')
-            f.write(data)
-            f.close()
+            # pywikibot.get_throttle()
+            request = pywikibot.comms.http.fetch(site=self.site,
+                                                 uri=self.image.fileUrl(),
+                                                 charset="binary")
+            data = request.raw
+            with open(self.image_path, 'wb') as f:
+                f.write(data)
 
     # LOOK ALSO AT: checkimages.CatImagesBot.checkStep
     # (and category scripts/bots too...)
@@ -3776,7 +3736,7 @@ class CatImagesBot(checkimages.checkImagesBot, CatImages_Default):
         if not (self._result_check + self._result_guess):   # category available?
             return False
 
-        pywikibot.get_throttle()
+        # pywikibot.get_throttle()
         content = self.image.get()
 
         # check the type of template used on page; Information, Artwork, ...

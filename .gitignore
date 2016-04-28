@@ -1,5 +1,9 @@
+/apicache
+throttle.ctrl
+
 # Cached test files
 /tests/files
+/archive/cache
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

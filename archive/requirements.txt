@@ -4,3 +4,4 @@ pycolorname
 music21
 mlpy
 zbar
+pyexifinfo
