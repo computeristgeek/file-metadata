@@ -73,27 +73,14 @@ if not os.path.isabs(scriptdir):
     scriptdir = os.path.abspath(os.path.join(os.curdir, scriptdir))
 
 # additional python packages (non-default but common)
-sys.exc_clear()
-try:
-    import numpy as np
-    from scipy import ndimage, fftpack  # , signal
-    import cv
-    # TS: nonofficial cv2.so backport of the testing-version of
-    # python-opencv because of missing build-host, done by DaB
-    sys.path.append('/usr/local/lib/python2.6/')
-    import cv2
-    sys.path.remove('/usr/local/lib/python2.6/')
-    import pyexiv2
-    import warnings
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        import gtk  # ignore warning: "GtkWarning: could not open display"
-    import rsvg     # gnome-python2-rsvg (binding to librsvg)
-    import cairo
-    import magic    # python-magic (binding to libmagic)
-except:
-    # either raise the ImportError later or skip it
-    pass
+import numpy as np
+from scipy import ndimage, fftpack  #, signal
+import cv, cv2
+from gi.repository import Gtk
+from gi.repository import GExiv2
+from gi.repository import Rsvg
+# import cairo  # Needed to convert svg -> png
+import magic    # python-magic (binding to libmagic)
 
 # pywikipedia framework python packages
 # import wikipedia as pywikibot
@@ -4584,8 +4571,6 @@ def disable_recovery():
 # Main loop will take all the (name of the) images and then i'll check them.
 if __name__ == "__main__":
     old = datetime.datetime.utcnow()  # timezones are UTC
-    if sys.exc_info()[0]:   # re-raise ImportError
-        raise               #
     try:
         main()
     finally:
