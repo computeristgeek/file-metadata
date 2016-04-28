@@ -78,7 +78,7 @@ import archive  # Path manipulation
 import numpy as np
 from scipy import ndimage, fftpack  #, signal
 import cv, cv2
-from gi.repository import Gtk
+from gi.repository import Gdk
 from gi.repository import Rsvg
 import pyexifinfo
 # import cairo  # Needed to convert svg -> png
@@ -122,7 +122,6 @@ import checkimages  # This is imported from scripts
 
 import pycolorname
 import mlpy  # Was commented before ?
-from colormath.color_objects import sRGBColor
 from py_w3c.validators.html.validator import HTMLValidator, ValidationFault
 ##from pdfminer import pdfparser, pdfinterp, pdfdevice, converter, cmapdb
 ##from pdfminer import layout
@@ -354,7 +353,8 @@ class _JpegFile(_UnknownFile):
             del self._features['Faces'][i]
 
         # Segments and colors
-        self._detect_SegmentColors()
+        # self._detect_SegmentColors()  # Disable as jseg not working
+
         # Average color
         self._detect_AverageColor()
 
@@ -479,43 +479,43 @@ class _JpegFile(_UnknownFile):
         # http://www.cognotics.com/opencv/servo_2007_series/part_4/index.html
 
         # https://code.ros.org/trac/opencv/browser/trunk/opencv_extra/testdata/gpu/haarcascade?rev=HEAD
-        xml = os.path.join(scriptdir, 'externals/opencv/haarcascades/haarcascade_eye_tree_eyeglasses.xml')
+        xml = os.path.join(scriptdir, 'opencv/haarcascades/haarcascade_eye_tree_eyeglasses.xml')
         #xml = os.path.join(scriptdir, 'externals/opencv/haarcascades/haarcascade_eye.xml')
         if not os.path.exists(xml):
             raise IOError("No such file: '%s'" % xml)
         #nestedCascade = cv.Load(
         nestedCascade = cv2.CascadeClassifier(xml)
         # http://tutorial-haartraining.googlecode.com/svn/trunk/data/haarcascades/
-        xml = os.path.join(scriptdir, 'externals/opencv/haarcascades/haarcascade_frontalface_alt.xml')
+        xml = os.path.join(scriptdir, 'opencv/haarcascades/haarcascade_frontalface_alt.xml')
         # MAY BE USE 'haarcascade_frontalface_alt_tree.xml' ALSO / INSTEAD...?!!
         if not os.path.exists(xml):
             raise IOError("No such file: '%s'" % xml)
         cascade = cv2.CascadeClassifier(xml)
-        xml = os.path.join(scriptdir, 'externals/opencv/haarcascades/haarcascade_profileface.xml')
+        xml = os.path.join(scriptdir, 'opencv/haarcascades/haarcascade_profileface.xml')
         if not os.path.exists(xml):
             raise IOError("No such file: '%s'" % xml)
         cascadeprofil = cv2.CascadeClassifier(xml)
-        xml = os.path.join(scriptdir, 'externals/opencv/haarcascades/haarcascade_mcs_mouth.xml')
+        xml = os.path.join(scriptdir, 'opencv/haarcascades/haarcascade_mcs_mouth.xml')
         if not os.path.exists(xml):
             raise IOError("No such file: '%s'" % xml)
         cascademouth = cv2.CascadeClassifier(xml)
-        xml = os.path.join(scriptdir, 'externals/opencv/haarcascades/haarcascade_mcs_nose.xml')
+        xml = os.path.join(scriptdir, 'opencv/haarcascades/haarcascade_mcs_nose.xml')
         if not os.path.exists(xml):
             raise IOError("No such file: '%s'" % xml)
         cascadenose = cv2.CascadeClassifier(xml)
-        xml = os.path.join(scriptdir, 'externals/opencv/haarcascades/haarcascade_lefteye_2splits.xml')
+        xml = os.path.join(scriptdir, 'opencv/haarcascades/haarcascade_lefteye_2splits.xml')
         if not os.path.exists(xml):
             raise IOError("No such file: '%s'" % xml)
         cascadelefteye = cv2.CascadeClassifier(xml)        # (http://yushiqi.cn/research/eyedetection)
-        xml = os.path.join(scriptdir, 'externals/opencv/haarcascades/haarcascade_righteye_2splits.xml')
+        xml = os.path.join(scriptdir, 'opencv/haarcascades/haarcascade_righteye_2splits.xml')
         if not os.path.exists(xml):
             raise IOError("No such file: '%s'" % xml)
         cascaderighteye = cv2.CascadeClassifier(xml)       # (http://yushiqi.cn/research/eyedetection)
-        xml = os.path.join(scriptdir, 'externals/opencv/haarcascades/haarcascade_mcs_leftear.xml')
+        xml = os.path.join(scriptdir, 'opencv/haarcascades/haarcascade_mcs_leftear.xml')
         if not os.path.exists(xml):
             raise IOError("No such file: '%s'" % xml)
         cascadeleftear = cv2.CascadeClassifier(xml)
-        xml = os.path.join(scriptdir, 'externals/opencv/haarcascades/haarcascade_mcs_rightear.xml')
+        xml = os.path.join(scriptdir, 'opencv/haarcascades/haarcascade_mcs_rightear.xml')
         if not os.path.exists(xml):
             raise IOError("No such file: '%s'" % xml)
         cascaderightear = cv2.CascadeClassifier(xml)
@@ -529,7 +529,7 @@ class _JpegFile(_UnknownFile):
             #img    = cv2.imread(self.image_path, cv.CV_LOAD_IMAGE_COLOR)
             img    = cv2.imread(self.image_path_JPEG, cv.CV_LOAD_IMAGE_COLOR)
             #image  = cv.fromarray(img)
-            if img == None:
+            if img is None:
                 raise IOError
 
             # !!! the 'scale' here IS RELEVANT FOR THE DETECTION RATE;
@@ -872,7 +872,7 @@ class _JpegFile(_UnknownFile):
         try:
             #video = bob.io.VideoReader(self.image_path_JPEG.encode('utf-8'))
             video = [cv2.imread(self.image_path_JPEG, cv.CV_LOAD_IMAGE_COLOR)]
-            #if img == None:
+            #if img is None:
             #    raise IOError
 
             # !!! the 'scale' here IS RELEVANT FOR THE DETECTION RATE;
@@ -952,7 +952,7 @@ class _JpegFile(_UnknownFile):
         try:
             img = cv2.imread(self.image_path_JPEG, cv.CV_LOAD_IMAGE_COLOR)
 
-            if (img == None) or (min(img.shape[:2]) < 100) or (not img.data) \
+            if (img is None) or (min(img.shape[:2]) < 100) or (not img.data) \
                or (self.image_size[0] is None):
                 return
 
@@ -1000,7 +1000,7 @@ class _JpegFile(_UnknownFile):
 
         # people haar/cascaded classifier
         # use 'haarcascade_fullbody.xml', ... also (like face detection)
-        xml = os.path.join(scriptdir, 'externals/opencv/haarcascades/haarcascade_fullbody.xml')
+        xml = os.path.join(scriptdir, 'opencv/haarcascades/haarcascade_fullbody.xml')
         #xml = os.path.join(scriptdir, 'externals/opencv/haarcascades/haarcascade_lowerbody.xml')
         #xml = os.path.join(scriptdir, 'externals/opencv/haarcascades/haarcascade_upperbody.xml')
         if not os.path.exists(xml):
@@ -1016,9 +1016,15 @@ class _JpegFile(_UnknownFile):
 
         #t = time.time() - t
         #print("tdetection time = %gms\n", t*1000.)
-        bbox = gtk.gdk.Rectangle(*(0,0,img.shape[1],img.shape[0]))
+        bbox = Gdk.Rectangle()
+        bbox.x, bbox.y, bbox.width, bbox.height = (0, 0, img.shape[1], img.shape[0])
         # exclude duplicates (see also in 'classifyFeatures()')
-        found_filtered = [gtk.gdk.Rectangle(*f) for f in self._util_merge_Regions(found, sub=True)[0]]
+        found_filtered = []
+        for f in self._util_merge_Regions(found, sub=True)[0]:
+            r = Gdk.Rectangle()
+            r.x, r.y, r.width, r.height = f
+            found_filtered.append(r)
+    
         result = []
         for i in range(len(found_filtered)):
             r = found_filtered[i]
@@ -1032,9 +1038,9 @@ class _JpegFile(_UnknownFile):
             }
                      #'Center':   (int(r.x + r.width*0.5), int(r.y + r.height*0.5)), }
             # crop to image size (because of the slightly bigger boxes)
-            r = bbox.intersect(r)
+            r = Gdk.rectangle_intersect(bbox, r)[1]
             #cv2.rectangle(img, (r.x, r.y), (r.x+r.width, r.y+r.height), cv.Scalar(0,255,0), 3)
-            data['Position'] = tuple(np.int_(np.array(r) * scale))
+            data['Position'] = tuple(np.int_(np.array([r.x, r.y, r.width, r.height]) * scale))
             data['Coverage'] = float(data['Position'][2] *
                                      data['Position'][3]) / (
                                          self.image_size[0] *
@@ -1069,7 +1075,7 @@ class _JpegFile(_UnknownFile):
         try:
             img = cv2.imread(self.image_path_JPEG, cv.CV_LOAD_IMAGE_COLOR)
 
-            if (img == None):
+            if (img is None):
                 raise IOError
 
             # !!! the 'scale' here IS RELEVANT FOR THE DETECTION RATE;
@@ -1416,48 +1422,14 @@ class _JpegFile(_UnknownFile):
                  'RGB':   rgb,
                  'Peaks': float(count)/len(h), }
 
-        #colors = pycolorname.RAL.colors
-        #colors = pycolorname.pantone.Formula_Guide_Solid
-        colors = pycolorname.pantone.Fashion_Home_paper
+        from pycolorname.pantone.pantonepaint import PantonePaint
+        colors = PantonePaint()
 
-        #print "=== RGB Example: RGB->LAB ==="
-        # Instantiate an Lab color object with the given values.
-        rgb = sRGBColor(rgb[0], rgb[1], rgb[2])
-        # Show a string representation.
-        #print rgb
-        # Convert RGB to LAB using a D50 illuminant.
-        lab = rgb.convert_to('lab', target_illuminant='D65')
-        #print lab
-        #print "=== End Example ===\n"
+        close_name, close_color = colors.find_closest(rgb)
 
-        # Reference color.
-        #color1 = LabColor(lab_l=0.9, lab_a=16.3, lab_b=-2.22)
-        # Color to be compared to the reference.
-        #color2 = LabColor(lab_l=0.7, lab_a=14.2, lab_b=-1.80)
-        color2 = lab
-
-        res = (1.E100, '')
-        for c in colors:
-            rgb = colors[c]
-            rgb = sRGBColor(rgb[0], rgb[1], rgb[2])
-            color1 = rgb.convert_to('lab', target_illuminant='D65')
-
-            #print "== Delta E Colors =="
-            #print " COLOR1: %s" % color1
-            #print " COLOR2: %s" % color2
-            #print "== Results =="
-            #print " CIE2000: %.3f" % color1.delta_e(color2, mode='cie2000')
-            ## Typically used for acceptability.
-            #print "     CMC: %.3f (2:1)" % color1.delta_e(color2, mode='cmc', pl=2, pc=1)
-            ## Typically used to more closely model human percetion.
-            #print "     CMC: %.3f (1:1)" % color1.delta_e(color2, mode='cmc', pl=1, pc=1)
-
-            r = color1.delta_e(color2, mode='cmc', pl=2, pc=1)
-            if (r < res[0]):
-                res = (r, c, colors[c])
-        data['Color']   = res[1]
-        data['Delta_E'] = res[0]
-        data['RGBref']  = res[2]
+        data['Color']   = close_color
+        # data['Delta_E'] = res[0]
+        data['RGBref']  = close_name
 
         return data
 
@@ -1640,7 +1612,7 @@ class _JpegFile(_UnknownFile):
 
         # http://tutorial-haartraining.googlecode.com/svn/trunk/data/haarcascades/
         # or own xml files trained onto specific file database/set
-        xml = os.path.join(scriptdir, ('externals/opencv/haarcascades/' + cascade_file))
+        xml = os.path.join(scriptdir, ('opencv/haarcascades/' + cascade_file))
         if not os.path.exists(xml):
             raise IOError("No such file: '%s'" % xml)
         cascade       = cv2.CascadeClassifier(xml)
@@ -1648,7 +1620,7 @@ class _JpegFile(_UnknownFile):
         scale = 1.
         try:
             img    = cv2.imread(self.image_path_JPEG, cv.CV_LOAD_IMAGE_COLOR)
-            if (img == None) or (self.image_size[0] is None):
+            if (img is None) or (self.image_size[0] is None):
                 raise IOError
 
             # !!! the 'scale' here IS RELEVANT FOR THE DETECTION RATE;
@@ -1709,7 +1681,7 @@ class _JpegFile(_UnknownFile):
             # Read a Data Matrix barcode
             dm_read = DataMatrix()
             img = Image.open(self.image_path_JPEG)
-            #if (img == None) or (self.image_size[0] is None):
+            #if (img is None) or (self.image_size[0] is None):
             if (self.image_size[0] is None):
                 raise IOError
 
@@ -1749,11 +1721,7 @@ class _JpegFile(_UnknownFile):
         self._features['OpticalCodes'] = result
 
         # supports many popular symbologies
-        try:
-            import zbar             # TS (debian)
-        except:
-            import _zbar as zbar    # other distros (fedora)
-
+        import zbar
         try:
             img = Image.open(self.image_path_JPEG).convert('L')
             width, height = img.size
@@ -1763,7 +1731,7 @@ class _JpegFile(_UnknownFile):
 
         scanner = zbar.ImageScanner()
         scanner.parse_config('enable')
-        zbar_img = zbar.Image(width, height, 'Y800', img.tostring())
+        zbar_img = zbar.Image(width, height, 'Y800', img.tobytes())
 
         # scan the image for barcodes
         # http://zbar.sourceforge.net/api/zbar_8h.html
@@ -1799,7 +1767,7 @@ class _JpegFile(_UnknownFile):
             #im = cv2.imread('Mutilated_checkerboard_3_1.jpg', cv2.CV_LOAD_IMAGE_GRAYSCALE)
             #im = cv2.imread('Jogo_de_Damas_-_Acatabul.JPG', cv2.CV_LOAD_IMAGE_GRAYSCALE)
             chessboard_dim = (7, 7)
-            if im == None:
+            if im is None:
                 raise IOError
 
             scale  = max([1., np.average(np.array(im.shape)[0:2]/1000.)])
@@ -1896,7 +1864,7 @@ class _JpegFile(_UnknownFile):
             # pose detection
             # http://docs.opencv.org/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html
             # http://stackoverflow.com/questions/10022568/opencv-2-3-camera-calibration
-            d = shelve.open(os.path.join(scriptdir, 'externals/opencv/camera_virtual_default'))
+            d = shelve.open(os.path.join(scriptdir, 'opencv/camera_virtual_default'))
             if ('retval' not in d):
                 # http://commons.wikimedia.org/wiki/File:Mutilated_checkerboard_3.jpg
                 pywikibot.output("Doing (virtual) camera calibration onto reference image 'File:Mutilated_checkerboard_3.jpg'")
@@ -2304,7 +2272,11 @@ class _JpegFile(_UnknownFile):
                 a2 = wh2[0]*wh2[1]
 
                 dr = np.linalg.norm(c1-c2)/dmax
-                intersect = gtk.gdk.Rectangle(*r1i).intersect(gtk.gdk.Rectangle(*r2i))
+                rect_r1i = Gdk.Rectangle()
+                rect_r1i.x, rect_r1i.y, rect_r1i.height, rect_r1i.width = r1i
+                rect_r2i = Gdk.Rectangle()
+                rect_r2i.x, rect_r2i.y, rect_r2i.height, rect_r2i.width = r2i
+                intersect = Gdk.rectangle_intersect(rect_r1i, rect_r2i)[1]
                 area = intersect.width*intersect.height
                 ar1, ar2 = area/a1, area/a2
                 check = [(1-dr), ar1, ar2]
@@ -4353,6 +4325,7 @@ def main():
         tagged = False
         try:
             (tagged, ret) = Bot.report()
+            print(image, tagged, ret)
             if ret:
                 outresult.append(ret)
         except AttributeError:

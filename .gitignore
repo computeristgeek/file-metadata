@@ -1,5 +1,6 @@
 /apicache
 throttle.ctrl
+/archive/opencv/BoWclassify
 
 # Cached test files
 /tests/files
