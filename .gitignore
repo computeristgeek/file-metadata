@@ -3,6 +3,9 @@
 /throttle.ctrl
 *.lwp
 
+# Cached test files
+/tests/files
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

@@ -9,12 +9,8 @@ import socket
 import unittest
 from io import StringIO
 
-try:  # Python 3
-    import unittest.mock as mock
-except ImportError:  # Python 2
-    import mock
-
 from file_metadata.utilities import make_temp, download, PropertyCached
+from tests.utilities import mock
 
 
 def active_internet(host="8.8.8.8", port=53, timeout=3):
