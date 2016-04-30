@@ -30,6 +30,8 @@ def make_temp(suffix="", prefix="tmp", directory=None):
     >>> with make_temp(suffix='.test', prefix='test_') as testfile:
     ...     print('Prefix:', os.path.basename(testfile)[:5])
     ...     print('Suffix:', os.path.basename(testfile)[-5:])
+    ...     os.remove(testfile)  # No clean up does if file already deleted
+    ...
     Prefix: test_
     Suffix: .test
 
@@ -43,9 +45,10 @@ def make_temp(suffix="", prefix="tmp", directory=None):
     :return:
         A contextmanager retrieving the file path.
     """
-    temporary = tempfile.mkstemp(suffix=suffix, prefix=prefix, dir=directory)
-    os.close(temporary[0])
+    fd, name = tempfile.mkstemp(suffix=suffix, prefix=prefix, dir=directory)
+    os.close(fd)
     try:
-        yield temporary[1]
+        yield name
     finally:
-        os.remove(temporary[1])
+        if os.path.exists(name):
+            os.remove(name)
