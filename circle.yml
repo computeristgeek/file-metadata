@@ -10,6 +10,6 @@ dependencies:
 
 test:
   override:
-    - flake8 .
+    - flake8 setup.py file_metadata tests
     - python -m pytest
     - pip install .
