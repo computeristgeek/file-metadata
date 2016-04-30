@@ -13,13 +13,37 @@ PROJECT_PATH = os.path.abspath(os.path.dirname(__file__))
 
 
 @contextmanager
-def make_temp(suffix="", prefix="tmp", dir=None):
+def make_temp(suffix="", prefix="tmp", directory=None):
     """
     Create a temporary file with a closed stream and deletes it when done.
 
-    :return: A contextmanager retrieving the file path.
+    >>> with make_temp() as testfile:
+    ...     testfilename = testfile
+    ...     print("Inside `with`:", os.path.isfile(testfile))
+    ...
+    Inside `with`: True
+    >>> print("Outside `with`:", os.path.exists(testfile))
+    ...
+    Outside `with`: False
+
+    And even force the file to have a specific properties:
+    >>> with make_temp(suffix='.test', prefix='test_') as testfile:
+    ...     print('Prefix:', os.path.basename(testfile)[:5])
+    ...     print('Suffix:', os.path.basename(testfile)[-5:])
+    Prefix: test_
+    Suffix: .test
+
+    :param suffix:
+        A string to add to the end of the tempfile name.
+    :param suffix:
+        A string to add to the start of the tempfile name.
+    :param directory:
+        The directory to put the tempfile in. By default it uses the
+        system's temporary folder.
+    :return:
+        A contextmanager retrieving the file path.
     """
-    temporary = tempfile.mkstemp(suffix=suffix, prefix=prefix, dir=dir)
+    temporary = tempfile.mkstemp(suffix=suffix, prefix=prefix, dir=directory)
     os.close(temporary[0])
     try:
         yield temporary[1]
