@@ -1,4 +1,9 @@
 # -*- coding: utf-8 -*-
+"""
+A bunch of utility functions that help out with basic functionality in
+python. Provides utilities to handle the python2 and python3 differences
+and also utilities for common tasks and boilerplate code.
+"""
 
 from __future__ import (division, absolute_import, unicode_literals,
                         print_function)
