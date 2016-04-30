@@ -14,7 +14,7 @@ try:  # Python 3
 except ImportError:  # Python 2
     import mock
 
-from file_metadata.utilities import make_temp, download
+from file_metadata.utilities import make_temp, download, PropertyCached
 
 
 def active_internet(host="8.8.8.8", port=53, timeout=3):
@@ -54,3 +54,14 @@ class DownloadTest(unittest.TestCase):
             os.remove(filename)
             download('https://httpbin.org/image/png', filename)
             self.assertEqual(imghdr.what(filename), "png")
+
+
+class PropertyCachedTest(unittest.TestCase):
+
+    def test_non_class_property(self):
+        @PropertyCached
+        def prop():
+            return 1
+
+        self.assertNotEqual(prop, 1)
+        self.assertTrue(type(prop), PropertyCached)

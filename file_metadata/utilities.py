@@ -76,3 +76,58 @@ def make_temp(suffix="", prefix="tmp", directory=None):
     finally:
         if os.path.exists(name):
             os.remove(name)
+
+
+class PropertyCached(object):
+    """
+    A decorator than is similar to the ``property`` decorator but saves
+    the return value into the property when called the first time.
+
+    Makes properties that simply have a hidden variable much simpler to
+    handle. For example:
+
+    >>> class OldMethod:
+    ...     @property
+    ...     def answer(self):
+    ...         if not hasattr(self, '_answer'):
+    ...             print("Computing the answer ...")
+    ...             self._answer = 42
+    ...         return self._answer
+    ...
+    >>> old = OldMethod()
+    >>> old.answer
+    Computing the answer ...
+    42
+    >>> old.answer
+    42
+
+    Can now be changed to
+
+    >>> class NewMethod:
+    ...     @PropertyCached
+    ...     def answer(self):
+    ...         print("Computing the answer ...")
+    ...         return 42
+    ...
+    >>> new = NewMethod()
+    >>> new.answer
+    Computing the answer ...
+    42
+    >>> new.answer
+    42
+
+    To delete the cached value, simply do:
+
+    >>> del new.__dict__['answer']
+    >>> new.answer
+    Computing the answer ...
+    42
+    """
+
+    def __init__(self, wrapped_function):
+        self.wrapped_function = wrapped_function
+
+    def __get__(self, instance, _type=None):
+        retval = self.wrapped_function(instance)
+        instance.__dict__[self.wrapped_function.__name__] = retval
+        return retval
