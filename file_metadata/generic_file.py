@@ -3,8 +3,10 @@
 from __future__ import (division, absolute_import, unicode_literals,
                         print_function)
 
+import json
 import mimetypes
 import os
+import subprocess
 
 try:
     import magic
@@ -12,6 +14,7 @@ except ImportError as error:  # pragma: no cover
     magic = error
 
 from file_metadata.utilities import PropertyCached
+from file_metadata._compat import check_output, JSONDecodeError
 
 
 class GenericFile:
@@ -64,6 +67,43 @@ class GenericFile:
         """
         return self.analyze()
 
+    @PropertyCached
+    def exiftool(self):
+        """
+        The exif data from the given file using ``exiftool``. The data it
+        fetches includes:
+
+         - Basic file information
+         - Exif data
+         - XMP data
+         - ICC Profile data
+         - Composite data
+         - GIMP, Adobe, Inkscape specific file data
+         - Vorbis data for audio files
+         - JFIF data
+         - SVG data
+
+        and many more types of information. For more information see
+        <http://www.sno.phy.queensu.ca/~phil/exiftool/>.
+
+        :return:      A dictionary containing the exif information.
+        """
+        command = ('exiftool', '-G', '-j', os.path.abspath(self.filename))
+        try:
+            proc = check_output(command)
+        except subprocess.CalledProcessError as proc_error:  # pragma: no cover
+            output = proc_error.output.decode('utf-8').rstrip('\r\n')
+        else:
+            output = proc.decode('utf-8').rstrip('\r\n')
+
+        try:
+            data = json.loads(output)
+        except JSONDecodeError:  # pragma: no cover
+            return {}
+
+        assert len(data) == 1
+        return data[0]
+
     def analyze_os_stat(self):
         """
         Use the python ``os`` library to find file-system related metadata.
@@ -103,3 +143,18 @@ class GenericFile:
             # was not found or not supported.
             mime, encoding = mimetypes.guess_type(self.filename)
         return {"File:MIMEType": mime}
+
+    def analyze_exiftool(self, ignored_keys=()):
+        """
+        Use ``exiftool`` and return metadata from it.
+
+        :return: dict containing all the data from ``exiftool``.
+        """
+        # We remove unimportant data as this is an analysis routine for the
+        # file. The method `exiftool` continues to have all the data.
+        ignored_keys = set(ignored_keys + (
+            'SourceFile', 'ExifTool:ExifToolVersion', 'ExifTool:Error',
+            'ExifTool:Warning' 'File:FileName', 'File:Directory',
+            'File:MIMEType'))
+        return dict((key, val) for key, val in self.exiftool.items()
+                    if key not in ignored_keys)

@@ -6,12 +6,18 @@ Provides utilities to handle the python2 and python3 differences.
 from __future__ import (division, absolute_import, unicode_literals,
                         print_function)
 
+import json
 import subprocess
 
 try:  # Python 3
     from urllib.request import urlopen  # flake8: noqa (unused import)
 except ImportError:  # Python 2
     from urllib2 import urlopen  # flake8: noqa (unused import)
+
+try:  # pragma: no cover
+    JSONDecodeError = json.decoder.JSONDecodeError
+except AttributeError:  # pragma: no cover
+    JSONDecodeError = ValueError
 
 
 def check_output(*popenargs, **kwargs):
