@@ -21,6 +21,11 @@ cache:
     - /home/travis/virtualenv/python2.7/
     - /home/travis/virtualenv/python2.6/
 
+addons:
+  apt:
+    packages:
+      - libimage-exiftool-perl
+
 install:
   - pip install -U pip
   - pip install -r requirements.txt -r test-requirements.txt

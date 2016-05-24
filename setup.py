@@ -4,9 +4,23 @@
 from __future__ import (division, absolute_import, unicode_literals,
                         print_function)
 
+import subprocess
+import sys
+
 from setuptools import find_packages, setup
 
 import file_metadata
+
+# Check if exiftool is installed.
+try:
+    out = subprocess.check_output(['exiftool', '-ver'])
+    if int(out.split(".", 1)[0]) < 8:
+        print('`exiftool` (http://www.sno.phy.queensu.ca/~phil/exiftool/) '
+              'version found was less than 8.0. Please update it.')
+except (OSError, subprocess.CalledProcessError):
+    print('`exiftool` (http://www.sno.phy.queensu.ca/~phil/exiftool/) needs '
+          'to be installed and needs to be made available in your PATH.')
+    sys.exit(1)
 
 with open('requirements.txt') as requirements:
     required = requirements.read().splitlines()
