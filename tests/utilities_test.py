@@ -6,11 +6,10 @@ from __future__ import (division, absolute_import, unicode_literals,
 import imghdr
 import os
 import socket
-import unittest
 from io import StringIO
 
 from file_metadata.utilities import make_temp, download, PropertyCached
-from tests import mock
+from tests import mock, unittest
 
 
 def active_internet(host="8.8.8.8", port=53, timeout=3):

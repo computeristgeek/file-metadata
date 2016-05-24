@@ -6,6 +6,11 @@ from __future__ import (division, absolute_import, unicode_literals,
 import os
 import string
 
+try:  # Python 2
+    import unittest2 as unittest
+except ImportError:
+    import unittest
+
 try:  # Python 3
     import unittest.mock as mock  # flake8: noqa (unused import)
 except ImportError:  # Python 2
