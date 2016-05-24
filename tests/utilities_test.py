@@ -10,7 +10,7 @@ import unittest
 from io import StringIO
 
 from file_metadata.utilities import make_temp, download, PropertyCached
-from tests.utilities import mock
+from tests import mock
 
 
 def active_internet(host="8.8.8.8", port=53, timeout=3):
