@@ -3,6 +3,8 @@
 from __future__ import (division, absolute_import, unicode_literals,
                         print_function)
 
+import os
+
 from file_metadata.utilities import PropertyCached
 
 
@@ -55,3 +57,14 @@ class GenericFile:
         :return: All the metadata found about the given file.
         """
         return self.analyze()
+
+    def analyze_os_stat(self):
+        """
+        Use the python ``os`` library to find file-system related metadata.
+
+        :return: dict with the keys:
+
+                  - Size of file - The size of the file in bytes.
+        """
+        stat_data = os.stat(self.filename)
+        return {"File:FileSize": str(stat_data.st_size) + " bytes"}

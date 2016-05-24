@@ -28,3 +28,14 @@ class DerivedFileTest(unittest.TestCase):
     def test_metadata(self):
         self.assertEqual(self.uut.metadata, {'test1': 'test1',
                                              'test2': 'test2'})
+
+
+class GenericFileTest(unittest.TestCase):
+
+    def setUp(self):
+        self.uut = GenericFile(fetch_file('ascii.txt'))
+
+    def test_os_stat(self):
+        data = self.uut.analyze_os_stat()
+        self.assertIn('File:FileSize', data)
+        self.assertEqual(data['File:FileSize'], '98 bytes')
