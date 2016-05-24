@@ -3,7 +3,13 @@
 from __future__ import (division, absolute_import, unicode_literals,
                         print_function)
 
+import mimetypes
 import os
+
+try:
+    import magic
+except ImportError as error:  # pragma: no cover
+    magic = error
 
 from file_metadata.utilities import PropertyCached
 
@@ -68,3 +74,32 @@ class GenericFile:
         """
         stat_data = os.stat(self.filename)
         return {"File:FileSize": str(stat_data.st_size) + " bytes"}
+
+    def analyze_mimetype(self):
+        """
+        Use libmagic to identify the mimetype of the file. This analysis is
+        done using multiple methods. The list (in priority order) is:
+
+         - python-magic pypi library.
+         - python-magic provided by ``file`` utility (Not supported, but
+           provided for better compatibility with system packages).
+         - Python's builtin ``mimetypes`` module.
+
+        :return: dict with the keys:
+
+                 - MIME type - The IANA mimetype string for this file.
+        """
+        if hasattr(magic, "from_file"):
+            # Use https://pypi.python.org/pypi/python-magic
+            mime = magic.from_file(self.filename, mime=True)
+        elif hasattr(magic, "open"):  # pragma: no cover
+            # Use the python-magic library in distro repos from the `file`
+            # command - http://www.darwinsys.com/file/
+            magic_instance = magic.open(magic.MAGIC_MIME)
+            magic_instance.load()
+            mime = magic_instance.file(self.filename)
+        else:
+            # Silently use python's builtin mimetype handler if magic package
+            # was not found or not supported.
+            mime, encoding = mimetypes.guess_type(self.filename)
+        return {"File:MIMEType": mime}
