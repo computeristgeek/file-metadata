@@ -4,7 +4,10 @@ from __future__ import (division, absolute_import, unicode_literals,
                         print_function)
 
 import os
+import random
 import string
+import struct
+import wave
 
 try:  # Python 2
     import unittest2 as unittest
@@ -45,6 +48,14 @@ def fetch_file(name, overwrite=False):
             file_handler.writelines([
                 string.ascii_lowercase, '\n', string.ascii_uppercase, '\n',
                 string.digits, '\n', string.punctuation, '\n'])
+    # Music files
+    elif name == "noise.wav":
+        wav_file = wave.open(filepath, 'w')
+        wav_file.setparams((1, 2, 44100, 0, 'NONE', 'not compressed'))
+        for _ in range(44100):  # 1 second
+            value = struct.pack('h', random.randint(-32767, 32767))
+            wav_file.writeframes(value)
+        wav_file.close()
     else:
         raise ValueError('Asked to fetch unknown file.')
 
