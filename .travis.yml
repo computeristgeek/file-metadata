@@ -3,9 +3,9 @@ language: python
 sudo: false
 
 python:
-  - '3.5'
-  - '3.4'
-  - '3.3'
+  # - '3.5'
+  # - '3.4'
+  # - '3.3'
   - '2.7'
   - '2.6'
 
@@ -15,9 +15,9 @@ os:
 cache:
   pip: true
   directories:
-    - /home/travis/virtualenv/python3.5/
-    - /home/travis/virtualenv/python3.4/
-    - /home/travis/virtualenv/python3.3/
+    # - /home/travis/virtualenv/python3.5/
+    # - /home/travis/virtualenv/python3.4/
+    # - /home/travis/virtualenv/python3.3/
     - /home/travis/virtualenv/python2.7/
     - /home/travis/virtualenv/python2.6/
 
