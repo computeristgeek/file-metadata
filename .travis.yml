@@ -27,7 +27,10 @@ install:
 
 script:
   - flake8 setup.py file_metadata tests
-  - python -m pytest
+  - python -m pytest --cov
+
+after_script:
+  - bash <(curl -s https://codecov.io/bash)
 
 after_success:
   - python setup.py sdist
