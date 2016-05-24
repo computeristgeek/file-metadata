@@ -29,7 +29,7 @@ class DownloadTest(unittest.TestCase):
         with make_temp() as filename:
             os.remove(filename)
             download('https://httpbin.org/ip', filename)
-            mock_urlopen.assert_called()
+            self.assertTrue(mock_urlopen.called)
 
     @mock.patch('file_metadata.utilities.urlopen')
     def test_overwrite(self, mock_urlopen):
@@ -39,7 +39,7 @@ class DownloadTest(unittest.TestCase):
             mock_urlopen.assert_not_called()
             os.remove(filename)
             download('https://httpbin.org/ip', filename, overwrite=True)
-            mock_urlopen.assert_called()
+            self.assertTrue(mock_urlopen.called)
 
     @unittest.skipIf(not active_internet(), 'Internet connection not found.')
     def test_binary_data(self):
