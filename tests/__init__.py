@@ -48,6 +48,10 @@ def fetch_file(name, overwrite=False):
             file_handler.writelines([
                 string.ascii_lowercase, '\n', string.ascii_uppercase, '\n',
                 string.digits, '\n', string.punctuation, '\n'])
+    elif name == 'file.bin':
+        with open(filepath, 'wb') as file_hander:
+            allascii = ''.join(chr(i) for i in range(128))
+            file_hander.write(allascii.encode('ascii'))
     # Music files
     elif name == "noise.wav":
         wav_file = wave.open(filepath, 'w')
