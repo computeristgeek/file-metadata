@@ -46,7 +46,8 @@ and then execute:
 Build status
 ------------
 
-|CircleCI Status|
+.. image:: https://travis-ci.org/AbdealiJK/file-metadata.svg?branch=master
+   :target: https://travis-ci.org/AbdealiJK/file-metadata
 
 Credits
 -------
@@ -61,15 +62,11 @@ is the original author of this package.
 LICENSE
 =======
 
-|MIT|
+.. image:: https://img.shields.io/github/license/AbdealiJK/file-metadata.svg
+   :target: https://opensource.org/licenses/MIT
 
 This code falls under the
 `MIT License <https://tldrlegal.com/license/mit-license>`__.
 Please note that some files or content may be copied from other places
 and have their own licenses. Dependencies that are being used to generate
 the databases also have their own licenses.
-
-.. |CircleCI Status| image:: https://img.shields.io/circleci/project/AbdealiJK/file-metadata/master.svg?label=CircleCI%20build
-   :target: https://circleci.com/gh/AbdealiJK/file-metadata
-.. |MIT| image:: https://img.shields.io/github/license/AbdealiJK/file-metadata.svg
-   :target: https://opensource.org/licenses/MIT
