@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 A bunch of utility functions that help out with basic functionality in
-python. Provides utilities to handle the python2 and python3 differences
-and also utilities for common tasks and boilerplate code.
+python. Provides utilities to handle common tasks and boilerplate code.
 """
 
 from __future__ import (division, absolute_import, unicode_literals,
@@ -12,11 +11,7 @@ import os
 import tempfile
 from shutil import copyfileobj
 
-try:
-    from urllib.request import urlopen  # Python 3
-except ImportError:
-    from urllib2 import urlopen  # Python 2
-
+from file_metadata._compat import urlopen
 from contextlib import contextmanager
 
 
