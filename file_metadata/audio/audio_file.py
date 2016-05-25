@@ -6,9 +6,10 @@ from __future__ import (division, absolute_import, unicode_literals,
 import audioread
 
 from file_metadata.generic_file import GenericFile
+from file_metadata.mixins import FFProbeMixin
 
 
-class AudioFile(GenericFile):
+class AudioFile(FFProbeMixin, GenericFile):
     mimetypes = ()
 
     def analyze_audioread(self):
