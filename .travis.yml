@@ -25,6 +25,7 @@ addons:
   apt:
     packages:
       - libimage-exiftool-perl
+      - libav-tools
 
 install:
   - pip install -U pip
