@@ -19,9 +19,12 @@ try:  # Python 3
 except ImportError:  # Python 2
     import mock  # flake8: noqa (unused import)
 
+from file_metadata.utilities import download
 
-CACHE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                         'files')
+CACHE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'files')
+
+file_download_links = {
+    'wikiexample.ogg': 'https://upload.wikimedia.org/wikipedia/commons/c/c8/Example.ogg'}
 
 
 def fetch_file(name, overwrite=False):
@@ -60,6 +63,8 @@ def fetch_file(name, overwrite=False):
             value = struct.pack('h', random.randint(-32767, 32767))
             wav_file.writeframes(value)
         wav_file.close()
+    elif name in file_download_links:
+        download(file_download_links[name], filepath)
     else:
         raise ValueError('Asked to fetch unknown file.')
 
