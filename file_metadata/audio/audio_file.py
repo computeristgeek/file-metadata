@@ -19,5 +19,5 @@ class AudioFile(FFProbeMixin, GenericFile):
                     'AudioRead:Duration': f.duration,
                     'AudioRead:SampleRate': f.samplerate,
                     'AudioRead:NumChannels': f.channels}
-        except audioread.NoBackendError, audioread.DecodeError:
+        except audioread.DecodeError:
             return {}
