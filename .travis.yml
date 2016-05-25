@@ -26,6 +26,7 @@ addons:
     packages:
       - libimage-exiftool-perl
       - libav-tools
+      - ffmpeg
 
 install:
   - pip install -U pip
