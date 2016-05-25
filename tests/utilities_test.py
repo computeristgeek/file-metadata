@@ -8,7 +8,8 @@ import os
 import socket
 from io import StringIO
 
-from file_metadata.utilities import make_temp, download, PropertyCached
+from file_metadata.utilities import (make_temp, download, PropertyCached,
+                                     DictNoNone)
 from tests import mock, unittest
 
 
@@ -60,3 +61,16 @@ class PropertyCachedTest(unittest.TestCase):
 
         self.assertNotEqual(prop, 1)
         self.assertTrue(type(prop), PropertyCached)
+
+
+class DictNoNoneTest(unittest.TestCase):
+
+    def test_constructor(self):
+        self.assertEqual(DictNoNone({'a': 1, 'b': None, 'c': 3}),
+                         {'a': 1, 'c': 3})
+
+    def test_addition(self):
+        data = DictNoNone()
+        data['a'] = 1
+        data['b'] = None
+        self.assertEqual(data, {'a': 1})

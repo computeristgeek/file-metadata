@@ -131,3 +131,19 @@ class PropertyCached(object):
         retval = self.wrapped_function(instance)
         instance.__dict__[self.wrapped_function.__name__] = retval
         return retval
+
+
+class DictNoNone(dict):
+    """
+    Create a dict but don't set the item if a value is ``None``.
+    """
+
+    def __init__(self, *args, **kwargs):
+        dict.__init__(self, *args, **kwargs)
+        for key, val in self.items():
+            if val is None:
+                del self[key]
+
+    def __setitem__(self, key, value):
+        if key in self or value is not None:
+            dict.__setitem__(self, key, value)
