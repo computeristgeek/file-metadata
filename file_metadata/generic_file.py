@@ -10,11 +10,11 @@ import subprocess
 
 try:
     import magic
-except ImportError as error:  # pragma: no cover
+except ImportError as error:
     magic = error
 
 from file_metadata.utilities import PropertyCached
-from file_metadata._compat import check_output, JSONDecodeError
+from file_metadata._compat import check_output
 
 
 class GenericFile:
@@ -91,15 +91,12 @@ class GenericFile:
         command = ('exiftool', '-G', '-j', os.path.abspath(self.filename))
         try:
             proc = check_output(command)
-        except subprocess.CalledProcessError as proc_error:  # pragma: no cover
+        except subprocess.CalledProcessError as proc_error:
             output = proc_error.output.decode('utf-8').rstrip('\r\n')
         else:
             output = proc.decode('utf-8').rstrip('\r\n')
 
-        try:
-            data = json.loads(output)
-        except JSONDecodeError:  # pragma: no cover
-            return {}
+        data = json.loads(output)
 
         assert len(data) == 1
         return data[0]
@@ -132,7 +129,7 @@ class GenericFile:
         if hasattr(magic, "from_file"):
             # Use https://pypi.python.org/pypi/python-magic
             mime = magic.from_file(self.filename, mime=True)
-        elif hasattr(magic, "open"):  # pragma: no cover
+        elif hasattr(magic, "open"):
             # Use the python-magic library in distro repos from the `file`
             # command - http://www.darwinsys.com/file/
             magic_instance = magic.open(magic.MAGIC_MIME)
