@@ -12,8 +12,10 @@ import json
 import os
 import subprocess
 
+from whichcraft import which
+
 from file_metadata.utilities import DictNoNone, PropertyCached
-from file_metadata._compat import check_output, JSONDecodeError
+from file_metadata._compat import check_output, ffprobe_parser
 
 
 class FFProbeMixin:
@@ -25,31 +27,29 @@ class FFProbeMixin:
         ffmpeg utility ffprobe (or avprobe from libav-tools, a fork of
         ffmpeg).
         """
-        probe_args = ('-v', '0', '-show_format', '-show_streams',
-                      os.path.abspath(self.filename), '-of', 'json')
-        try:
-            proc = check_output(('ffprobe',) + probe_args)
-        except subprocess.CalledProcessError as proc_error:  # pragma: no cover
-            output = proc_error.output.decode('utf-8').rstrip('\r\n')
-        except OSError:
-            # Use avprobe if ffprobe not found
-            try:
-                proc = check_output(('avprobe',) + probe_args)
-            except subprocess.CalledProcessError \
-                    as proc_error:
-                output = proc_error.output.decode('utf-8').rstrip('\r\n')
-            except OSError:
-                return {}
-            else:
-                output = proc.decode('utf-8').rstrip('\r\n')
+        # Choose executable to use
+        if which('ffprobe') is not None:
+            executable = 'ffprobe'
+        elif which('avprobe') is not None:
+            executable = 'avprobe'
         else:
-            output = proc.decode('utf-8').rstrip('\r\n')
-
-        try:
-            data = json.loads(output)
-        except JSONDecodeError:  # pragma: no cover
             return {}
 
+        # Check whether json is supported
+        json_support = False if subprocess.call([
+            executable, '-v', '0', os.devnull, '-of', 'json']) == 1 else True
+
+        command = (executable, '-v', '0', '-show_format', '-show_streams',
+                   self.filename) + (('-of', 'json') if json_support else ())
+
+        try:
+            proc = check_output(command)
+        except subprocess.CalledProcessError as proc_error:
+            output = proc_error.output.decode('utf-8')
+        else:
+            output = proc.decode('utf-8')
+
+        data = json.loads(output) if json_support else ffprobe_parser(output)
         return data
 
     def analyze_ffprobe(self):
@@ -67,7 +67,7 @@ class FFProbeMixin:
         data = DictNoNone({
             'FFProbe:Format': fmt('format_name'),
             'FFProbe:Duration': float(fmt('duration')),
-            'FFProbe:NumStreams': fmt('nb_streams')})
+            'FFProbe:NumStreams': int(fmt('nb_streams'))})
 
         streams = []
         for stream in self.ffprobe['streams']:

@@ -5,16 +5,15 @@ from __future__ import (division, absolute_import, unicode_literals,
 
 from whichcraft import which
 
-from file_metadata._compat import check_output
 from file_metadata.mixins import FFProbeMixin
 from tests import fetch_file, mock, unittest
 
 
-def check_output_sideeffect(unavailable_executables):
+def which_sideeffect(unavailable_executables):
     def wrapper(command, *args, **kwargs):
-        if command[0] in unavailable_executables:
-            raise OSError
-        return check_output(command, *args, **kwargs)
+        if command in unavailable_executables:
+            return None
+        return which(command, *args, **kwargs)
     return wrapper
 
 
@@ -75,32 +74,30 @@ class FFProbeMixinTest(unittest.TestCase):
         self.assertNotIn('Width', stream)
         self.assertNotIn('Height', stream)
         self.assertNotIn('Rate', stream)
-        self.assertNotIn('Duration', stream)
 
         stream = data['FFProbe:Streams'][1]
         self.assertEqual(stream['Format'], 'video/theora')
         self.assertEqual(stream['Width'], 320)
         self.assertEqual(stream['Height'], 240)
-        self.assertEqual(stream['Rate'], '143/6')
         self.assertEqual(round(stream['Duration']), 11)
 
 
 @unittest.skipIf(which('ffprobe') is None, '`ffprobe` not found.')
-@mock.patch('file_metadata.mixins.check_output',
-            side_effect=check_output_sideeffect(['avprobe']))
+@mock.patch('file_metadata.mixins.which',
+            side_effect=which_sideeffect(['avprobe']))
 class FFProbeMixinWithFFProbeTest(FFProbeMixinTest):
     __test__ = True
 
 
 @unittest.skipIf(which('avprobe') is None, '`avprobe` not found.')
-@mock.patch('file_metadata.mixins.check_output',
-            side_effect=check_output_sideeffect(['ffprobe']))
+@mock.patch('file_metadata.mixins.which',
+            side_effect=which_sideeffect(['ffprobe']))
 class FFProbeMixinWithAVProbeTest(FFProbeMixinTest):
     __test__ = True
 
 
-@mock.patch('file_metadata.mixins.check_output',
-            side_effect=check_output_sideeffect(['ffprobe', 'avprobe']))
+@mock.patch('file_metadata.mixins.which',
+            side_effect=which_sideeffect(['ffprobe', 'avprobe']))
 class FFProbeMixinWithoutBackendsTest(unittest.TestCase):
     def setUp(self):
         self.wav_file = FFProbeMixin()
