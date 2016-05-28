@@ -7,6 +7,7 @@ from __future__ import (division, absolute_import, unicode_literals,
                         print_function)
 
 import json
+import os
 import re
 import subprocess
 import sys
@@ -85,3 +86,13 @@ def ffprobe_parser(output):
         parsed_format = parse_section(_format[0])
         data['format'] = parsed_format
     return data
+
+
+def makedirs(name, exist_ok=False, **kwargs):
+    """
+    Make the directories in the given path.  The ``exist_ok`` argument was
+    added in python 3.2+.
+    """
+    if not (exist_ok and os.path.exists(name)):
+        os.makedirs(name, **kwargs)
+    return name

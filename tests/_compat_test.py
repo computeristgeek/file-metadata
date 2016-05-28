@@ -3,10 +3,13 @@
 from __future__ import (division, absolute_import, unicode_literals,
                         print_function)
 
+import os
+import shutil
 import subprocess
 import sys
+import tempfile
 
-from file_metadata._compat import check_output, ffprobe_parser
+from file_metadata._compat import check_output, ffprobe_parser, makedirs
 from tests import unittest
 
 
@@ -58,3 +61,27 @@ class FFProbeParserTest(unittest.TestCase):
         self.assertIn('format', data)
         self.assertEqual(data['format']['filename'], 'path/to/file.ext')
         self.assertEqual(data['format']['format_name'], 'ogg')
+
+
+class MakeDirsTest(unittest.TestCase):
+
+    def setUp(self):
+        self.tempdir = tempfile.mkdtemp()
+
+    def tearDown(self):
+        shutil.rmtree(self.tempdir)
+
+    def test_makes_path(self):
+        test_dirs = os.path.abspath(os.path.join(
+            self.tempdir, 'make', 'these', 'dirs'))
+
+        self.assertFalse(os.path.exists(test_dirs))
+        self.assertEqual(makedirs(test_dirs), test_dirs)
+        self.assertTrue(os.path.exists(test_dirs))
+
+    def test_exist_ok(self):
+        self.assertRaises(OSError, makedirs, self.tempdir)
+        try:
+            makedirs(self.tempdir, exist_ok=True)
+        except OSError:
+            self.fail('OSError was raised even though exist_ok=True')
