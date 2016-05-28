@@ -15,11 +15,7 @@ os:
 cache:
   pip: true
   directories:
-    # - /home/travis/virtualenv/python3.5/
-    # - /home/travis/virtualenv/python3.4/
-    # - /home/travis/virtualenv/python3.3/
-    - /home/travis/virtualenv/python2.7/
-    - /home/travis/virtualenv/python2.6/
+    - /home/travis/miniconda
 
 addons:
   apt:
@@ -28,8 +24,33 @@ addons:
       - libav-tools
       - ffmpeg
 
+before_install:
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  # Download and install conda if necessary
+  - if ! ( conda -V && which conda ); then
+      if [[ "$TRAVIS_PYTHON_VERSION" == "2."* ]]; then
+        wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
+      else
+        wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+      fi ;
+      bash miniconda.sh -f -b -p $HOME/miniconda;
+    fi
+  # Setup conda
+  - hash -r
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update -q conda
+  - conda info -a
+  # Create and activate the virtualenv
+  - if [ ! -e $HOME/miniconda/envs/py$TRAVIS_PYTHON_VERSION ]; then
+      conda create -q -n py$TRAVIS_PYTHON_VERSION python=$TRAVIS_PYTHON_VERSION pip;
+    fi
+  - source activate py$TRAVIS_PYTHON_VERSION
+  - if [[ "$TRAVIS_PYTHON_VERSION" == *"$(python --version 2>&1)"* ]]; then exit 1; fi
+
 install:
-  - pip install -U pip
+  - conda update setuptools  # conda has an issue with pip updating setuptools - https://github.com/ContinuumIO/anaconda-issues/issues/542
+  - conda install -c conda-forge opencv
+  - pip install --ignore-installed -U setuptools  # conda has an issue with pip updating setuptools - https://github.com/ContinuumIO/anaconda-issues/issues/542
   - pip install -r requirements.txt -r test-requirements.txt
 
 script:
@@ -42,6 +63,7 @@ after_script:
 after_success:
   - python setup.py sdist
   - pip install .
+  - pip uninstall -y file-metadata
 
 notifications:
   email: false
