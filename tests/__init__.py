@@ -28,7 +28,13 @@ file_download_links = {
     'veins.ogv': 'https://upload.wikimedia.org/wikipedia/commons/f/f2/POROS_3.ogv',
     'drums.mid': 'https://upload.wikimedia.org/wikipedia/commons/6/61/Drum_sample.mid',
     'ball.png': 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/1-ball.svg/226px-1-ball.svg.png',
-    'ball.svg': 'https://upload.wikimedia.org/wikipedia/commons/5/51/1-ball.svg'}
+    'ball.svg': 'https://upload.wikimedia.org/wikipedia/commons/5/51/1-ball.svg',
+    'red.png': 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/62/Pure_Red.svg/100px-Pure_Red.svg.png',
+    'green.png': 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Pure_Green.svg/100px-Pure_Green.svg.png',
+    'blue.png': 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Pure_Blue.svg/100px-Pure_Blue.svg.png',
+    'red.svg': 'https://upload.wikimedia.org/wikipedia/commons/6/62/Pure_Red.svg',
+    'green.svg': 'https://upload.wikimedia.org/wikipedia/commons/c/c5/Pure_Green.svg',
+    'blue.svg': 'https://upload.wikimedia.org/wikipedia/commons/7/77/Pure_Blue.svg'}
 
 
 def fetch_file(name, overwrite=False):
