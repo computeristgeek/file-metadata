@@ -9,6 +9,7 @@ from __future__ import (division, absolute_import, unicode_literals,
 import json
 import re
 import subprocess
+import sys
 
 try:  # Python 3
     from urllib.request import urlopen  # flake8: noqa (unused import)
@@ -19,6 +20,8 @@ try:  # pragma: no cover
     JSONDecodeError = json.decoder.JSONDecodeError
 except AttributeError:  # pragma: no cover
     JSONDecodeError = ValueError
+
+PY2 = sys.version_info[0] == 2
 
 
 def check_output(*popenargs, **kwargs):
