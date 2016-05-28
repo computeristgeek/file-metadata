@@ -22,6 +22,14 @@ except (OSError, subprocess.CalledProcessError):
           'to be installed and needs to be made available in your PATH.')
     sys.exit(1)
 
+# Check if opencv is installed.
+try:
+    import cv2  # flake8: noqa (unused import)
+except ImportError:
+    print("`OpenCV` (http://opencv.org/) or it's python bindings are not "
+          "installed or not in your python PATH.")
+    sys.exit(1)
+
 with open('requirements.txt') as requirements:
     required = requirements.read().splitlines()
 
