@@ -26,7 +26,9 @@ CACHE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'files')
 file_download_links = {
     'wikiexample.ogg': 'https://upload.wikimedia.org/wikipedia/commons/c/c8/Example.ogg',
     'veins.ogv': 'https://upload.wikimedia.org/wikipedia/commons/f/f2/POROS_3.ogv',
-    'drums.mid': 'https://upload.wikimedia.org/wikipedia/commons/6/61/Drum_sample.mid'}
+    'drums.mid': 'https://upload.wikimedia.org/wikipedia/commons/6/61/Drum_sample.mid',
+    'ball.png': 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/1-ball.svg/226px-1-ball.svg.png',
+    'ball.svg': 'https://upload.wikimedia.org/wikipedia/commons/5/51/1-ball.svg'}
 
 
 def fetch_file(name, overwrite=False):
