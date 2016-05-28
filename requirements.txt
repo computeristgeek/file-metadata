@@ -1,4 +1,4 @@
-setuptools>=19.2
+setuptools>=5.0
 python-magic>=0.4.1
 audioread>=2.0.0
 whichcraft>=0.4
