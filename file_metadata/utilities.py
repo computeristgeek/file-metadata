@@ -11,7 +11,9 @@ import os
 import tempfile
 from shutil import copyfileobj
 
-from file_metadata._compat import urlopen
+import appdirs
+
+from file_metadata._compat import urlopen, makedirs
 from contextlib import contextmanager
 
 
@@ -147,3 +149,17 @@ class DictNoNone(dict):
     def __setitem__(self, key, value):
         if key in self or value is not None:
             dict.__setitem__(self, key, value)
+
+
+def app_dir(dirtype, *args):
+    """
+    The path to store all module data into. It auto created the directory if
+    it doesn't exist. It does not create any of the paths given in ``args``.
+
+    :param args: The args to append to the data directory.
+    """
+    if dirtype not in ('user_config_dir', 'user_data_dir', 'user_log_dir',
+                       'user_cache_dir', 'site_config_dir', 'site_data_dir'):
+        return None
+    path = os.path.abspath(getattr(appdirs, dirtype)('file-metadata'))
+    return os.path.join(makedirs(path, exist_ok=True), *args)

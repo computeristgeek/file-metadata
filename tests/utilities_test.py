@@ -5,11 +5,13 @@ from __future__ import (division, absolute_import, unicode_literals,
 
 import imghdr
 import os
+import shutil
 import socket
+import tempfile
 from io import StringIO
 
-from file_metadata.utilities import (make_temp, download, PropertyCached,
-                                     DictNoNone)
+from file_metadata.utilities import (app_dir, make_temp, download,
+                                     PropertyCached, DictNoNone)
 from tests import mock, unittest
 
 
@@ -74,3 +76,30 @@ class DictNoNoneTest(unittest.TestCase):
         data['a'] = 1
         data['b'] = None
         self.assertEqual(data, {'a': 1})
+
+
+class AppDirTest(unittest.TestCase):
+
+    def setUp(self):
+        self.testdir = tempfile.mkdtemp()
+
+    def tearDown(self):
+        shutil.rmtree(self.testdir)
+
+    def test_invalid_dirtype(self):
+        self.assertEqual(app_dir('unknown_function'), None)
+
+    @mock.patch('file_metadata.utilities.appdirs')
+    def test_check_paths(self, mock_appdirs):
+        confdir = os.path.join(self.testdir, 'appdirs', 'configdir')
+        mock_appdirs.user_config_dir = mock.Mock(return_value=confdir)
+
+        self.assertFalse(os.path.exists(confdir))
+        self.assertEqual(app_dir('user_config_dir'), confdir)
+        self.assertTrue(os.path.exists(confdir))
+
+        self.assertEqual(app_dir('user_config_dir', 'a', 'path'),
+                         os.path.join(confdir, 'a', 'path'))
+
+    def test_integration(self):
+        self.assertTrue(os.path.exists(app_dir('user_data_dir')))
