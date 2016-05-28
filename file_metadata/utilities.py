@@ -7,6 +7,7 @@ python. Provides utilities to handle common tasks and boilerplate code.
 from __future__ import (division, absolute_import, unicode_literals,
                         print_function)
 
+import bz2
 import os
 import tempfile
 from shutil import copyfileobj
@@ -36,6 +37,24 @@ def download(url, filename, overwrite=False):
         response = urlopen(url)
         with open(filename, 'wb') as out_file:
             copyfileobj(response, out_file)
+
+
+def bz2_decompress(filepath, newfilepath, overwrite=False,
+                   block_size=64 * 1024):
+    """
+    Decompress the given file using a bz2 decompressor.
+
+    :param filepath:    The filepath of the archived file
+    :param newfilepath: The path to decompress the file into..
+    :param overwrite:   Set to True if the file should be decompressed to the
+                        given location even if it already exists.
+    :param block_size:  The block size to iteratively decompress with.
+    """
+    with open(newfilepath, 'wb') as new_file:
+        _file = bz2.BZ2File(filepath, 'rb')
+        for data in iter(lambda: _file.read(block_size), ''):
+            new_file.write(data)
+        _file.close()
 
 
 @contextmanager

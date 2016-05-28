@@ -3,6 +3,7 @@
 from __future__ import (division, absolute_import, unicode_literals,
                         print_function)
 
+import bz2
 import imghdr
 import os
 import shutil
@@ -10,8 +11,8 @@ import socket
 import tempfile
 from io import StringIO
 
-from file_metadata.utilities import (app_dir, make_temp, download,
-                                     PropertyCached, DictNoNone)
+from file_metadata.utilities import (app_dir, bz2_decompress, make_temp,
+                                     download, PropertyCached, DictNoNone)
 from tests import mock, unittest
 
 
@@ -52,6 +53,30 @@ class DownloadTest(unittest.TestCase):
             os.remove(filename)
             download('https://httpbin.org/image/png', filename)
             self.assertEqual(imghdr.what(filename), "png")
+
+
+class BZ2DecompressTest(unittest.TestCase):
+
+    def setUp(self):
+        self.testdir = tempfile.mkdtemp(prefix='abdeali_')
+        self.bzfile = os.path.join(self.testdir, 'bz2file')
+
+    def tearDown(self):
+        shutil.rmtree(self.testdir)
+
+    def test_bz2(self):
+        with open(self.bzfile + '.txt', 'w') as _file:
+            _file.write('hello world')
+        with open(self.bzfile + '.txt', 'rb') as textfile:
+            _file = bz2.BZ2File(self.bzfile + '.bz2', 'wb')
+            _file.write(textfile.read())
+            _file.close()
+        os.remove(self.bzfile + '.txt')
+
+        bz2_decompress(self.bzfile + '.bz2', self.bzfile + '.txt')
+
+        with open(self.bzfile + '.txt') as _file:
+            self.assertEqual(_file.read().decode('utf-8'), 'hello world')
 
 
 class PropertyCachedTest(unittest.TestCase):
