@@ -79,3 +79,14 @@ def fetch_file(name, overwrite=False):
         raise ValueError('Asked to fetch unknown file.')
 
     return filepath
+
+
+def importable(modulename):
+    """
+    Check if the given module can be imported or not.
+    """
+    try:
+        _ = __import__(modulename)
+        return True
+    except ImportError:
+        return False
