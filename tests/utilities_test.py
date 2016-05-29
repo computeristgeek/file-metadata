@@ -12,7 +12,8 @@ import tempfile
 from io import StringIO
 
 from file_metadata.utilities import (app_dir, bz2_decompress, make_temp,
-                                     download, PropertyCached, DictNoNone)
+                                     download, md5sum, PropertyCached,
+                                     DictNoNone)
 from tests import mock, unittest
 
 
@@ -77,6 +78,23 @@ class BZ2DecompressTest(unittest.TestCase):
 
         with open(self.bzfile + '.txt') as _file:
             self.assertEqual(_file.read().decode('utf-8'), 'hello world')
+
+
+class MD5SumTest(unittest.TestCase):
+
+    def test_md5sum_small_file(self):
+        with make_temp() as filename:
+            with open(filename, 'w') as _file:
+                _file.write('hello world!')
+            self.assertEqual(md5sum(filename),
+                             'fc3ff98e8c6a0d3087d515c0473f8677')
+
+    def test_md5sum_large_file(self):
+        with make_temp() as filename:
+            with open(filename, 'w') as _file:
+                _file.write('hello world!')
+            self.assertEqual(md5sum(filename, blocksize=1),
+                             'fc3ff98e8c6a0d3087d515c0473f8677')
 
 
 class PropertyCachedTest(unittest.TestCase):

@@ -8,6 +8,7 @@ from __future__ import (division, absolute_import, unicode_literals,
                         print_function)
 
 import bz2
+import hashlib
 import os
 import tempfile
 from shutil import copyfileobj
@@ -69,6 +70,20 @@ def bz2_decompress(filepath, newfilepath, overwrite=False,
         for data in iter(lambda: _file.read(block_size), ''):
             new_file.write(data)
         _file.close()
+
+
+def md5sum(filename, blocksize=64 * 1024):
+    """
+    Take a file and find it's md5sum.
+
+    :param filepath:  The filepath to find md5sum of.
+    :param blocksize: The block size to iteratively read with.
+    """
+    _hash = hashlib.md5()
+    with open(filename, "rb") as f:
+        for block in iter(lambda: f.read(blocksize), b""):
+            _hash.update(block)
+    return _hash.hexdigest()
 
 
 @contextmanager
