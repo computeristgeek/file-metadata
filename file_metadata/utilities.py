@@ -21,6 +21,20 @@ from contextlib import contextmanager
 PROJECT_PATH = os.path.abspath(os.path.dirname(__file__))
 
 
+def to_cstr(value):
+    """
+    Convert a python string into a C style string. Meant for packages which
+    expect C strings like boost.python and other python bindings on C
+    libraries.
+    C strings are 8 byte ansii. Hence, we convert the unicode from python to
+    that format.
+
+    >>> to_cstr(u'a')
+    'a'
+    """
+    return value.encode('utf-8')
+
+
 def download(url, filename, overwrite=False):
     """
     Download the given URL to the given filename. If the file exists,
