@@ -34,7 +34,21 @@ file_download_links = {
     'blue.png': 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Pure_Blue.svg/100px-Pure_Blue.svg.png',
     'red.svg': 'https://upload.wikimedia.org/wikipedia/commons/6/62/Pure_Red.svg',
     'green.svg': 'https://upload.wikimedia.org/wikipedia/commons/c/c5/Pure_Green.svg',
-    'blue.svg': 'https://upload.wikimedia.org/wikipedia/commons/7/77/Pure_Blue.svg'}
+    'blue.svg': 'https://upload.wikimedia.org/wikipedia/commons/7/77/Pure_Blue.svg',
+
+    # Images with special exifdata:
+    'canon_face.jpg': 'https://upload.wikimedia.org/wikipedia/commons/7/7b/Annagrah-2_041.JPG',
+
+    # Images of faces
+    'mona_lisa.jpg': 'https://upload.wikimedia.org/wikipedia/commons/7/7d/Mona_Lisa_color_restoration.jpg',
+    'michael_jackson.jpg': 'https://upload.wikimedia.org/wikipedia/commons/7/7e/Michaeljackson_%28cropped%29.jpg',
+    'charlie_chaplin.jpg': 'https://upload.wikimedia.org/wikipedia/commons/0/00/Charlie_Chaplin.jpg',
+    'baby_face.jpg': 'https://upload.wikimedia.org/wikipedia/commons/1/10/Portrait_of_a_male_baby_%285866018681%29.jpg',
+    'baby_partial_face.jpg': 'https://upload.wikimedia.org/wikipedia/commons/1/1f/Sweet_Baby_Kisses_Family_Love.jpg',
+    'old_face.jpg': 'https://upload.wikimedia.org/wikipedia/commons/1/11/Brazil_%283042571516%29_%282%29.jpg',
+    'beard_face.jpg': 'https://upload.wikimedia.org/wikipedia/commons/6/61/Oskar_Almgren%2C_Stockholm%2C_Sweden_%285859501260%29_%282%29.jpg',
+    'cat_face.jpg': 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c4/Savannah_Cat_portrait.jpg/400px-Savannah_Cat_portrait.jpg',
+    'monkey_face.jpg': 'https://upload.wikimedia.org/wikipedia/commons/2/27/Baby_ginger_monkey.jpg'}
 
 
 def fetch_file(name, overwrite=False):
