@@ -50,6 +50,9 @@ before_install:
 install:
   - conda update setuptools  # conda has an issue with pip updating setuptools - https://github.com/ContinuumIO/anaconda-issues/issues/542
   - conda install -c conda-forge opencv
+  - if [[ "$TRAVIS_PYTHON_VERSION" != "2.6" ]]; then
+      conda install -c menpo dlib;
+    fi
   - pip install --ignore-installed -U setuptools  # conda has an issue with pip updating setuptools - https://github.com/ContinuumIO/anaconda-issues/issues/542
   - pip install -r requirements.txt -r test-requirements.txt
 

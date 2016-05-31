@@ -3,6 +3,9 @@
 from __future__ import (division, absolute_import, unicode_literals,
                         print_function)
 
+import numpy
+import pytest
+
 from file_metadata._compat import PY2
 from file_metadata.image.image_file import ImageFile
 from tests import fetch_file, importable, mock, unittest
@@ -45,3 +48,41 @@ class ImageFileTest(unittest.TestCase):
     def test_color_average_without_pycolorname(self, mocked_import):
         self.assertEqual(self.red_png.analyze_color_average(), {})
         self.assertEqual(mocked_import.call_count, 1)
+
+
+# Increase the timeout as the first time it will need to download the
+# shape predictor data ~60MB
+@unittest.skipIf(not importable('dlib'), "dlib not installed")
+@pytest.mark.timeout(300)
+class ImageFileFaceLandmarksTest(unittest.TestCase):
+
+    def setUp(self):
+        self.mona_lisa = ImageFile(fetch_file('mona_lisa.jpg'))
+        self.baby_face = ImageFile(fetch_file('baby_face.jpg'))
+        self.monkey_face = ImageFile(fetch_file('monkey_face.jpg'))
+
+        # Ensure that the data file is downloaded for facial landmarks
+        img = ImageFile('a')
+        img.opencv = numpy.ndarray((1, 1, 3))  # Set image as single pixel
+        img.opencv.fill(0)
+        img.analyze_facial_landmarks()  # Downloads the shape data if needed
+
+    def test_facial_landmarks_monkey_face(self):
+        data = self.monkey_face.analyze_facial_landmarks()
+        self.assertEqual(data, {})
+
+    def test_facial_landmarks_mona_lisa(self):
+        data = self.mona_lisa.analyze_facial_landmarks(with_landmarks=True)
+        self.assertIn('dlib:Faces', data)
+        self.assertEqual(len(data['dlib:Faces']), 1)
+        face = data['dlib:Faces'][0]
+        print(face)
+        self.assertEqual(face['left_eye'], (288, 252))
+        self.assertEqual(face['right_eye'], (361, 251))
+        self.assertEqual(face['nose'], (325, 318))
+        self.assertEqual(face['mouth'], (321, 338))
+
+    def test_facial_landmarks_baby_face(self):
+        data = self.baby_face.analyze_facial_landmarks()
+        self.assertIn('dlib:Faces', data)
+        self.assertEqual(len(data['dlib:Faces']), 1)
