@@ -4,9 +4,11 @@ from __future__ import (division, absolute_import, unicode_literals,
                         print_function)
 
 import os
+import re
 
 import cv2
 
+from file_metadata._compat import check_output, makedirs
 from file_metadata.generic_file import GenericFile
 from file_metadata.utilities import (app_dir, bz2_decompress, download,
                                      to_cstr, PropertyCached)
@@ -105,3 +107,54 @@ class ImageFile(GenericFile):
             data.append(fdata)
 
         return {'dlib:Faces': data}
+
+    def analyze_barcode(self):
+        """
+        Use ``zxing`` tot find barcodes, qr codes, data matrices, etc.
+        from the image.
+        """
+        # Make directory for data
+        path_data = app_dir('user_data_dir', 'zxing')
+        makedirs(path_data, exist_ok=True)
+
+        def download_jar(path, name, ver):
+            data = {'name': name, 'ver': ver, 'path': path}
+            fname = os.path.join(path_data, '{name}-{ver}.jar'.format(**data))
+            download('http://central.maven.org/maven2/{path}/{name}/{ver}/'
+                     '{name}-{ver}.jar'.format(**data),
+                     fname)
+            return fname
+
+        # Download all important jar files
+        path_core = download_jar('com/google/zxing', 'core', '3.2.1')
+        path_javase = download_jar('com/google/zxing', 'javase', '3.2.1')
+        path_jcomm = download_jar('com/beust', 'jcommander', '1.48')
+
+        output = check_output([
+            'java', '-cp', ':'.join([path_core, path_javase, path_jcomm]),
+            'com.google.zxing.client.j2se.CommandLineRunner', '--multi',
+            'file://{0}'.format(self.filename)])
+
+        if 'No barcode found' in output:
+            return {}
+
+        barcodes = []
+        for section in output.split("\nfile:"):
+            lines = section.strip().splitlines()
+
+            _format = re.search(r'format:\s([^,]+)', lines[0]).group(1)
+            raw_result = lines[2]
+            parsed_result = lines[4]
+            num_pts = int(re.search(r'Found (\d+) result points.', lines[5])
+                          .group(1))
+            points = []
+            float_re = r'(\d*[.])?\d+'
+            for i in range(num_pts):
+                pt = re.search(r'\(\s*{0}\s*,\s*{0}\s*\)'.format(float_re),
+                               lines[6 + i])
+                point = float(pt.group(1)), float(pt.group(2))
+                points.append(point)
+            barcodes.append({'format': _format, 'points': points,
+                             'raw_data': raw_result, 'data': parsed_result})
+
+        return {'zxing:Barcodes': barcodes}
