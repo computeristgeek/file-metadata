@@ -110,3 +110,11 @@ def importable(modulename):
         return True
     except ImportError:
         return False
+
+
+def is_toolserver(self):
+    return os.environ.get('INSTANCEPROJECT', None) == 'tools'
+
+
+def is_travis(self):
+    return os.environ.get('TRAVIS', None) == 'true'
