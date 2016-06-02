@@ -2,6 +2,7 @@
 from __future__ import absolute_import, unicode_literals
 
 import os
+import tempfile
 
 # This is an automatically generated file. You can find more configuration
 # parameters in 'config.py' file.
@@ -46,14 +47,12 @@ _userpass = os.environ.get('USER_PASSWORD', None)
 _username = os.environ.get('PYWIKIBOT2_USERNAME', None)
 
 if _userpass and _username:
-    usernames['commons']['commons'] = _username
-    _wiki_dir = os.path.join(os.path.expanduser('~'), '.pywikibot')
-    if not os.path.exists(_wiki_dir):
-        os.makedirs(_wiki_dir)
+    _fd, _fname = tempfile.mkstemp()
+    os.write(_fd, "('{0}', '{1}')\n".format(_username, _userpass))
+    os.close(_fd)
 
-    password_file = os.path.join(_wiki_dir, 'passwordfile')
-    with open(password_file, 'w') as _file:
-        _file.write("('{0}', '{1}')\n".format(_username, _userpass)
+    usernames['commons']['commons'] = _username
+    password_file = _fname
 
 # ############# LOGFILE SETTINGS ##############
 
