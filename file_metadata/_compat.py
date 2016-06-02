@@ -24,6 +24,11 @@ except AttributeError:  # pragma: no cover
 
 PY2 = sys.version_info[0] == 2
 
+if PY2:
+    str_type = basestring
+else:
+    str_type = str
+
 
 def check_output(*popenargs, **kwargs):
     """
