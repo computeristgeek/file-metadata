@@ -42,7 +42,7 @@ before_install:
       conda create -q -n py$TRAVIS_PYTHON_VERSION python=$TRAVIS_PYTHON_VERSION pip;
     fi
   - source activate py$TRAVIS_PYTHON_VERSION
-  - if [[ "$TRAVIS_PYTHON_VERSION" == *"$(python --version 2>&1)"* ]]; then exit 1; fi
+  - if [[ "$(python --version 2>&1)" != *"$TRAVIS_PYTHON_VERSION"* ]]; then exit 1; fi
 
   # If the branch is "bulk" run bulk tests. This is a special case.
   - if [[ "$TRAVIS_BRANCH" == "bulk" && "$TRAVIS_PYTHON_VERSION" == "2.7" ]] ; then
