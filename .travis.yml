@@ -62,7 +62,7 @@ script:
   - if [[ "$BULK_TEST" ]] ; then
       python -m pytest -k bulk_test ;
     else
-      python -m pytest --cov ;
+      python -m pytest -k "not bulk_test" --cov ;
     fi
 
 after_script:
