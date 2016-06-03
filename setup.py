@@ -10,9 +10,21 @@ import sys
 
 from setuptools import find_packages, setup
 
+
+def check_output(cmd):
+    """
+    Mimic subprocess.check_output() which is not available in py2.6
+    """
+    process = subprocess.Popen(['exiftool', '-ver'], stdout=subprocess.PIPE)
+    out, err = process.communicate()
+    if process.poll():
+        raise subprocess.CalledProcessError(retcode)
+    return out
+
+
 # Check if exiftool is installed.
 try:
-    out = subprocess.check_output(['exiftool', '-ver'])
+    out = check_output(['exiftool', '-ver'])
     if int(out.split(".", 1)[0]) < 8:
         print('`exiftool` (http://www.sno.phy.queensu.ca/~phil/exiftool/) '
               'version found was less than 8.0. Please update it.')

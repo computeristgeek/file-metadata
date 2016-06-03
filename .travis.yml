@@ -56,6 +56,7 @@ install:
       conda install -c menpo dlib;
     fi
   - pip install --ignore-installed -U setuptools  # conda has an issue with pip updating setuptools - https://github.com/ContinuumIO/anaconda-issues/issues/542
+  - pip install -U pip
   - pip install -r requirements.txt -r test-requirements.txt
   - if [[ "$BULK_TEST" == true ]] ; then
       pip install git+https://github.com/wikimedia/pywikibot-core.git ;
@@ -69,14 +70,12 @@ script:
     else
       python -m pytest -k "not bulk_test $EXTRA_PYTEST_KEYWORDS" --cov ;
     fi
-
-after_script:
-  - bash <(curl -s https://codecov.io/bash)
-
-after_success:
   - python setup.py sdist
   - pip install .
   - pip uninstall -y file-metadata
+
+after_script:
+  - bash <(curl -s https://codecov.io/bash)
 
 notifications:
   email: false
