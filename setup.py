@@ -29,6 +29,14 @@ except ImportError:
           "installed or not in your python PATH.")
     sys.exit(1)
 
+# Check if java is installed.
+try:
+    out = subprocess.check_call(['java', '-version'])
+except (OSError, subprocess.CalledProcessError):
+    print('`java` (https://java.com/) needs to be installed and needs to '
+          'be made available in your PATH.')
+    sys.exit(1)
+
 with open('requirements.txt') as requirements:
     required = requirements.read().splitlines()
 

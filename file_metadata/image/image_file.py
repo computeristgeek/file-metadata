@@ -137,7 +137,7 @@ class ImageFile(GenericFile):
         output = check_output([
             'java', '-cp', ':'.join([path_core, path_javase, path_jcomm]),
             'com.google.zxing.client.j2se.CommandLineRunner', '--multi',
-            'file://{0}'.format(self.filename)])
+            'file://{0}'.format(os.path.abspath(self.filename))])
 
         if 'No barcode found' in output:
             return {}
