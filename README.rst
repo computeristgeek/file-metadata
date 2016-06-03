@@ -12,15 +12,16 @@ latest stable version run::
 
     $ pip install file-metadata
 
-To get bightly builds from the master branch of the github repo, use::
+To get nightly builds from the master branch of the github repo, use::
 
     $ pip install --pre file-metadata
 
 Note that there are 3 dependencies which need to be manually installed:
-- `exiftool <http://www.sno.phy.queensu.ca/~phil/exiftool/>`__
-- `opencv <http://opencv.org/>`__ - v2.x is supported, although v3.x should
-    also work.
-- `java <https://java.com/en/>`__
+
+-  `exiftool <http://www.sno.phy.queensu.ca/~phil/exiftool/>`__
+-  `opencv <http://opencv.org/>`__ - v2.x is supported, although v3.x should
+   also work.
+-  `java <https://java.com/en/>`__
 
 Usage
 =====
