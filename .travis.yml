@@ -2,9 +2,9 @@ language: python
 
 sudo: false
 
-matrix:
-  - python: 2.7
-  - python: 2.6
+python:
+  - 2.7
+  - 2.6
 
 os:
   - linux
@@ -44,6 +44,11 @@ before_install:
   - source activate py$TRAVIS_PYTHON_VERSION
   - if [[ "$TRAVIS_PYTHON_VERSION" == *"$(python --version 2>&1)"* ]]; then exit 1; fi
 
+  # If the branch is "bulk" run bulk tests. This is a special case.
+  - if [[ "$TRAVIS_BRANCH" == "bulk" && "$TRAVIS_PYTHON_VERSION" == "2.7" ]] ; then
+      export BULK_TEST=true ;
+    fi
+
 install:
   - conda update setuptools  # conda has an issue with pip updating setuptools - https://github.com/ContinuumIO/anaconda-issues/issues/542
   - conda install -c conda-forge opencv
@@ -52,14 +57,14 @@ install:
     fi
   - pip install --ignore-installed -U setuptools  # conda has an issue with pip updating setuptools - https://github.com/ContinuumIO/anaconda-issues/issues/542
   - pip install -r requirements.txt -r test-requirements.txt
-  - if [[ "$BULK_TEST" ]] ; then
+  - if [[ "$BULK_TEST" == true ]] ; then
       pip install git+https://github.com/wikimedia/pywikibot-core.git ;
       cp .ci/user-config.py . ;
     fi
 
 script:
   - flake8 setup.py file_metadata tests
-  - if [[ "$BULK_TEST" ]] ; then
+  - if [[ "$BULK_TEST" == true ]] ; then
       python -m pytest -k bulk_test ;
     else
       python -m pytest -k "not bulk_test" --cov ;
