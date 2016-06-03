@@ -3,10 +3,12 @@
 from __future__ import (division, absolute_import, unicode_literals,
                         print_function)
 
+import json
 import os
 import random
 import string
 import struct
+import types
 import wave
 
 try:  # Python 2
@@ -19,6 +21,12 @@ try:  # Python 3
 except ImportError:  # Python 2
     import mock  # flake8: noqa (unused import)
 
+try:
+    import pywikibot
+except (ImportError, RuntimeError) as err:
+    pywikibot = err
+
+from file_metadata._compat import str_type
 from file_metadata.utilities import download
 
 CACHE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'files')
@@ -118,3 +126,44 @@ def is_toolserver(self):
 
 def is_travis(self):
     return os.environ.get('TRAVIS', None) == 'true'
+
+
+def dump_log(data, logname, _type='text', header=None):
+    """
+    Dump the given info into a mediawiki file in the User namespace
+    'User:<Username>/logs/<logname>'.
+
+    :param data:    The data to log.
+    :param logname: The name of the page to save it in.
+    :param _type:   The type of data being logged. json or text.
+    :param header:  The header to add to the page before dumping data.
+    """
+    if (data is not None and
+            not isinstance(pywikibot, (ImportError, RuntimeError))):
+
+        if _type == 'json':
+            logs = '<pre>{0}</pre>'.format(json.dumps(
+                data, sort_keys=True, indent=2, separators=(',', ': ')))
+        elif _type == 'text':
+            if isinstance(data, str_type):
+                logs = data
+            elif isinstance(data,
+                            (tuple, list, types.GeneratorType)):
+                logs = "\n".join(data)
+            else:
+                raise ValueError('Unexpected output got. Expected '
+                                 'str, tuple, list or generator when '
+                                 '_type=text is given.')
+        else:
+            raise ValueError('Unexpected value "{0} given."'
+                             .format(_type))
+
+        if header is not None:
+            logs = header + '\n' + logs
+
+        site = pywikibot.Site()
+        site.login()
+
+        page = pywikibot.Page(
+            site, 'User:' + site.username() + '/logs/' + logname)
+        page.put(logs, "Logged with file-metadata's dump_log()")
