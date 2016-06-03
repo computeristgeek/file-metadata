@@ -8,12 +8,16 @@ commons.wikimedia.org.
 from __future__ import (division, absolute_import, unicode_literals,
                         print_function)
 
+import json
 import os
+import types
+
 import pytest
 
+from file_metadata._compat import str_type
 from file_metadata.generic_file import GenericFile
 from file_metadata.utilities import download
-from tests import dump_log, unittest, CACHE_DIR
+from tests import unittest, CACHE_DIR
 
 try:
     import pywikibot
@@ -27,6 +31,42 @@ except RuntimeError as err:
                             'bulk tests.')
 
 from pywikibot import pagegenerators
+
+
+def dump_log(data, logname, _type='text', header=None):
+    """
+    Dump the given info into a mediawiki file in the User namespace
+    'User:<Username>/logs/<logname>'.
+
+    :param data:    The data to log.
+    :param logname: The name of the page to save it in.
+    :param _type:   The type of data being logged. json or text.
+    :param header:  The header to add to the page before dumping data.
+    """
+    if data is not None:
+        if _type == 'json':
+            logs = '<pre>{0}</pre>'.format(json.dumps(
+                data, sort_keys=True, indent=2, separators=(',', ': ')))
+        elif _type == 'text':
+            if isinstance(data, str_type):
+                logs = data
+            elif isinstance(data, (tuple, list, types.GeneratorType)):
+                logs = "\n".join(data)
+            else:
+                raise ValueError('Unexpected output got. Expected str, tuple, '
+                                 'list or generator when _type=text is given.')
+        else:
+            raise ValueError('Unexpected value "{0} given."'.format(_type))
+
+        if header is not None:
+            logs = header + '\n' + logs
+
+        site = pywikibot.Site()
+        site.login()
+
+        page = pywikibot.Page(
+            site, 'User:' + site.username() + '/logs/' + logname)
+        page.put(logs, "Logged with file-metadata's dump_log()")
 
 
 @pytest.mark.timeout(60 * 60)
@@ -63,7 +103,8 @@ class PyWikiBotTestHelper(unittest.TestCase):
         if not generator:
             self.fail('No generator was asked from the factory.')
         else:
-            pregen = pagegenerators.PreloadingGenerator(generator)
+            pregen = pagegenerators.PreloadingGenerator(generator,
+                                                        groupsize=500)
             for page in pregen:
                 if page.exists() and not page.isRedirectPage():
                     page_path = self.download_page(page, fname=fname)
