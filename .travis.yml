@@ -65,7 +65,7 @@ install:
 script:
   - flake8 setup.py file_metadata tests
   - if [[ "$BULK_TEST" == true ]] ; then
-      python -m pytest -k bulk_test -vvv --capture=no ;
+      python -m pytest -k bulk_test -vvv --capture=no --cov ;
     else
       python -m pytest -k "not bulk_test" --cov ;
     fi
