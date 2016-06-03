@@ -4,3 +4,4 @@ python-magic>=0.4.1
 audioread>=2.0.0
 whichcraft>=0.4
 pycolorname>=0.1.0 ; python_version > '2.6'
+retry>=0.9

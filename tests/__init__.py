@@ -19,6 +19,7 @@ try:  # Python 3
 except ImportError:  # Python 2
     import mock  # flake8: noqa (unused import)
 
+from file_metadata._compat import makedirs
 from file_metadata.utilities import download
 
 CACHE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'files')
@@ -69,8 +70,7 @@ def fetch_file(name, overwrite=False):
     """
     filepath = os.path.join(CACHE_DIR, name)
 
-    if not os.path.isdir(CACHE_DIR):  # Make folder is it doesn't exist
-        os.makedirs(CACHE_DIR)
+    makedirs(CACHE_DIR, exist_ok=True)
 
     if os.path.exists(filepath) and not overwrite:  # Use cached file
         return filepath

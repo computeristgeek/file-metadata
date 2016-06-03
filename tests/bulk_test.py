@@ -10,11 +10,13 @@ from __future__ import (division, absolute_import, unicode_literals,
 
 import json
 import os
+import ssl
 import types
 
 import pytest
+from retry import retry
 
-from file_metadata._compat import str_type
+from file_metadata._compat import URLError, str_type, makedirs
 from file_metadata.generic_file import GenericFile
 from file_metadata.utilities import download
 from tests import is_travis, unittest, CACHE_DIR
@@ -76,10 +78,10 @@ class PyWikiBotTestHelper(unittest.TestCase):
         self.site = pywikibot.Site()
         self.site.login()
 
-        if not os.path.isdir(CACHE_DIR):
-            os.makedirs(CACHE_DIR)
+        makedirs(CACHE_DIR, exist_ok=True)
 
     @staticmethod
+    @retry((ssl.SSLError, URLError), tries=5)
     def download_page(page, fname=None):
         url = page.fileUrl()
         fname = fname or page.title(as_filename=True)
@@ -105,11 +107,10 @@ class PyWikiBotTestHelper(unittest.TestCase):
             self.fail('No generator was asked from the factory.')
         else:
             pregen = pagegenerators.PreloadingGenerator(generator,
-                                                        groupsize=500)
+                                                        groupsize=50)
             for page in pregen:
                 if page.exists() and not page.isRedirectPage():
                     page_path = self.download_page(page, fname=fname)
-                    print('Analyzing', page.title())
                     yield page, page_path
                     if is_travis():
                         os.remove(page_path)
@@ -119,17 +120,17 @@ class BulkCategoryTest(PyWikiBotTestHelper):
 
     def _test_mimetype_category(self, cat):
         log = []
-        for page, path in self.factory(['-catr:' + cat,
-                                        '-limit:1000',
-                                        '-ns:File']):
+        for count, (page, path) in enumerate(self.factory(
+                ['-catr:' + cat, '-limit:1000', '-ns:File'])):
             data = GenericFile(path).analyze_mimetype()
             log.append('=== [[:' + page.title() + ']] ===')
             log.append("* '''URL''': " + page.fileUrl())
             log.append("* '''Mime Type''': " +
                        data.get('File:MIMEType', "ERROR: KEY NOT FOUND"))
+            print(count, '. Analyzing', page.title())
         dump_log(log, logname='Category_' + cat,
                  header="This page holds all the analysis done on the "
-                        "files of the category " + cat + ".\n")
+                        "files of the category [[:Category:" + cat + "]].\n")
 
     def test_mimetype_images(self):
         for cat in ['PNG_files', 'SVG_files', 'JPEG_files', 'GIF_files',
