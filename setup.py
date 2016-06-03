@@ -4,12 +4,11 @@
 from __future__ import (division, absolute_import, unicode_literals,
                         print_function)
 
+import os
 import subprocess
 import sys
 
 from setuptools import find_packages, setup
-
-import file_metadata
 
 # Check if exiftool is installed.
 try:
@@ -36,9 +35,11 @@ with open('requirements.txt') as requirements:
 with open('test-requirements.txt') as requirements:
     test_required = requirements.read().splitlines()
 
+VERSION = open(os.path.join('file_metadata', 'VERSION')).read().strip()
+
 if __name__ == "__main__":
     setup(name='file-metadata',
-          version=file_metadata.__version__,
+          version=VERSION,
           description='Helps to find structured metadata from a given file.',
           author="DrTrigon",
           author_email="dr.trigon@surfeu.ch",
