@@ -17,7 +17,7 @@ import pytest
 from file_metadata._compat import str_type
 from file_metadata.generic_file import GenericFile
 from file_metadata.utilities import download
-from tests import unittest, CACHE_DIR
+from tests import is_travis, unittest, CACHE_DIR
 
 try:
     import pywikibot
@@ -89,7 +89,8 @@ class PyWikiBotTestHelper(unittest.TestCase):
 
     def factory(self, args, fname=None):
         """
-        Use pywikibot to fetch pages based on the given arguments.
+        Use pywikibot to fetch pages based on the given arguments. If the
+        system is detected to be TRAVIS, it auto deletes the file afterwards.
 
         :param args:  The args to give to pywikibot
         :param fname: If this is given, the file is stored in this filename.
@@ -110,6 +111,8 @@ class PyWikiBotTestHelper(unittest.TestCase):
                     page_path = self.download_page(page, fname=fname)
                     print('Analyzing', page.title())
                     yield page, page_path
+                    if is_travis():
+                        os.remove(page_path)
 
 
 class BulkCategoryTest(PyWikiBotTestHelper):
