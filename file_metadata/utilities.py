@@ -36,7 +36,7 @@ def to_cstr(value):
     return value.encode('utf-8')
 
 
-def download(url, filename, overwrite=False):
+def download(url, filename, overwrite=False, timeout=None):
     """
     Download the given URL to the given filename. If the file exists,
     it won't be downloaded unless asked to overwrite. Both, text data
@@ -49,7 +49,10 @@ def download(url, filename, overwrite=False):
                       already exists.
     """
     if not os.path.exists(filename) or overwrite:
-        response = urlopen(url)
+        if timeout is None:
+            response = urlopen(url)
+        else:
+            response = urlopen(url, timeout=timeout)
         with open(filename, 'wb') as out_file:
             copyfileobj(response, out_file)
 

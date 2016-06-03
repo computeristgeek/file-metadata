@@ -13,9 +13,10 @@ import subprocess
 import sys
 
 try:  # Python 3
-    from urllib.request import urlopen  # flake8: noqa (unused import)
+    from urllib.request import (
+        URLError, urlopen)  # flake8: noqa (unused import)
 except ImportError:  # Python 2
-    from urllib2 import urlopen  # flake8: noqa (unused import)
+    from urllib2 import URLError, urlopen  # flake8: noqa (unused import)
 
 try:  # pragma: no cover
     JSONDecodeError = json.decoder.JSONDecodeError

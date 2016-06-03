@@ -11,6 +11,7 @@ import socket
 import tempfile
 from io import StringIO
 
+from file_metadata._compat import URLError
 from file_metadata.utilities import (app_dir, bz2_decompress, make_temp,
                                      download, md5sum, PropertyCached,
                                      DictNoNone)
@@ -54,6 +55,13 @@ class DownloadTest(unittest.TestCase):
             os.remove(filename)
             download('https://httpbin.org/image/png', filename)
             self.assertEqual(imghdr.what(filename), "png")
+
+    def test_timeout(self):
+        with make_temp() as filename:
+            os.remove(filename)
+            self.assertRaises(URLError, download,
+                              'https://httpbin.org/delay/3', filename,
+                              timeout=1e-50)
 
 
 class BZ2DecompressTest(unittest.TestCase):
