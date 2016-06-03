@@ -42,8 +42,7 @@ class PyWikiBotTestHelper(unittest.TestCase):
     @staticmethod
     def download_page(page, fname=None):
         url = page.fileUrl()
-        if fname is None:
-            _, fname = os.path.split(url)
+        fname = fname or page.title(as_filename=True)
         fpath = os.path.join(CACHE_DIR, fname)
         download(url, fpath)
         return fpath
@@ -68,6 +67,7 @@ class PyWikiBotTestHelper(unittest.TestCase):
             for page in pregen:
                 if page.exists() and not page.isRedirectPage():
                     page_path = self.download_page(page, fname=fname)
+                    print('Analyzing', page.title())
                     yield page, page_path
 
 
