@@ -133,3 +133,13 @@ class ImageFileBarcodesTest(unittest.TestCase):
                          '2LUS94941+67000000')
         self.assertEqual(data['zxing:Barcodes'][1]['format'], 'ITF')
         self.assertEqual(data['zxing:Barcodes'][1]['data'], '054804124097')
+
+
+class ImageFileCreateTest(unittest.TestCase):
+
+    def test_create_image_file(self):
+        for fname in ['red.png', 'red.svg', 'qrcode.jpg', 'example.tiff',
+                      'blank.xcf']:
+            self.assertTrue(isinstance(
+                ImageFile.create(fetch_file(fname)), ImageFile),
+                'File "{0}" was not of type image'.format(fname))

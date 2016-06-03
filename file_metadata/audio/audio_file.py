@@ -12,6 +12,10 @@ from file_metadata.mixins import FFProbeMixin
 class AudioFile(FFProbeMixin, GenericFile):
     mimetypes = ()
 
+    @classmethod
+    def create(cls, *args, **kwargs):
+        return cls(*args, **kwargs)
+
     def analyze_audioread(self):
         try:
             with audioread.audio_open(self.filename) as f:

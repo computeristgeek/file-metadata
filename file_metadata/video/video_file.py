@@ -9,3 +9,7 @@ from file_metadata.mixins import FFProbeMixin
 
 class VideoFile(FFProbeMixin, GenericFile):
     mimetypes = ()
+
+    @classmethod
+    def create(cls, *args, **kwargs):
+        return cls(*args, **kwargs)

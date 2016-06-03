@@ -37,6 +37,33 @@ class GenericFile:
     def __init__(self, fname):
         self.filename = fname
 
+    @classmethod
+    def create(cls, *args, **kwargs):
+        """
+        Create an object which best suits the given file. It first opens the
+        file as a GenericFile and then uses the mimetype analysis to suggest
+        the best class to use.
+
+        :param args:   The args to pass to the file class.
+        :parak kwargs: The kwargs to pass to the file class.
+        :return:       A class inheriting from GenericFile.
+        """
+        cls_file = cls(*args, **kwargs)
+        mime = cls_file.analyze_mimetype()['File:MIMEType']
+        _type, subtype = mime.split('/', 1)
+
+        if _type == 'image':
+            from file_metadata.image.image_file import ImageFile
+            return ImageFile.create(*args, **kwargs)
+        elif _type == 'audio':
+            from file_metadata.audio.audio_file import AudioFile
+            return AudioFile.create(*args, **kwargs)
+        elif _type == 'video':
+            from file_metadata.video.video_file import VideoFile
+            return VideoFile.create(*args, **kwargs)
+
+        return cls_file
+
     def analyze(self, prefix='analyze_', suffix='', methods=None):
         """
         Analyze the given file and create metadata information appropriately.

@@ -88,3 +88,27 @@ class GenericFileTest(unittest.TestCase):
 
         data = self.wav_file.analyze_exiftool()
         self.assertEqual(data['File:FileSize'], '86 kB')
+
+
+class GenericFileCreateTest(unittest.TestCase):
+
+    def test_create_image_file(self):
+        from file_metadata.image.image_file import ImageFile
+        for fname in ['red.png', 'red.svg', 'qrcode.jpg', 'example.tiff',
+                      'blank.xcf']:
+            self.assertTrue(isinstance(
+                GenericFile.create(fetch_file(fname)), ImageFile),
+                'File "{0}" was not of type image'.format(fname))
+
+    def test_create_audio_file(self):
+        from file_metadata.audio.audio_file import AudioFile
+        for fname in ['drums.mid', 'bell.flac', 'bell.wav']:
+            self.assertTrue(isinstance(
+                GenericFile.create(fetch_file(fname)), AudioFile),
+                'File "{0}" was not of type audio'.format(fname))
+
+    def test_create_generic_file(self):
+        for fname in ['image.pdf', 'text.pdf']:
+            self.assertTrue(isinstance(
+                GenericFile.create(fetch_file(fname)), GenericFile),
+                'File "{0}" was not of type generic'.format(fname))

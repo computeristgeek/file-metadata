@@ -27,3 +27,12 @@ class AudioFileTest(unittest.TestCase):
 
         data = self.bin_file.analyze_audioread()
         self.assertEqual(data, {})
+
+
+class AudioFileCreateTest(unittest.TestCase):
+
+    def test_create_audio_file(self):
+        for fname in ['drums.mid', 'bell.flac', 'bell.wav']:
+            self.assertTrue(isinstance(
+                AudioFile.create(fetch_file(fname)), AudioFile),
+                'File "{0}" was not of type audio'.format(fname))

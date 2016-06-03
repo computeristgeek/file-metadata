@@ -17,6 +17,10 @@ from file_metadata.utilities import (app_dir, bz2_decompress, download,
 class ImageFile(GenericFile):
     mimetypes = ()
 
+    @classmethod
+    def create(cls, *args, **kwargs):
+        return cls(*args, **kwargs)
+
     @PropertyCached
     def opencv(self):
         return cv2.imread(self.filename)

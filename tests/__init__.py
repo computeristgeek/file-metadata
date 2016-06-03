@@ -25,9 +25,18 @@ from file_metadata.utilities import download
 CACHE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'files')
 
 file_download_links = {
+    # Audio
     'wikiexample.ogg': 'https://upload.wikimedia.org/wikipedia/commons/c/c8/Example.ogg',
-    'veins.ogv': 'https://upload.wikimedia.org/wikipedia/commons/f/f2/POROS_3.ogv',
     'drums.mid': 'https://upload.wikimedia.org/wikipedia/commons/6/61/Drum_sample.mid',
+    'bell.wav': 'https://upload.wikimedia.org/wikipedia/commons/9/97/156064_marcolo91_bicycle-bell.wav',
+    'bell.flac': 'https://upload.wikimedia.org/wikipedia/commons/b/b2/Bell-ring.flac',
+    'bell.oga': 'https://upload.wikimedia.org/wikipedia/commons/6/6c/Announcement_on_a_wharf.oga',
+    'bell.ogg': 'https://upload.wikimedia.org/wikipedia/commons/3/34/Sound_Effect_-_Door_Bell.ogg',
+
+    # Videos
+    'veins.ogv': 'https://upload.wikimedia.org/wikipedia/commons/f/f2/POROS_3.ogv',
+
+    # Images
     'ball.png': 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/1-ball.svg/226px-1-ball.svg.png',
     'ball.svg': 'https://upload.wikimedia.org/wikipedia/commons/5/51/1-ball.svg',
     'red.png': 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/62/Pure_Red.svg/100px-Pure_Red.svg.png',
@@ -55,7 +64,12 @@ file_download_links = {
     'qrcode.jpg': 'https://upload.wikimedia.org/wikipedia/commons/5/5b/Qrcode_wikipedia.jpg',
     'barcode.png': 'https://upload.wikimedia.org/wikipedia/commons/1/1f/Rationalized-codabar.png',
     'datamatrix.png': 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/Datamatrix.svg/200px-Datamatrix.svg.png',
-    'multibarcodes.png': 'https://upload.wikimedia.org/wikipedia/commons/9/98/DHL_Online-Frankierung_-_Paket_bis_5_kg_-_D-USA.png'}
+    'multibarcodes.png': 'https://upload.wikimedia.org/wikipedia/commons/9/98/DHL_Online-Frankierung_-_Paket_bis_5_kg_-_D-USA.png',
+
+    'blank.xcf': 'https://upload.wikimedia.org/wikipedia/commons/e/e2/Blank_file.xcf',
+    'example.tiff': 'https://upload.wikimedia.org/wikipedia/commons/b/b0/Dabigatran_binding_pockets.tiff',
+    'text.pdf': 'https://upload.wikimedia.org/wikipedia/commons/a/a7/Life_of_Future.pdf',
+    'image.pdf': 'https://upload.wikimedia.org/wikipedia/commons/4/40/AugerTransition1.pdf'}
 
 
 def fetch_file(name, overwrite=False):
