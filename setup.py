@@ -43,7 +43,7 @@ except ImportError:
 
 # Check if java is installed.
 try:
-    out = subprocess.check_call(['java', '-version'])
+    out = check_output(['java', '-version'])
 except (OSError, subprocess.CalledProcessError):
     print('`java` (https://java.com/) needs to be installed and needs to '
           'be made available in your PATH.')
