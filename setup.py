@@ -49,12 +49,19 @@ except (OSError, subprocess.CalledProcessError):
           'be made available in your PATH.')
     sys.exit(1)
 
-with open('requirements.txt') as requirements:
-    required = requirements.read().splitlines()
+# Make a list of required packages
+required = ['setuptools>=5.0',
+            'appdirs>=1.4.0',
+            'python-magic>=0.4.1',
+            'audioread>=2.0.0',
+            'whichcraft>=0.4',
+            'retry>=0.9']
 
-with open('test-requirements.txt') as requirements:
-    test_required = requirements.read().splitlines()
+if sys.version_info >= (2, 7):
+    # Not usable in python 2.6
+    required.append('pycolorname>=0.1.0')
 
+test_required = open('test-requirements.txt').read().splitlines()
 VERSION = open(os.path.join('file_metadata', 'VERSION')).read().strip()
 
 if __name__ == "__main__":
