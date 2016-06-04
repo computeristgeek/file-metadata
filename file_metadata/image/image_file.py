@@ -5,11 +5,12 @@ from __future__ import (division, absolute_import, unicode_literals,
 
 import os
 import re
+import subprocess
 
 import cv2
 import pathlib2
 
-from file_metadata._compat import check_output, makedirs
+from file_metadata._compat import makedirs
 from file_metadata.generic_file import GenericFile
 from file_metadata.utilities import (app_dir, bz2_decompress, download,
                                      to_cstr, PropertyCached)
@@ -135,7 +136,7 @@ class ImageFile(GenericFile):
         path_javase = download_jar('com/google/zxing', 'javase', '3.2.1')
         path_jcomm = download_jar('com/beust', 'jcommander', '1.48')
 
-        output = check_output([
+        output = subprocess.check_output([
             'java', '-cp', ':'.join([path_core, path_javase, path_jcomm]),
             'com.google.zxing.client.j2se.CommandLineRunner', '--multi',
             pathlib2.Path(os.path.abspath(self.filename)).as_uri()])

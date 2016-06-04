@@ -11,20 +11,9 @@ import sys
 from setuptools import find_packages, setup
 
 
-def check_output(cmd):
-    """
-    Mimic subprocess.check_output() which is not available in py2.6
-    """
-    process = subprocess.Popen(['exiftool', '-ver'], stdout=subprocess.PIPE)
-    out, err = process.communicate()
-    if process.poll():
-        raise subprocess.CalledProcessError(retcode)
-    return out
-
-
 # Check if exiftool is installed.
 try:
-    out = check_output(['exiftool', '-ver'])
+    out = subprocess.check_output(['exiftool', '-ver'])
     if int(out.split(".", 1)[0]) < 8:
         print('`exiftool` (http://www.sno.phy.queensu.ca/~phil/exiftool/) '
               'version found was less than 8.0. Please update it.')
@@ -43,25 +32,16 @@ except ImportError:
 
 # Check if java is installed.
 try:
-    out = check_output(['java', '-version'])
+    out = subprocess.check_output(['java', '-version'])
 except (OSError, subprocess.CalledProcessError):
     print('`java` (https://java.com/) needs to be installed and needs to '
           'be made available in your PATH.')
     sys.exit(1)
 
 # Make a list of required packages
-required = ['setuptools>=5.0',
-            'appdirs>=1.4.0',
-            'python-magic>=0.4.1',
-            'audioread>=2.0.0',
-            'whichcraft>=0.4',
-            'retry>=0.9']
+required = open('requirements.txt').read().strip().splitlines()
 
-if sys.version_info >= (2, 7):
-    # Not usable in python 2.6
-    required.append('pycolorname>=0.1.0')
-
-test_required = open('test-requirements.txt').read().splitlines()
+test_required = open('test-requirements.txt').read().strip().splitlines()
 VERSION = open(os.path.join('file_metadata', 'VERSION')).read().strip()
 
 if __name__ == "__main__":

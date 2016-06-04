@@ -11,7 +11,8 @@ import socket
 import tempfile
 from io import StringIO
 
-from file_metadata._compat import URLError
+from six.moves.urllib.error import URLError
+
 from file_metadata.utilities import (app_dir, bz2_decompress, make_temp,
                                      download, md5sum, PropertyCached,
                                      DictNoNone)

@@ -18,8 +18,10 @@ from collections import Counter
 
 import pytest
 from retry import retry
+from six import string_types
+from six.moves.urllib.error import URLError
 
-from file_metadata._compat import URLError, str_type, makedirs
+from file_metadata._compat import makedirs
 from file_metadata.generic_file import GenericFile
 from file_metadata.image.image_file import ImageFile
 from file_metadata.utilities import download
@@ -54,7 +56,7 @@ def dump_log(data, logname, _type='text', header=None):
             logs = '<pre>{0}</pre>'.format(json.dumps(
                 data, sort_keys=True, indent=2, separators=(',', ': ')))
         elif _type == 'text':
-            if isinstance(data, str_type):
+            if isinstance(data, string_types):
                 logs = data
             elif isinstance(data, (tuple, list, types.GeneratorType)):
                 logs = "\n".join(data)
@@ -134,7 +136,7 @@ class BulkCategoryTest(PyWikiBotTestHelper):
                    page.title(asLink=True, textlink=True)))
 
         mime = _file.analyze_mimetype().get('File:MIMEType', "ERROR")
-        stats['mime'] = mime 
+        stats['mime'] = mime
         txt.append("* '''Mime Type''': " + mime)
         if mime == 'application/ogg':
             _type = _file.analyze_exiftool().get('File:FileType', 'ERROR')
@@ -164,7 +166,7 @@ class BulkCategoryTest(PyWikiBotTestHelper):
             barcode_data = {}
             try:
                 barcode_data = _file.analyze_barcode()
-            except subprocess.CalledProcessError as err:
+            except subprocess.CalledProcessError:
                 txt.append("* '''Barcodes ERROR:''' Unsupported file type")
             barcodes = barcode_data.get('zxing:Barcodes', None)
             if barcodes is not None and len(barcodes) > 0:

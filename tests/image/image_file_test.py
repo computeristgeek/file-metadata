@@ -5,8 +5,8 @@ from __future__ import (division, absolute_import, unicode_literals,
 
 import numpy
 import pytest
+from six import PY2
 
-from file_metadata._compat import PY2
 from file_metadata.image.image_file import ImageFile
 from tests import fetch_file, importable, mock, unittest
 

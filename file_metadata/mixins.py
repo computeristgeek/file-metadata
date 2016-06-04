@@ -15,7 +15,7 @@ import subprocess
 from whichcraft import which
 
 from file_metadata.utilities import DictNoNone, PropertyCached
-from file_metadata._compat import check_output, ffprobe_parser
+from file_metadata._compat import ffprobe_parser
 
 
 class FFProbeMixin:
@@ -43,7 +43,7 @@ class FFProbeMixin:
                    self.filename) + (('-of', 'json') if json_support else ())
 
         try:
-            proc = check_output(command)
+            proc = subprocess.check_output(command)
         except subprocess.CalledProcessError as proc_error:
             output = proc_error.output.decode('utf-8')
         else:

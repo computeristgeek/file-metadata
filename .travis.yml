@@ -4,7 +4,9 @@ sudo: false
 
 python:
   - 2.7
-  - 2.6
+
+env:
+  - WITHOUT_DEPS=0
 
 os:
   - linux
@@ -50,22 +52,20 @@ before_install:
     fi
 
 install:
-  - conda update setuptools  # conda has an issue with pip updating setuptools - https://github.com/ContinuumIO/anaconda-issues/issues/542
-  - conda install -c conda-forge opencv
-  - if [[ "$TRAVIS_PYTHON_VERSION" != "2.6" ]]; then
-      conda install -c menpo dlib;
+  - if [[ "$WITHOUT_DEPS" != "1" ]] ; then
+      conda install -c menpo dlib opencv ;
     fi
-  - pip install --ignore-installed -U setuptools  # conda has an issue with pip updating setuptools - https://github.com/ContinuumIO/anaconda-issues/issues/542
-  - pip install -U pip
-  - pip install -r requirements.txt -r test-requirements.txt
-  - if [[ "$BULK_TEST" == true ]] ; then
+  - if [[ "$WITHOUT_DEPS" != "1" ]] ; then
+      pip install -r requirements.txt -r test-requirements.txt ;
+    fi
+  - if [[ "$BULK_TEST" == "1" && "$WITHOUT_DEPS" != "1" ]] ; then
       pip install git+https://github.com/wikimedia/pywikibot-core.git ;
       cp .ci/user-config.py . ;
     fi
 
 script:
   - flake8 setup.py file_metadata tests
-  - if [[ "$BULK_TEST" == true ]] ; then
+  - if [[ "$BULK_TEST" == "1" ]] ; then
       python -m pytest -k "bulk_test $EXTRA_PYTEST_KEYWORDS" -vvv --capture=no --cov ;
     else
       python -m pytest -k "not bulk_test $EXTRA_PYTEST_KEYWORDS" --cov ;

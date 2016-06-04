@@ -14,8 +14,9 @@ import tempfile
 from shutil import copyfileobj
 
 import appdirs
+from six.moves.urllib.request import urlopen
 
-from file_metadata._compat import urlopen, makedirs
+from file_metadata._compat import makedirs
 from contextlib import contextmanager
 
 

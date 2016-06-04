@@ -14,7 +14,6 @@ except ImportError as error:
     magic = error
 
 from file_metadata.utilities import PropertyCached
-from file_metadata._compat import check_output
 
 
 class GenericFile:
@@ -117,7 +116,7 @@ class GenericFile:
         """
         command = ('exiftool', '-G', '-j', os.path.abspath(self.filename))
         try:
-            proc = check_output(command)
+            proc = subprocess.check_output(command)
         except subprocess.CalledProcessError as proc_error:
             output = proc_error.output.decode('utf-8').rstrip('\r\n')
         else:
