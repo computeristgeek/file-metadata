@@ -14,6 +14,11 @@ import tarfile
 import tempfile
 from shutil import copyfileobj
 
+try:
+    import lzma
+except ImportError:
+    from backports import lzma
+
 import appdirs
 from six.moves.urllib.request import urlopen
 
@@ -84,6 +89,19 @@ def targz_decompress(filepath, newfilepath):
     tar = tarfile.open(filepath, "r:gz")
     tar.extractall(newfilepath)
     tar.close()
+
+
+def tarxz_decompress(filepath, newfilepath):
+    """
+    Decompress the given file using a tar+xz decompressor.
+
+    :param filepath:    The filepath of the archived file.
+    :param newfilepath: The path to decompress the file into.
+    """
+    with lzma.open(filepath) as lzma_file:
+        tar = tarfile.open(fileobj=lzma_file)
+        tar.extractall(newfilepath)
+        tar.close()
 
 
 def md5sum(filename, blocksize=64 * 1024):

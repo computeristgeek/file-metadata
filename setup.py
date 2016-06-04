@@ -5,6 +5,7 @@ from __future__ import (division, absolute_import, unicode_literals,
                         print_function)
 
 import os
+import platform
 import subprocess
 import sys
 
@@ -39,19 +40,21 @@ except (OSError, subprocess.CalledProcessError):
           '`sudo apt-get install openjdk-7-jre`')
     sys.exit(1)
 
-# Check if avprobe of ffprobe is installed.
-try:
-    out = subprocess.check_output(['avprobe', '-version'])
-except (OSError, subprocess.CalledProcessError):
+# Check if avprobe of ffprobe is installed if system is not Linux.
+# If it's linux, we use static builds from http://johnvansickle.com/libav/
+if platform.system() != 'Linux':
     try:
         out = subprocess.check_output(['ffprobe', '-version'])
     except (OSError, subprocess.CalledProcessError):
-        print('Neither `ffprobe` (https://ffmpeg.org/ffprobe.html) nor '
-              '`avprobe` (https://libav.org/documentation/avprobe.html) '
-              'were found. Either one of them needs to be installed and '
-              'made available in your PATH. If using Ubuntu, you can do '
-              '`sudo apt-get install libav-tools` to install avprobe.')
-    sys.exit(1)
+        try:
+            out = subprocess.check_output(['avprobe', '-version'])
+        except (OSError, subprocess.CalledProcessError):
+            print('Neither `ffprobe` (https://ffmpeg.org/ffprobe.html) nor '
+                  '`avprobe` (https://libav.org/documentation/avprobe.html) '
+                  'were found. Either one of them needs to be installed and '
+                  'made available in your PATH. If using Ubuntu, you can do '
+                  '`sudo apt-get install libav-tools` to install avprobe.')
+        sys.exit(1)
 
 
 # Make a list of required packages

@@ -3,6 +3,8 @@
 from __future__ import (division, absolute_import, unicode_literals,
                         print_function)
 
+import platform
+
 from whichcraft import which
 
 from file_metadata.mixins import FFProbeMixin
@@ -30,11 +32,11 @@ class FFProbeMixinTest(unittest.TestCase):
         self.bin_file = FFProbeMixin()
         self.bin_file.filename = fetch_file('file.bin')
 
-    def test_bin(self, mock_check_output):
+    def test_bin(self, mock_check_output, mock_system=None):
         data = self.bin_file.analyze_ffprobe()
         self.assertEqual(data, {})
 
-    def test_ogg(self, mock_check_output):
+    def test_ogg(self, mock_check_output, mock_system=None):
         data = self.wikiexample_file.analyze_ffprobe()
         self.assertIn('FFProbe:Format', data)
         self.assertEqual(data['FFProbe:Format'], 'ogg')
@@ -45,10 +47,10 @@ class FFProbeMixinTest(unittest.TestCase):
         self.assertEqual(stream['Format'], 'audio/vorbis')
         self.assertNotIn('Width', stream)
         self.assertNotIn('Height', stream)
-        self.assertEqual(stream['Rate'], '2/-/44100')
+        self.assertIn('44100', stream['Rate'])
         self.assertEqual(round(stream['Duration']), 6)
 
-    def test_wav(self, mock_check_output):
+    def test_wav(self, mock_check_output, mock_system=None):
         data = self.wav_file.analyze_ffprobe()
         self.assertIn('FFProbe:Format', data)
         self.assertEqual(data['FFProbe:Format'], 'wav')
@@ -59,10 +61,10 @@ class FFProbeMixinTest(unittest.TestCase):
         self.assertEqual(stream['Format'], 'audio/pcm_s16le')
         self.assertNotIn('Width', stream)
         self.assertNotIn('Height', stream)
-        self.assertEqual(stream['Rate'], '1/-/44100')
+        self.assertIn('44100', stream['Rate'])
         self.assertEqual(round(stream['Duration']), 1)
 
-    def test_ogv(self, mock_check_output):
+    def test_ogv(self, mock_check_output, mock_system=None):
         data = self.veins_file.analyze_ffprobe()
         self.assertIn('FFProbe:Format', data)
         self.assertEqual(data['FFProbe:Format'], 'ogg')
@@ -85,6 +87,7 @@ class FFProbeMixinTest(unittest.TestCase):
 @unittest.skipIf(which('ffprobe') is None, '`ffprobe` not found.')
 @mock.patch('file_metadata.mixins.which',
             side_effect=which_sideeffect(['avprobe']))
+@mock.patch('file_metadata.mixins.platform.system', return_value='NOT Linux')
 class FFProbeMixinWithFFProbeTest(FFProbeMixinTest):
     __test__ = True
 
@@ -92,16 +95,27 @@ class FFProbeMixinWithFFProbeTest(FFProbeMixinTest):
 @unittest.skipIf(which('avprobe') is None, '`avprobe` not found.')
 @mock.patch('file_metadata.mixins.which',
             side_effect=which_sideeffect(['ffprobe']))
+@mock.patch('file_metadata.mixins.platform.system', return_value='NOT Linux')
 class FFProbeMixinWithAVProbeTest(FFProbeMixinTest):
+    __test__ = True
+
+
+@unittest.skipIf(not (platform.system() == 'Linux' and
+                      platform.architecture()[0] in ('32bit', '64bit')),
+                 'Only 32bit and 64bit Linux static builds are available')
+@mock.patch('file_metadata.mixins.which',
+            side_effect=which_sideeffect(['ffprobe', 'avprobe']))
+class FFProbeMixinWithStaticBuildTest(FFProbeMixinTest):
     __test__ = True
 
 
 @mock.patch('file_metadata.mixins.which',
             side_effect=which_sideeffect(['ffprobe', 'avprobe']))
+@mock.patch('file_metadata.mixins.platform.system', return_value='NOT Linux')
 class FFProbeMixinWithoutBackendsTest(unittest.TestCase):
     def setUp(self):
         self.wav_file = FFProbeMixin()
         self.wav_file.filename = fetch_file('noise.wav')
 
-    def test_wav(self, mock_check_output):
+    def test_wav(self, mock_check_output, mock_system=None):
         self.assertRaises(OSError, self.wav_file.analyze_ffprobe)

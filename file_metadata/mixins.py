@@ -8,13 +8,17 @@ formats.
 from __future__ import (division, absolute_import, unicode_literals,
                         print_function)
 
+import glob
 import json
+import logging
 import os
+import platform
 import subprocess
 
 from whichcraft import which
 
-from file_metadata.utilities import DictNoNone, PropertyCached
+from file_metadata.utilities import (app_dir, download, tarxz_decompress,
+                                     DictNoNone, PropertyCached)
 from file_metadata._compat import ffprobe_parser
 
 
@@ -27,13 +31,37 @@ class FFProbeMixin:
         ffmpeg utility ffprobe (or avprobe from libav-tools, a fork of
         ffmpeg).
         """
-        # Choose executable to use
-        if which('avprobe') is not None:
-            executable = 'avprobe'
-        elif which('ffprobe') is not None:
-            executable = 'ffprobe'
-        else:
-            raise OSError('Neither avprobe nor ffprobe were found.')
+        executable = None
+        platform_arch = platform.architecture()[0]
+        if (platform.system() == 'Linux' and
+                platform_arch in ('32bit', '64bit')):
+            # Fetch static binaries
+            arch = 'ffmpeg-release-{0}-static.tar.xz'.format(platform_arch)
+            arch_path = app_dir('user_data_dir', arch)
+            bin_path = app_dir('user_data_dir',
+                               'ffmpeg-*-{0}-static'.format(platform_arch),
+                               'ffprobe')
+
+            bins = glob.glob(bin_path)
+            if len(bins) == 0:
+                logging.info('Downloading `ffmpeg`\'s `ffprobe` to analyze '
+                             'media streams and formats. Hence, the first '
+                             'run may take longer than normal.')
+                url = 'http://johnvansickle.com/ffmpeg/releases/' + arch
+                download(url, arch_path)
+                tarxz_decompress(arch_path, app_dir('user_data_dir'))
+                bins = glob.glob(bin_path)
+
+            executable = sorted(bins)[-1]  # Last one would be highest version
+
+        if executable is None:
+            # Choose executable to use
+            if which('avprobe') is not None:
+                executable = 'avprobe'
+            elif which('ffprobe') is not None:
+                executable = 'ffprobe'
+            else:
+                raise OSError('Neither avprobe nor ffprobe were found.')
 
         # Check whether json is supported
         json_support = False if subprocess.call([

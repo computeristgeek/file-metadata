@@ -9,3 +9,4 @@ pathlib2
 six
 numpy
 dlib
+backports.lzma
