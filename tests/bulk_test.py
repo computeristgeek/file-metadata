@@ -8,16 +8,20 @@ commons.wikimedia.org.
 from __future__ import (division, absolute_import, unicode_literals,
                         print_function)
 
+import datetime
 import json
 import os
 import ssl
+import subprocess
 import types
+from collections import Counter
 
 import pytest
 from retry import retry
 
 from file_metadata._compat import URLError, str_type, makedirs
 from file_metadata.generic_file import GenericFile
+from file_metadata.image.image_file import ImageFile
 from file_metadata.utilities import download
 from tests import is_travis, unittest, CACHE_DIR
 
@@ -118,73 +122,168 @@ class PyWikiBotTestHelper(unittest.TestCase):
 
 class BulkCategoryTest(PyWikiBotTestHelper):
 
-    def _test_mimetype_category(self, cat, limit=10000):
+    def _test_file(self, page, path):
         log = []
+        stats = {'mime': None}
+        txt, im = [], []
+        # First cell has text info
+        # Second cell has image bounding boxes if applicable
+
+        _file = GenericFile.create(path)
+        log.append('===== {0} ====='.format(
+                   page.title(asLink=True, textlink=True)))
+
+        mime = _file.analyze_mimetype().get('File:MIMEType', "ERROR")
+        stats['mime'] = mime 
+        txt.append("* '''Mime Type''': " + mime)
+        if mime == 'application/ogg':
+            _type = _file.analyze_exiftool().get('File:FileType', 'ERROR')
+            txt.append("* '''File type''': " + _type)
+
+        if isinstance(_file, ImageFile) and mime in {
+                'image/jpeg', 'image/png', 'image/gif', 'image/tiff'}:
+            # Can read the pixel data of the image ...
+
+            height, width = _file.opencv.shape[:2]
+            if width > height:
+                scale = min(200, width) * 1.0 / width
+            else:
+                scale = min(200, height) * 1.0 / height
+            scaled_h, scaled_w = int(height * scale), int(width * scale)
+
+            im.append('<div style="position:relative;">')
+            im.append('{0}|{1}x{2}px]]'.format(
+                      page.title(underscore=False, asLink=True)[:-2],
+                      scaled_w, scaled_h))
+            box = ('<div class="position-marker {cls}" '
+                   'style="position:absolute; '
+                   'left:{l}px; top:{t}px; width:{w}px; height:{h}px; '
+                   'border:2px solid #{col};"></div>')
+
+            # Analyze barcodes
+            barcode_data = {}
+            try:
+                barcode_data = _file.analyze_barcode()
+            except subprocess.CalledProcessError as err:
+                txt.append("* '''Barcodes ERROR:''' Unsupported file type")
+            barcodes = barcode_data.get('zxing:Barcodes', None)
+            if barcodes is not None and len(barcodes) > 0:
+                txt.append("* '''Barcodes found:'''")
+                for bar in barcodes:
+                    txt.append("** Data: " + bar['data'])
+                    txt.append("** Format: " + str(bar['format']))
+                    txt.append("** Position: " + str(bar['points']))
+                    if len(bar['points']) == 2:
+                        # left, right
+                        l, r = [(int(i * scale), int(j * scale))
+                                for (i, j) in bar['points']]
+                        im.append(box.format(
+                            cls='barcode', col='ff0000', l=l[0], t=l[1],
+                            w=r[0] - l[0] + 2, h=r[1] - l[1] + 2))
+                    elif len(bar['points']) == 4:
+                        # bottomLeft, topLeft, topRight, bottomRight
+                        lb, lt, rt, rb = [(int(i * scale), int(j * scale))
+                                          for (i, j) in bar['points']]
+                        im.append(box.format(
+                            cls='barcode', col='ff0000',
+                            l=min(lb[0], lt[0]), t=min(lt[1], rt[1]),
+                            w=max(rb[0] - lb[0], rt[0] - lt[0]),
+                            h=max(rb[1] - rt[1], lb[1] - lt[1])))
+
+            # Make a table for text and image
+            log += ['{| class="wikitable"', '|'] + txt + ['|'] + im + ['|}']
+        else:
+            # Image cell is empty as it's not an image
+            log += ['{| class="wikitable"', '|'] + txt + ['|', '', '|}']
+        return log, stats
+
+    def _test_category(self, category, limit=10000):
+        log = []
+        cat = pywikibot.Category(self.site, category)
+
+        stats = {'count': 0, 'mime': [], 'ext': [],
+                 'start_time': datetime.datetime.now()}
         for count, (page, path) in enumerate(self.factory(
-                ['-catr:' + str(cat), '-limit:' + str(limit), '-ns:File'])):
+                ['-catr:' + cat.title(withNamespace=False, underscore=True),
+                 '-limit:' + str(limit),
+                 '-ns:File'])):
 
             print(count + 1, '. Analyzing', page.title(underscore=False))
             if (count + 1) % 500 == 1:
                 log.append('== {0} to {1} =='.format(count + 1, count + 500))
+            _log, _stat = self._test_file(page, path)
+            log += _log
 
-            _file = GenericFile.create(path)
-            log.append('* [[:{0}'.format(
-                       page.title(underscore=True, asLink=True)[2:]))
-            # log.append("** '''URL''': " + page.fileUrl())
-            mime = _file.analyze_mimetype().get('File:MIMEType', "ERROR")
-            log.append("** '''Mime Type''': " + mime)
-            if mime == 'application/ogg':
-                _type = _file.analyze_exiftool().get('File:FileType', 'ERROR')
-                log.append("** '''File type''': " + _type)
+            stats['count'] = count + 1
+            stats['ext'].append(os.path.splitext(page.title())[-1])
+            stats['mime'].append(_stat['mime'])
 
-        dump_log(log, logname='Category ' + cat,
-                 header="This page holds all the analysis done on the "
-                        "files of the category [[:Category:" + cat + "]].\n")
+        stats['end_time'] = datetime.datetime.now()
+        stats['timetaken'] = (stats['end_time'] -
+                              stats['start_time']).total_seconds()
+
+        title = 'Category {0}'.format(cat.title(underscore=False,
+                                                withNamespace=False))
+        summary = ["Analyis from files of " + cat.title(asLink=True,
+                                                        textlink=True),
+                   "* '''Time taken''': " + str(stats['timetaken']),
+                   "* '''Files analyzed''': " + str(stats['count']),
+                   "* '''MIME type stats''': "]
+        for mime, count in Counter(stats['mime']).items():
+            summary.append("** " + str(mime) + " - " + str(count))
+        summary.append("* '''Enxtension Stats''': ")
+        for ext, count in Counter(stats['ext']).items():
+            summary.append("** " + str(ext) + " - " + str(count))
+
+        dump_log(log, logname=title, header="\n".join(summary))
 
     def test_mimetype_png_files(self):
-        self._test_mimetype_category('PNG files')
+        self._test_category('PNG files')
 
     def test_mimetype_svg_files(self):
-        self._test_mimetype_category('SVG files')
+        self._test_category('SVG files')
 
     def test_mimetype_jpeg_files(self):
-        self._test_mimetype_category('JPEG files')
+        self._test_category('JPEG files')
 
     def test_mimetype_gif_files(self):
-        self._test_mimetype_category('GIF files')
+        self._test_category('GIF files')
 
     def test_mimetype_tiff_files(self):
-        self._test_mimetype_category('TIFF files')
+        self._test_category('TIFF files')
 
     def test_mimetype_ogv_videos(self):
-        self._test_mimetype_category('Ogv videos')
+        self._test_category('Ogv videos')
 
     def test_mimetype_animated_gif_files(self):
-        self._test_mimetype_category('Animated GIF files')
+        self._test_category('Animated GIF files')
 
     def test_mimetype_animated_png(self):
-        self._test_mimetype_category('Animated PNG')
+        self._test_category('Animated PNG')
 
     def test_mimetype_animated_svg(self):
-        self._test_mimetype_category('Animated SVG')
+        self._test_category('Animated SVG')
 
     def test_mimetype_audio(self):
-        self._test_mimetype_category('FLAC files')
+        self._test_category('FLAC files')
 
     def test_mimetype_wav_files(self):
-        self._test_mimetype_category('WAV files')
+        self._test_category('WAV files')
 
     def test_mimetype_ogg_sound_files(self):
-        self._test_mimetype_category('Ogg sound files')
+        self._test_category('Ogg sound files')
 
     def test_mimetype_midi_files(self):
-        self._test_mimetype_category('MIDI files')
+        self._test_category('MIDI files')
 
     def test_mimetype_djvu_files(self):
-        self._test_mimetype_category('DjVu files')
+        self._test_category('DjVu files')
 
     def test_mimetype_xcf_files(self):
-        self._test_mimetype_category('XCF files')
+        self._test_category('XCF files')
 
     def test_mimetype_pdf_files(self):
-        self._test_mimetype_category('PDF files')
+        self._test_category('PDF files')
+
+    def test_barcode(self):
+        self._test_category('Barcode')

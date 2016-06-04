@@ -7,6 +7,7 @@ import os
 import re
 
 import cv2
+import pathlib2
 
 from file_metadata._compat import check_output, makedirs
 from file_metadata.generic_file import GenericFile
@@ -137,7 +138,7 @@ class ImageFile(GenericFile):
         output = check_output([
             'java', '-cp', ':'.join([path_core, path_javase, path_jcomm]),
             'com.google.zxing.client.j2se.CommandLineRunner', '--multi',
-            'file://{0}'.format(os.path.abspath(self.filename))])
+            pathlib2.Path(os.path.abspath(self.filename)).as_uri()])
 
         if 'No barcode found' in output:
             return {}
