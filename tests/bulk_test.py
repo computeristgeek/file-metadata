@@ -118,35 +118,73 @@ class PyWikiBotTestHelper(unittest.TestCase):
 
 class BulkCategoryTest(PyWikiBotTestHelper):
 
-    def _test_mimetype_category(self, cat):
+    def _test_mimetype_category(self, cat, limit=10000):
         log = []
         for count, (page, path) in enumerate(self.factory(
-                ['-catr:' + cat, '-limit:1000', '-ns:File'])):
-            data = GenericFile(path).analyze_mimetype()
-            log.append('=== [[:' + page.title() + ']] ===')
-            log.append("* '''URL''': " + page.fileUrl())
-            log.append("* '''Mime Type''': " +
-                       data.get('File:MIMEType', "ERROR: KEY NOT FOUND"))
-            print(count, '. Analyzing', page.title())
-        dump_log(log, logname='Category_' + cat,
+                ['-catr:' + str(cat), '-limit:' + str(limit), '-ns:File'])):
+
+            print(count + 1, '. Analyzing', page.title(underscore=False))
+            if (count + 1) % 500 == 1:
+                log.append('== {0} to {1} =='.format(count + 1, count + 500))
+
+            _file = GenericFile.create(path)
+            log.append('* [[:{0}'.format(
+                       page.title(underscore=True, asLink=True)[2:]))
+            # log.append("** '''URL''': " + page.fileUrl())
+            mime = _file.analyze_mimetype().get('File:MIMEType', "ERROR")
+            log.append("** '''Mime Type''': " + mime)
+            if mime == 'application/ogg':
+                _type = _file.analyze_exiftool().get('File:FileType', 'ERROR')
+                log.append("** '''File type''': " + _type)
+
+        dump_log(log, logname='Category ' + cat,
                  header="This page holds all the analysis done on the "
                         "files of the category [[:Category:" + cat + "]].\n")
 
-    def test_mimetype_images(self):
-        for cat in ['PNG_files', 'SVG_files', 'JPEG_files', 'GIF_files',
-                    'TIFF_files']:
-            self._test_mimetype_category(cat)
+    def test_mimetype_png_files(self):
+        self._test_mimetype_category('PNG files')
 
-    def test_mimetype_videos(self):
-        for cat in ['Ogv_videos', 'Animated_GIF_files',
-                    'Animated_PNG', 'Animated_SVG']:
-            self._test_mimetype_category(cat)
+    def test_mimetype_svg_files(self):
+        self._test_mimetype_category('SVG files')
+
+    def test_mimetype_jpeg_files(self):
+        self._test_mimetype_category('JPEG files')
+
+    def test_mimetype_gif_files(self):
+        self._test_mimetype_category('GIF files')
+
+    def test_mimetype_tiff_files(self):
+        self._test_mimetype_category('TIFF files')
+
+    def test_mimetype_ogv_videos(self):
+        self._test_mimetype_category('Ogv videos')
+
+    def test_mimetype_animated_gif_files(self):
+        self._test_mimetype_category('Animated GIF files')
+
+    def test_mimetype_animated_png(self):
+        self._test_mimetype_category('Animated PNG')
+
+    def test_mimetype_animated_svg(self):
+        self._test_mimetype_category('Animated SVG')
 
     def test_mimetype_audio(self):
-        for cat in ['WAV_files', 'Ogg_sound_files', 'MIDI_files',
-                    'FLAC_files']:
-            self._test_mimetype_category(cat)
+        self._test_mimetype_category('FLAC files')
 
-    def test_mimetype_other(self):
-        for cat in ['PDF_files', 'DjVu_files', 'XCF_files']:
-            self._test_mimetype_category(cat)
+    def test_mimetype_wav_files(self):
+        self._test_mimetype_category('WAV files')
+
+    def test_mimetype_ogg_sound_files(self):
+        self._test_mimetype_category('Ogg sound files')
+
+    def test_mimetype_midi_files(self):
+        self._test_mimetype_category('MIDI files')
+
+    def test_mimetype_djvu_files(self):
+        self._test_mimetype_category('DjVu files')
+
+    def test_mimetype_xcf_files(self):
+        self._test_mimetype_category('XCF files')
+
+    def test_mimetype_pdf_files(self):
+        self._test_mimetype_category('PDF files')

@@ -35,6 +35,7 @@ file_download_links = {
 
     # Videos
     'veins.ogv': 'https://upload.wikimedia.org/wikipedia/commons/f/f2/POROS_3.ogv',
+    'ogg_video.ogg': 'https://upload.wikimedia.org/wikipedia/commons/e/e3/2010-06-06-V-German-Flag.ogg',
 
     # Images
     'ball.png': 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/1-ball.svg/226px-1-ball.svg.png',
@@ -45,6 +46,10 @@ file_download_links = {
     'red.svg': 'https://upload.wikimedia.org/wikipedia/commons/6/62/Pure_Red.svg',
     'green.svg': 'https://upload.wikimedia.org/wikipedia/commons/c/c5/Pure_Green.svg',
     'blue.svg': 'https://upload.wikimedia.org/wikipedia/commons/7/77/Pure_Blue.svg',
+    'animated_smil.svg': 'https://upload.wikimedia.org/wikipedia/commons/7/7c/Bid_Wikimania_Esino_Lario_2016_slides_07_SMIL.svg',
+    'animated.svg': 'https://upload.wikimedia.org/wikipedia/commons/d/de/Animated-runner.svg',
+    'animated.gif': 'https://upload.wikimedia.org/wikipedia/commons/d/d7/123_Numbers.gif',
+    'animated.png': 'https://upload.wikimedia.org/wikipedia/commons/b/b5/Load.png',
 
     # Images with special exifdata:
     'canon_face.jpg': 'https://upload.wikimedia.org/wikipedia/commons/7/7b/Annagrah-2_041.JPG',
