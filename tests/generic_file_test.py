@@ -64,16 +64,11 @@ class GenericFileTest(unittest.TestCase):
         self.assertEqual(data['File:MIMEType'], 'audio/x-wav')
 
     @mock.patch('file_metadata.generic_file.magic')
-    def test_builtin_mimetype(self, mock_magic):
+    def test_magic_not_found(self, mock_magic):
         del mock_magic.open
         del mock_magic.from_file
 
-        data = self.text_file.analyze_mimetype()
-        self.assertIn('File:MIMEType', data)
-        self.assertEqual(data['File:MIMEType'], 'text/plain')
-
-        data = self.wav_file.analyze_mimetype()
-        self.assertEqual(data['File:MIMEType'], 'audio/x-wav')
+        self.assertRaises(ImportError, self.text_file.analyze_mimetype)
 
     def test_exiftool(self):
         data = self.binary_file.analyze_exiftool()

@@ -5,8 +5,6 @@ from __future__ import (division, absolute_import, unicode_literals,
 
 import os
 import shutil
-import subprocess
-import sys
 import tempfile
 
 from file_metadata._compat import ffprobe_parser, makedirs

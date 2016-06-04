@@ -4,14 +4,10 @@ from __future__ import (division, absolute_import, unicode_literals,
                         print_function)
 
 import json
-import mimetypes
 import os
 import subprocess
 
-try:
-    import magic
-except ImportError as error:
-    magic = error
+import magic
 
 from file_metadata.utilities import PropertyCached
 
@@ -162,9 +158,11 @@ class GenericFile:
             magic_instance.load()
             mime = magic_instance.file(self.filename)
         else:
-            # Silently use python's builtin mimetype handler if magic package
-            # was not found or not supported.
-            mime, encoding = mimetypes.guess_type(self.filename)
+            raise ImportError('The `magic` module that was found is not the '
+                              'expected pypi package python-magic '
+                              '(https://pypi.python.org/pypi/python-magic) '
+                              'nor file\'s (http://www.darwinsys.com/file/) '
+                              'package.')
         return {"File:MIMEType": mime}
 
     def analyze_exiftool(self, ignored_keys=()):

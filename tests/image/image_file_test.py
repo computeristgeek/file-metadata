@@ -5,10 +5,9 @@ from __future__ import (division, absolute_import, unicode_literals,
 
 import numpy
 import pytest
-from six import PY2
 
 from file_metadata.image.image_file import ImageFile
-from tests import fetch_file, importable, mock, unittest
+from tests import fetch_file, unittest
 
 
 class ImageFileTest(unittest.TestCase):
@@ -22,8 +21,6 @@ class ImageFileTest(unittest.TestCase):
     def test_opencv_read(self):
         self.assertEqual(self.ball_png.opencv.shape, (226, 226, 3))
 
-    @unittest.skipIf(not importable('pycolorname'),
-                     "pycolorname not installed.")
     def test_color_average(self):
         data = self.red_png.analyze_color_average()
         self.assertEqual(data['Color:AverageRGB'], (255, 0, 0))
@@ -43,16 +40,9 @@ class ImageFileTest(unittest.TestCase):
                          'PMS 18-3949 TPX (Dazzling blue)')
         self.assertEqual(data['Color:ClosestLabeledColorRGB'], (46, 77, 167))
 
-    @mock.patch('{0}.__import__'.format('__builtin__' if PY2 else 'builtins'),
-                side_effect=ImportError, autospec=True)
-    def test_color_average_without_pycolorname(self, mocked_import):
-        self.assertEqual(self.red_png.analyze_color_average(), {})
-        self.assertEqual(mocked_import.call_count, 1)
-
 
 # Increase the timeout as the first time it will need to download the
 # shape predictor data ~60MB
-@unittest.skipIf(not importable('dlib'), "dlib not installed")
 @pytest.mark.timeout(300)
 class ImageFileFaceLandmarksTest(unittest.TestCase):
 
@@ -76,7 +66,7 @@ class ImageFileFaceLandmarksTest(unittest.TestCase):
         self.assertIn('dlib:Faces', data)
         self.assertEqual(len(data['dlib:Faces']), 1)
         face = data['dlib:Faces'][0]
-        print(face)
+
         self.assertEqual(face['left_eye'], (288, 252))
         self.assertEqual(face['right_eye'], (361, 251))
         self.assertEqual(face['nose'], (325, 318))

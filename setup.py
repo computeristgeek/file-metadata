@@ -19,7 +19,8 @@ try:
               'version found was less than 8.0. Please update it.')
 except (OSError, subprocess.CalledProcessError):
     print('`exiftool` (http://www.sno.phy.queensu.ca/~phil/exiftool/) needs '
-          'to be installed and needs to be made available in your PATH.')
+          'to be installed and needs to be made available in your PATH. '
+          'On Ubuntu, you can do `sudo apt-get install exiftool`.')
     sys.exit(1)
 
 # Check if opencv is installed.
@@ -27,7 +28,9 @@ try:
     import cv2  # flake8: noqa (unused import)
 except ImportError:
     print("`OpenCV` (http://opencv.org/) or it's python bindings are not "
-          "installed or not in your python PATH.")
+          "installed or not in your python PATH. If using Ubuntu, you can do "
+          "`sudo apt-get install python-opencv` or use `python3-opencv`, "
+          "depending on the python version.")
     sys.exit(1)
 
 # Check if java is installed.
@@ -35,8 +38,24 @@ try:
     out = subprocess.check_output(['java', '-version'])
 except (OSError, subprocess.CalledProcessError):
     print('`java` (https://java.com/) needs to be installed and needs to '
-          'be made available in your PATH.')
+          'be made available in your PATH. If using Ubuntu, you can do '
+          '`sudo apt-get install openjdk-7-jre`')
     sys.exit(1)
+
+# Check if avprobe of ffprobe is installed.
+try:
+    out = subprocess.check_output(['avprobe', '-version'])
+except (OSError, subprocess.CalledProcessError):
+    try:
+        out = subprocess.check_output(['ffprobe', '-version'])
+    except (OSError, subprocess.CalledProcessError):
+        print('Neither `ffprobe` (https://ffmpeg.org/ffprobe.html) nor '
+              '`avprobe` (https://libav.org/documentation/avprobe.html) '
+              'were found. Either one of them needs to be installed and '
+              'made available in your PATH. If using Ubuntu, you can do '
+              '`sudo apt-get install libav-tools` to install avprobe.')
+    sys.exit(1)
+
 
 # Make a list of required packages
 required = open('requirements.txt').read().strip().splitlines()

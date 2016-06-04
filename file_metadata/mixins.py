@@ -28,12 +28,12 @@ class FFProbeMixin:
         ffmpeg).
         """
         # Choose executable to use
-        if which('ffprobe') is not None:
-            executable = 'ffprobe'
-        elif which('avprobe') is not None:
+        if which('avprobe') is not None:
             executable = 'avprobe'
+        elif which('ffprobe') is not None:
+            executable = 'ffprobe'
         else:
-            return {}
+            raise OSError('Neither avprobe nor ffprobe were found.')
 
         # Check whether json is supported
         json_support = False if subprocess.call([

@@ -3,12 +3,15 @@
 from __future__ import (division, absolute_import, unicode_literals,
                         print_function)
 
+import logging
 import os
 import re
 import subprocess
 
 import cv2
+import dlib
 import pathlib2
+from pycolorname.pantone.pantonepaint import PantonePaint
 
 from file_metadata._compat import makedirs
 from file_metadata.generic_file import GenericFile
@@ -32,11 +35,6 @@ class ImageFile(GenericFile):
         Find the average RGB color of the image and compare with the existing
         Pantone color system to identify the color name.
         """
-        try:
-            from pycolorname.pantone.pantonepaint import PantonePaint
-        except ImportError:
-            return {}
-
         mean_color = cv2.mean(self.opencv)[:3][::-1]
         # cv2.mean Assumes 4 channels and uses the color format BGR
         closest_label, closest_color = PantonePaint().find_closest(mean_color)
@@ -57,14 +55,15 @@ class ImageFile(GenericFile):
         :param detector_upsample_num_times:
             The number of times to upscale the image by when detecting faces.
         """
-        import dlib
-
         predictor_dat = 'shape_predictor_68_face_landmarks.dat'
         predictor_arch = predictor_dat + '.bz2'
         dat_path = app_dir('user_data_dir', predictor_dat)
         arch_path = app_dir('user_data_dir', predictor_arch)
 
         if with_landmarks and not os.path.exists(dat_path):
+            logging.info('Downloading the landmark data file for facial '
+                         'landmark detection. Due to this the '
+                         'first run may take longer than normal.')
             url = 'http://sourceforge.net/projects/dclib/files/dlib/v18.10/{0}'
             download(url.format(predictor_arch), arch_path)
             bz2_decompress(arch_path, dat_path)
@@ -124,6 +123,9 @@ class ImageFile(GenericFile):
         makedirs(path_data, exist_ok=True)
 
         def download_jar(path, name, ver):
+            logging.info('Downloading the zxing jar file to analyze barcodes. '
+                         'Due to this the first run may take longer '
+                         'than normal.')
             data = {'name': name, 'ver': ver, 'path': path}
             fname = os.path.join(path_data, '{name}-{ver}.jar'.format(**data))
             download('http://central.maven.org/maven2/{path}/{name}/{ver}/'

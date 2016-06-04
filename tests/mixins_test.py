@@ -104,5 +104,4 @@ class FFProbeMixinWithoutBackendsTest(unittest.TestCase):
         self.wav_file.filename = fetch_file('noise.wav')
 
     def test_wav(self, mock_check_output):
-        data = self.wav_file.ffprobe
-        self.assertEqual(data, {})
+        self.assertRaises(OSError, self.wav_file.analyze_ffprobe)

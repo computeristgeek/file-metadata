@@ -7,3 +7,5 @@ pycolorname>=0.1.0
 retry
 pathlib2
 six
+numpy
+dlib
