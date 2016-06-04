@@ -1,7 +1,6 @@
 setuptools
 appdirs
 python-magic
-audioread
 whichcraft
 pycolorname>=0.1.0
 retry
