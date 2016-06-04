@@ -4,12 +4,14 @@ from __future__ import (division, absolute_import, unicode_literals,
                         print_function)
 
 import json
+import logging
 import os
 import subprocess
 
 import magic
 
 from file_metadata.utilities import PropertyCached
+from file_metadata.utilities import app_dir, download, targz_decompress
 
 
 class GenericFile:
@@ -110,7 +112,20 @@ class GenericFile:
 
         :return:      A dictionary containing the exif information.
         """
-        command = ('exiftool', '-G', '-j', os.path.abspath(self.filename))
+        folder = 'Image-ExifTool-10.15'
+        arch = folder + '.tar.gz'
+        arch_path = app_dir('user_data_dir', arch)
+        bin_path = app_dir('user_data_dir', folder, 'exiftool')
+
+        if not os.path.exists(bin_path):
+            logging.info('Downloading `exiftool` to analyze exif data.'
+                         'Hence, the first run may take longer than normal.')
+            url = 'http://www.sno.phy.queensu.ca/~phil/exiftool/' + arch
+            download(url, arch_path)
+            targz_decompress(arch_path, app_dir('user_data_dir'))
+
+        command = ('perl', bin_path, '-G', '-j',
+                   os.path.abspath(self.filename))
         try:
             proc = subprocess.check_output(command)
         except subprocess.CalledProcessError as proc_error:

@@ -11,16 +11,13 @@ import sys
 from setuptools import find_packages, setup
 
 
-# Check if exiftool is installed.
+# Check if perl is installed.
 try:
-    out = subprocess.check_output(['exiftool', '-ver'])
-    if int(out.split(".", 1)[0]) < 8:
-        print('`exiftool` (http://www.sno.phy.queensu.ca/~phil/exiftool/) '
-              'version found was less than 8.0. Please update it.')
+    out = subprocess.check_output(['perl', '-v'])
 except (OSError, subprocess.CalledProcessError):
-    print('`exiftool` (http://www.sno.phy.queensu.ca/~phil/exiftool/) needs '
-          'to be installed and needs to be made available in your PATH. '
-          'On Ubuntu, you can do `sudo apt-get install exiftool`.')
+    print('`perl` (https://www.perl.org/) needs to be installed and needs '
+          'to be made available in your PATH. '
+          'On Ubuntu, you can do `sudo apt-get install perl`.')
     sys.exit(1)
 
 # Check if opencv is installed.

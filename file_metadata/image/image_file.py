@@ -62,7 +62,7 @@ class ImageFile(GenericFile):
 
         if with_landmarks and not os.path.exists(dat_path):
             logging.info('Downloading the landmark data file for facial '
-                         'landmark detection. Due to this the '
+                         'landmark detection. Hence, the '
                          'first run may take longer than normal.')
             url = 'http://sourceforge.net/projects/dclib/files/dlib/v18.10/{0}'
             download(url.format(predictor_arch), arch_path)
@@ -124,7 +124,7 @@ class ImageFile(GenericFile):
 
         def download_jar(path, name, ver):
             logging.info('Downloading the zxing jar file to analyze barcodes. '
-                         'Due to this the first run may take longer '
+                         'Hence, the first run may take longer '
                          'than normal.')
             data = {'name': name, 'ver': ver, 'path': path}
             fname = os.path.join(path_data, '{name}-{ver}.jar'.format(**data))

@@ -10,6 +10,7 @@ from __future__ import (division, absolute_import, unicode_literals,
 import bz2
 import hashlib
 import os
+import tarfile
 import tempfile
 from shutil import copyfileobj
 
@@ -58,15 +59,12 @@ def download(url, filename, overwrite=False, timeout=None):
             copyfileobj(response, out_file)
 
 
-def bz2_decompress(filepath, newfilepath, overwrite=False,
-                   block_size=64 * 1024):
+def bz2_decompress(filepath, newfilepath, block_size=64 * 1024):
     """
     Decompress the given file using a bz2 decompressor.
 
-    :param filepath:    The filepath of the archived file
-    :param newfilepath: The path to decompress the file into..
-    :param overwrite:   Set to True if the file should be decompressed to the
-                        given location even if it already exists.
+    :param filepath:    The filepath of the archived file.
+    :param newfilepath: The path to decompress the file into.
     :param block_size:  The block size to iteratively decompress with.
     """
     with open(newfilepath, 'wb') as new_file:
@@ -74,6 +72,18 @@ def bz2_decompress(filepath, newfilepath, overwrite=False,
         for data in iter(lambda: _file.read(block_size), ''):
             new_file.write(data)
         _file.close()
+
+
+def targz_decompress(filepath, newfilepath):
+    """
+    Decompress the given file using a tar+gz decompressor.
+
+    :param filepath:    The filepath of the archived file.
+    :param newfilepath: The path to decompress the file into.
+    """
+    tar = tarfile.open(filepath, "r:gz")
+    tar.extractall(newfilepath)
+    tar.close()
 
 
 def md5sum(filename, blocksize=64 * 1024):
