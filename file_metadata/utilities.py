@@ -8,6 +8,7 @@ from __future__ import (division, absolute_import, unicode_literals,
                         print_function)
 
 import bz2
+import functools
 import hashlib
 import os
 import tarfile
@@ -158,6 +159,36 @@ def make_temp(suffix="", prefix="tmp", directory=None):
     finally:
         if os.path.exists(name):
             os.remove(name)
+
+
+def memoize(obj):
+    """
+    A decorator to remember the function call and cache the result based on
+    args and kwargs.
+
+    >>> @memoize
+    ... def func(arg1):
+    ...     print('Running with arg', arg1)
+    ...     return arg1
+    ...
+    >>> func(42)
+    Running with arg 42
+    42
+    >>> func(42)
+    42
+    >>> len(func.cache)
+    1
+    """
+    cache = obj.cache = {}
+
+    @functools.wraps(obj)
+    def memoizer(*args, **kwargs):
+        key = str(args) + str(kwargs)
+        if key not in cache:
+            cache[key] = obj(*args, **kwargs)
+        return cache[key]
+
+    return memoizer
 
 
 class PropertyCached(object):
