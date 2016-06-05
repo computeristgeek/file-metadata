@@ -3,7 +3,6 @@
 from __future__ import (division, absolute_import, unicode_literals,
                         print_function)
 
-import numpy
 import pytest
 
 from file_metadata.image.image_file import ImageFile
@@ -18,8 +17,8 @@ class ImageFileTest(unittest.TestCase):
         self.green_png = ImageFile(fetch_file('green.png'))
         self.blue_png = ImageFile(fetch_file('blue.png'))
 
-    def test_opencv_read(self):
-        self.assertEqual(self.ball_png.opencv.shape, (226, 226, 3))
+    def test_ndarray_read(self):
+        self.assertEqual(self.ball_png.fetch('ndarray').shape, (226, 226, 4))
 
     def test_color_average(self):
         data = self.red_png.analyze_color_average()
@@ -50,12 +49,6 @@ class ImageFileFaceLandmarksTest(unittest.TestCase):
         self.mona_lisa = ImageFile(fetch_file('mona_lisa.jpg'))
         self.baby_face = ImageFile(fetch_file('baby_face.jpg'))
         self.monkey_face = ImageFile(fetch_file('monkey_face.jpg'))
-
-        # Ensure that the data file is downloaded for facial landmarks
-        img = ImageFile('a')
-        img.opencv = numpy.ndarray((1, 1, 3))  # Set image as single pixel
-        img.opencv.fill(0)
-        img.analyze_facial_landmarks()  # Downloads the shape data if needed
 
     def test_facial_landmarks_monkey_face(self):
         data = self.monkey_face.analyze_facial_landmarks()

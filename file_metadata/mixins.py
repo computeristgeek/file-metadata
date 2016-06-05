@@ -22,7 +22,7 @@ from file_metadata.utilities import (app_dir, download, tarxz_decompress,
 from file_metadata._compat import ffprobe_parser
 
 
-class FFProbeMixin:
+class FFProbeMixin(object):
 
     @PropertyCached
     def ffprobe(self):

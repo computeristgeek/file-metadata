@@ -7,5 +7,7 @@ retry
 pathlib2
 six
 numpy
+scipy
 dlib
 backports.lzma
+scikit-image

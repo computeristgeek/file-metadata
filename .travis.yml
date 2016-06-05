@@ -5,9 +5,6 @@ sudo: false
 python:
   - 2.7
 
-env:
-  - WITHOUT_DEPS=0
-
 os:
   - linux
 
@@ -53,14 +50,14 @@ before_install:
 
 install:
   - if [[ "$WITHOUT_DEPS" != "1" ]] ; then
-      conda install -c menpo dlib opencv ;
-    fi
-  - if [[ "$WITHOUT_DEPS" != "1" ]] ; then
-      pip install -r requirements.txt -r test-requirements.txt ;
-    fi
-  - if [[ "$BULK_TEST" == "1" && "$WITHOUT_DEPS" != "1" ]] ; then
-      pip install git+https://github.com/wikimedia/pywikibot-core.git ;
-      cp .ci/user-config.py . ;
+      conda install boost scipy ;
+      conda install -c menpo dlib ;
+      pip install -r test-requirements.txt ;
+      pip install setuptools appdirs python-magic whichcraft pycolorname>=0.1.0 retry pathlib2 six numpy scipy backports.lzma scikit-image ;
+      if [[ "$BULK_TEST" == "1" ]] ; then
+        pip install git+https://github.com/wikimedia/pywikibot-core.git ;
+        cp .ci/user-config.py . ;
+      fi ;
     fi
 
 script:

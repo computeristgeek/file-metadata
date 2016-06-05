@@ -8,15 +8,15 @@ import os
 import re
 import subprocess
 
-import cv2
 import dlib
 import pathlib2
+import skimage.io
 from pycolorname.pantone.pantonepaint import PantonePaint
 
 from file_metadata._compat import makedirs
 from file_metadata.generic_file import GenericFile
 from file_metadata.utilities import (app_dir, bz2_decompress, download,
-                                     to_cstr, PropertyCached)
+                                     to_cstr, memoize)
 
 
 class ImageFile(GenericFile):
@@ -26,17 +26,29 @@ class ImageFile(GenericFile):
     def create(cls, *args, **kwargs):
         return cls(*args, **kwargs)
 
-    @PropertyCached
-    def opencv(self):
-        return cv2.imread(self.filename)
+    @memoize
+    def fetch(self, key=''):
+        if key == 'filename_zxing':
+            return pathlib2.Path(self.fetch('filename')).as_uri()
+        elif key == 'ndarray':
+            return skimage.io.imread(self.fetch('filename'))
+        return super(ImageFile, self).fetch(key)
 
     def analyze_color_average(self):
         """
         Find the average RGB color of the image and compare with the existing
         Pantone color system to identify the color name.
         """
-        mean_color = cv2.mean(self.opencv)[:3][::-1]
-        # cv2.mean Assumes 4 channels and uses the color format BGR
+        image_array = self.fetch('ndarray')
+        if len(image_array.shape) == 4:  # Animated images
+            mean_color = image_array.mean(axis=(0, 1, 2))
+        elif len(image_array.shape) == 3:  # Static images
+            mean_color = image_array.mean(axis=(0, 1))
+        elif len(image_array.shape) == 2:  # Greyscale images
+            avg = image_array.mean()
+            mean_color = (avg, avg, avg)
+
+        mean_color = mean_color[:3]  # Remove alpha channel if existent
         closest_label, closest_color = PantonePaint().find_closest(mean_color)
 
         return {
@@ -55,6 +67,12 @@ class ImageFile(GenericFile):
         :param detector_upsample_num_times:
             The number of times to upscale the image by when detecting faces.
         """
+        image_array = self.fetch('ndarray')
+        if image_array.shape == 4:
+            logging.warn('Facial landmarks of animated images cannot be '
+                         'detected yet.')
+            return {}
+
         predictor_dat = 'shape_predictor_68_face_landmarks.dat'
         predictor_arch = predictor_dat + '.bz2'
         dat_path = app_dir('user_data_dir', predictor_dat)
@@ -72,7 +90,7 @@ class ImageFile(GenericFile):
 
         # TODO: Get orientation data from ``orient_id`` and use it.
         faces, scores, orient_id = detector.run(
-            self.opencv,
+            image_array,
             upsample_num_times=detector_upsample_num_times)
 
         if len(faces) == 0:
@@ -93,7 +111,7 @@ class ImageFile(GenericFile):
             # dlib's shape detector uses the ibug dataset to detect shape.
             # More info at: http://ibug.doc.ic.ac.uk/resources/300-W/
             if with_landmarks:
-                shape = predictor(self.opencv, face)
+                shape = predictor(image_array, face)
 
                 def tup(point):
                     return point.x, point.y
@@ -141,7 +159,7 @@ class ImageFile(GenericFile):
         output = subprocess.check_output([
             'java', '-cp', ':'.join([path_core, path_javase, path_jcomm]),
             'com.google.zxing.client.j2se.CommandLineRunner', '--multi',
-            pathlib2.Path(os.path.abspath(self.filename)).as_uri()])
+            self.fetch('filename_zxing')])
 
         if 'No barcode found' in output:
             return {}

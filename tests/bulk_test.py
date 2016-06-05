@@ -146,7 +146,7 @@ class BulkCategoryTest(PyWikiBotTestHelper):
                 'image/jpeg', 'image/png', 'image/gif', 'image/tiff'}:
             # Can read the pixel data of the image ...
 
-            height, width = _file.opencv.shape[:2]
+            height, width = _file.fetch('ndarray').shape[:2]
             if width > height:
                 scale = min(200, width) * 1.0 / width
             else:

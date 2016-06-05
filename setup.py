@@ -21,16 +21,6 @@ except (OSError, subprocess.CalledProcessError):
           'On Ubuntu, you can do `sudo apt-get install perl`.')
     sys.exit(1)
 
-# Check if opencv is installed.
-try:
-    import cv2  # flake8: noqa (unused import)
-except ImportError:
-    print("`OpenCV` (http://opencv.org/) or it's python bindings are not "
-          "installed or not in your python PATH. If using Ubuntu, you can do "
-          "`sudo apt-get install python-opencv` or use `python3-opencv`, "
-          "depending on the python version.")
-    sys.exit(1)
-
 # Check if java is installed.
 try:
     out = subprocess.check_output(['java', '-version'])

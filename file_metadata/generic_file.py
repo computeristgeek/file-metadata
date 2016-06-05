@@ -10,11 +10,11 @@ import subprocess
 
 import magic
 
-from file_metadata.utilities import PropertyCached
+from file_metadata.utilities import memoize, PropertyCached
 from file_metadata.utilities import app_dir, download, targz_decompress
 
 
-class GenericFile:
+class GenericFile(object):
     """
     Object corresponding to a single file. An abstract class that can be
     used for any mimetype/media-type (depending of the file itself). Provides
@@ -33,6 +33,19 @@ class GenericFile:
 
     def __init__(self, fname):
         self.filename = fname
+
+    @memoize
+    def fetch(self, key=''):
+        """
+        Fetch data about the file based on the key provided. Provides a
+        uniform location where all the conversions of filetype, reading, etc.
+        can happen efficiently and also it gets cached as it's memoized.
+
+        :param key: The key decides what data is fetched.
+        """
+        if key == '' or key == 'filename':
+            return os.path.abspath(self.filename)
+        return None
 
     @classmethod
     def create(cls, *args, **kwargs):
@@ -125,7 +138,7 @@ class GenericFile:
             targz_decompress(arch_path, app_dir('user_data_dir'))
 
         command = ('perl', bin_path, '-G', '-j',
-                   os.path.abspath(self.filename))
+                   os.path.abspath(self.fetch('filename')))
         try:
             proc = subprocess.check_output(command)
         except subprocess.CalledProcessError as proc_error:
@@ -146,7 +159,7 @@ class GenericFile:
 
                   - Size of file - The size of the file in bytes.
         """
-        stat_data = os.stat(self.filename)
+        stat_data = os.stat(self.fetch('filename'))
         return {"File:FileSize": str(stat_data.st_size) + " bytes"}
 
     def analyze_mimetype(self):
@@ -165,13 +178,13 @@ class GenericFile:
         """
         if hasattr(magic, "from_file"):
             # Use https://pypi.python.org/pypi/python-magic
-            mime = magic.from_file(self.filename, mime=True)
+            mime = magic.from_file(self.fetch('filename'), mime=True)
         elif hasattr(magic, "open"):
             # Use the python-magic library in distro repos from the `file`
             # command - http://www.darwinsys.com/file/
             magic_instance = magic.open(magic.MAGIC_MIME)
             magic_instance.load()
-            mime = magic_instance.file(self.filename)
+            mime = magic_instance.file(self.fetch('filename'))
         else:
             raise ImportError('The `magic` module that was found is not the '
                               'expected pypi package python-magic '
