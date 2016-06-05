@@ -49,7 +49,7 @@ class GenericFile:
         mime = cls_file.analyze_mimetype()['File:MIMEType']
         _type, subtype = mime.split('/', 1)
 
-        if _type == 'image':
+        if _type == 'image' or mime == 'application/x-xcf':
             from file_metadata.image.image_file import ImageFile
             return ImageFile.create(*args, **kwargs)
         elif _type == 'audio':
