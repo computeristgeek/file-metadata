@@ -22,6 +22,7 @@ addons:
       - libmagickwand-dev
 
 before_install:
+  - export PYTHONIOENCODING=UTF-8
   - export PATH="$HOME/miniconda/bin:$PATH"
   # Download and install conda if necessary
   - if ! ( conda -V && which conda ); then
@@ -50,11 +51,15 @@ before_install:
     fi
 
 install:
+    # For pip, we use an ugly hack so that pip does not try to install
+    # dlib from requirements.txt. The travis environment faces the issues:
+    # - https://github.com/davisking/dlib/issues/127
+    # - https://github.com/davisking/dlib/issues/129
   - if [[ "$WITHOUT_DEPS" != "1" ]] ; then
       conda install boost scipy ;
       conda install -c menpo dlib ;
       pip install -r test-requirements.txt ;
-      pip install setuptools appdirs python-magic whichcraft pycolorname>=0.1.0 retry pathlib2 six numpy scipy backports.lzma scikit-image ;
+      python -c "import pip; list(pip.main(args=['install', pkg]) for pkg in open('requirements.txt').read().strip().splitlines() if pkg != 'dlib')" ;
       if [[ "$BULK_TEST" == "1" ]] ; then
         pip install git+https://github.com/wikimedia/pywikibot-core.git ;
         cp .ci/user-config.py . ;
@@ -68,9 +73,9 @@ script:
     else
       python -m pytest -k "not bulk_test $EXTRA_PYTEST_KEYWORDS" --cov ;
     fi
-  - python setup.py sdist
-  - pip install .
-  - pip uninstall -y file-metadata
+  # - python setup.py sdist
+  # - pip install .
+  # - pip uninstall -y file-metadata
 
 after_script:
   - bash <(curl -s https://codecov.io/bash)
