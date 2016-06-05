@@ -24,6 +24,11 @@ class ImageFile(GenericFile):
 
     @classmethod
     def create(cls, *args, **kwargs):
+        cls_file = cls(*args, **kwargs)
+        mime = cls_file.analyze_mimetype()['File:MIMEType']
+        if mime == 'image/jpeg':
+            from file_metadata.image.jpeg_file import JPEGFile
+            return JPEGFile.create(*args, **kwargs)
         return cls(*args, **kwargs)
 
     @memoize
