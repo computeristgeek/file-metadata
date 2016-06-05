@@ -11,3 +11,4 @@ scipy
 dlib
 backports.lzma
 scikit-image
+wand

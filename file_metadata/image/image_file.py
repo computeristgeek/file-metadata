@@ -26,17 +26,25 @@ class ImageFile(GenericFile):
     def create(cls, *args, **kwargs):
         cls_file = cls(*args, **kwargs)
         mime = cls_file.analyze_mimetype()['File:MIMEType']
+        _type, subtype = mime.split('/', 1)
+
         if mime == 'image/jpeg':
             from file_metadata.image.jpeg_file import JPEGFile
             return JPEGFile.create(*args, **kwargs)
+        elif _type in ('image', 'application') and subtype == 'x-xcf':
+            from file_metadata.image.xcf_file import XCFFile
+            return XCFFile.create(*args, **kwargs)
         return cls(*args, **kwargs)
 
     @memoize
     def fetch(self, key=''):
-        if key == 'filename_zxing':
-            return pathlib2.Path(self.fetch('filename')).as_uri()
+        if key == 'filename_raster':
+            # A raster filename holds the file in a raster graphic format
+            return self.fetch('filename')
+        elif key == 'filename_zxing':
+            return pathlib2.Path(self.fetch('filename_raster')).as_uri()
         elif key == 'ndarray':
-            return skimage.io.imread(self.fetch('filename'))
+            return skimage.io.imread(self.fetch('filename_raster'))
         return super(ImageFile, self).fetch(key)
 
     def analyze_color_average(self):
@@ -45,11 +53,11 @@ class ImageFile(GenericFile):
         Pantone color system to identify the color name.
         """
         image_array = self.fetch('ndarray')
-        if len(image_array.shape) == 4:  # Animated images
+        if image_array.ndim == 4:  # Animated images
             mean_color = image_array.mean(axis=(0, 1, 2))
-        elif len(image_array.shape) == 3:  # Static images
+        elif image_array.ndim == 3:  # Static images
             mean_color = image_array.mean(axis=(0, 1))
-        elif len(image_array.shape) == 2:  # Greyscale images
+        elif image_array.ndim == 2:  # Greyscale images
             avg = image_array.mean()
             mean_color = (avg, avg, avg)
 
@@ -73,10 +81,16 @@ class ImageFile(GenericFile):
             The number of times to upscale the image by when detecting faces.
         """
         image_array = self.fetch('ndarray')
-        if image_array.shape == 4:
+        if len(image_array.shape) == 4:
             logging.warn('Facial landmarks of animated images cannot be '
                          'detected yet.')
             return {}
+
+        if len(image_array.shape) == 3 and image_array.shape[2] == 4:
+            # RGBA is not supported, Hence convert it to RGB
+            image_array = image_array[:, :, :3].copy()
+            # The .copy() is needed because of the dlib `shape` finding issue:
+            # https://github.com/davisking/dlib/issues/128
 
         predictor_dat = 'shape_predictor_68_face_landmarks.dat'
         predictor_arch = predictor_dat + '.bz2'

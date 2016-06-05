@@ -19,6 +19,7 @@ addons:
       - libimage-exiftool-perl
       - libav-tools
       - ffmpeg
+      - libmagickwand-dev
 
 before_install:
   - export PATH="$HOME/miniconda/bin:$PATH"

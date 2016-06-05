@@ -121,7 +121,7 @@ class ImageFileBarcodesTest(unittest.TestCase):
 class ImageFileCreateTest(unittest.TestCase):
 
     def test_create_image_file(self):
-        for fname in ['red.png', 'red.svg', 'example.tiff', 'blank.xcf']:
+        for fname in ['red.png', 'red.svg', 'example.tiff']:
             self.assertTrue(isinstance(
                 ImageFile.create(fetch_file(fname)), ImageFile),
                 'File "{0}" was not of type image'.format(fname))
@@ -132,3 +132,10 @@ class ImageFileCreateTest(unittest.TestCase):
             self.assertTrue(isinstance(
                 ImageFile.create(fetch_file(fname)), JPEGFile),
                 'File "{0}" was not of type jpeg'.format(fname))
+
+    def test_create_xcf_file(self):
+        from file_metadata.image.xcf_file import XCFFile
+        for fname in ['blank.xcf']:
+            self.assertTrue(isinstance(
+                ImageFile.create(fetch_file(fname)), XCFFile),
+                'File "{0}" was not of type xcf'.format(fname))

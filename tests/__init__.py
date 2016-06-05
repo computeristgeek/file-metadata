@@ -64,6 +64,7 @@ file_download_links = {
     'beard_face.jpg': 'https://upload.wikimedia.org/wikipedia/commons/6/61/Oskar_Almgren%2C_Stockholm%2C_Sweden_%285859501260%29_%282%29.jpg',
     'cat_face.jpg': 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c4/Savannah_Cat_portrait.jpg/400px-Savannah_Cat_portrait.jpg',
     'monkey_face.jpg': 'https://upload.wikimedia.org/wikipedia/commons/2/27/Baby_ginger_monkey.jpg',
+    'woman.xcf': 'https://upload.wikimedia.org/wikipedia/commons/a/af/Beatrix_Podolska_pedagog_muzykolog_Krakow_2008.xcf',
 
     # Barcodes / QR Codes / Data matrices
     'qrcode.jpg': 'https://upload.wikimedia.org/wikipedia/commons/5/5b/Qrcode_wikipedia.jpg',
