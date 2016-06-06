@@ -64,7 +64,6 @@ if __name__ == "__main__":
           maintainer="AbdealiJK",
           maintainer_email='abdealikothari@gmail.com',
           url='https://github.com/AbdealiJK/file-metadata',
-          platforms='any',
           packages=find_packages(exclude=["build.*", "tests.*", "tests"]),
           install_requires=required,
           tests_require=test_required,
