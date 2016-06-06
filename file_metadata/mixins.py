@@ -14,6 +14,7 @@ import logging
 import os
 import platform
 import subprocess
+from xml.etree import cElementTree
 
 from whichcraft import which
 
@@ -126,3 +127,30 @@ class FFProbeMixin(object):
 
         data['FFProbe:Streams'] = streams or None
         return data
+
+
+def is_svg(_file):
+    """
+    Check is a given file is SVG or not. A file is considered to be SVG if:
+
+    - Its mimetype is "application/svg+xml" or "image/svg+xml".
+    - Its mimetype is "text/html" or "application/xml" or "text/xml" or
+      "text/plain" and it has the svg tag with xmlns http://www.w3.org/2000/svg
+
+    :param _file: A GenericFile object that should be checked for SVG.
+    :return:      Boolean corresponding to whether the file is SVG.
+    """
+    mime = _file.analyze_mimetype()['File:MIMEType']
+    if mime in ('application/svg+xml', 'image/svg+xml'):
+        return True
+    elif mime in ('application/xml', 'text/xml', 'text/html', 'text/plain'):
+        tag = None
+        with open(_file.fetch('filename'), "r") as f:
+            # cElementTree needs the events as bytes in python2
+            items = cElementTree.iterparse(f, events=(str('start'),))
+            try:
+                _, el = items.next()
+                tag = el.tag
+            except cElementTree.ParseError:
+                return False
+        return tag == '{http://www.w3.org/2000/svg}svg'

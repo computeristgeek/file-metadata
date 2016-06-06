@@ -89,8 +89,9 @@ class GenericFileCreateTest(unittest.TestCase):
 
     def test_create_image_file(self):
         from file_metadata.image.image_file import ImageFile
-        for fname in ['red.png', 'red.svg', 'qrcode.jpg', 'example.tiff',
-                      'blank.xcf']:
+        for fname in ['red.png', 'blank.xcf', 'qrcode.jpg', 'example.tiff',
+                      'text_html.svg', 'text_plain.svg', 'image_svg_xml.svg',
+                      'application_xml.svg']:
             self.assertTrue(isinstance(
                 GenericFile.create(fetch_file(fname)), ImageFile),
                 'File "{0}" was not of type image'.format(fname))

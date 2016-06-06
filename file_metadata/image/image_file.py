@@ -15,6 +15,7 @@ from pycolorname.pantone.pantonepaint import PantonePaint
 
 from file_metadata._compat import makedirs
 from file_metadata.generic_file import GenericFile
+from file_metadata.mixins import is_svg
 from file_metadata.utilities import (app_dir, bz2_decompress, download,
                                      to_cstr, memoize)
 
@@ -34,6 +35,9 @@ class ImageFile(GenericFile):
         elif _type in ('image', 'application') and subtype == 'x-xcf':
             from file_metadata.image.xcf_file import XCFFile
             return XCFFile.create(*args, **kwargs)
+        elif is_svg(cls_file):
+            from file_metadata.image.svg_file import SVGFile
+            return SVGFile.create(*args, **kwargs)
         return cls(*args, **kwargs)
 
     @memoize

@@ -161,7 +161,7 @@ class ImageFileBarcodesTest(unittest.TestCase):
 class ImageFileCreateTest(unittest.TestCase):
 
     def test_create_image_file(self):
-        for fname in ['red.png', 'red.svg', 'example.tiff']:
+        for fname in ['red.png', 'example.tiff']:
             self.assertTrue(isinstance(
                 ImageFile.create(fetch_file(fname)), ImageFile),
                 'File "{0}" was not of type image'.format(fname))
@@ -179,3 +179,11 @@ class ImageFileCreateTest(unittest.TestCase):
             self.assertTrue(isinstance(
                 ImageFile.create(fetch_file(fname)), XCFFile),
                 'File "{0}" was not of type xcf'.format(fname))
+
+    def test_create_svg_file(self):
+        from file_metadata.image.svg_file import SVGFile
+        for fname in ['text_html.svg', 'text_plain.svg', 'image_svg_xml.svg',
+                      'application_xml.svg']:
+            self.assertTrue(isinstance(
+                ImageFile.create(fetch_file(fname)), SVGFile),
+                'File "{0}" was not of type svg'.format(fname))

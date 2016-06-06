@@ -46,10 +46,15 @@ file_download_links = {
     'red.svg': 'https://upload.wikimedia.org/wikipedia/commons/6/62/Pure_Red.svg',
     'green.svg': 'https://upload.wikimedia.org/wikipedia/commons/c/c5/Pure_Green.svg',
     'blue.svg': 'https://upload.wikimedia.org/wikipedia/commons/7/77/Pure_Blue.svg',
-    'animated_smil.svg': 'https://upload.wikimedia.org/wikipedia/commons/7/7c/Bid_Wikimania_Esino_Lario_2016_slides_07_SMIL.svg',
-    'animated.svg': 'https://upload.wikimedia.org/wikipedia/commons/d/de/Animated-runner.svg',
+    'animated.svg': 'https://upload.wikimedia.org/wikipedia/commons/f/fd/Animated_pendulum.svg',
     'animated.gif': 'https://upload.wikimedia.org/wikipedia/commons/d/d7/123_Numbers.gif',
     'animated.png': 'https://upload.wikimedia.org/wikipedia/commons/b/b5/Load.png',
+
+    # SVG files with different mimetypes
+    'image_svg_xml.svg': 'https://upload.wikimedia.org/wikipedia/commons/6/62/Pure_Red.svg',
+    'text_plain.svg': 'https://upload.wikimedia.org/wikipedia/commons/5/57/Color_icon_white.svg',
+    'text_html.svg': 'https://upload.wikimedia.org/wikipedia/commons/f/fd/Animated_pendulum.svg',
+    'application_xml.svg': 'https://upload.wikimedia.org/wikipedia/commons/0/0b/Sieve_of_Eratosthenes_animation.svg',
 
     # Images with special exifdata:
     'canon_face.jpg': 'https://upload.wikimedia.org/wikipedia/commons/7/7b/Annagrah-2_041.JPG',
@@ -117,7 +122,7 @@ def fetch_file(name, overwrite=False):
     elif name in file_download_links:
         download(file_download_links[name], filepath)
     else:
-        raise ValueError('Asked to fetch unknown file.')
+        raise ValueError('Asked to fetch unknown file {0}.'.format(name))
 
     return filepath
 

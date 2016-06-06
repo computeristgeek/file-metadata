@@ -10,8 +10,9 @@ import subprocess
 
 import magic
 
-from file_metadata.utilities import memoize, PropertyCached
-from file_metadata.utilities import app_dir, download, targz_decompress
+from file_metadata.mixins import is_svg
+from file_metadata.utilities import (memoize, PropertyCached, app_dir,
+                                     download, targz_decompress)
 
 
 class GenericFile(object):
@@ -62,7 +63,8 @@ class GenericFile(object):
         mime = cls_file.analyze_mimetype()['File:MIMEType']
         _type, subtype = mime.split('/', 1)
 
-        if _type == 'image' or mime == 'application/x-xcf':
+        if (_type == 'image' or mime == 'application/x-xcf' or
+                is_svg(cls_file)):
             from file_metadata.image.image_file import ImageFile
             return ImageFile.create(*args, **kwargs)
         elif _type == 'audio':

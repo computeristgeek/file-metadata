@@ -7,7 +7,8 @@ import platform
 
 from whichcraft import which
 
-from file_metadata.mixins import FFProbeMixin
+from file_metadata.generic_file import GenericFile
+from file_metadata.mixins import is_svg, FFProbeMixin
 from tests import fetch_file, mock, unittest
 
 
@@ -119,3 +120,30 @@ class FFProbeMixinWithoutBackendsTest(unittest.TestCase):
 
     def test_wav(self, mock_check_output, mock_system=None):
         self.assertRaises(OSError, self.wav_file.analyze_ffprobe)
+
+
+class IsSvgTest(unittest.TestCase):
+
+    def test_is_svg_application_xml(self):
+        _file = GenericFile(fetch_file('application_xml.svg'))
+        self.assertTrue(is_svg(_file))
+
+    def test_is_svg_image_svg_xml(self):
+        _file = GenericFile(fetch_file('image_svg_xml.svg'))
+        self.assertTrue(is_svg(_file))
+
+    def test_is_svg_text_plain(self):
+        _file = GenericFile(fetch_file('text_plain.svg'))
+        self.assertTrue(is_svg(_file))
+
+    def test_is_svg_text_html(self):
+        _file = GenericFile(fetch_file('text_html.svg'))
+        self.assertTrue(is_svg(_file))
+
+    def test_is_svg_binary(self):
+        _file = GenericFile(fetch_file('file.bin'))
+        self.assertFalse(is_svg(_file))
+
+    def test_is_svg_png(self):
+        _file = GenericFile(fetch_file('red.png'))
+        self.assertFalse(is_svg(_file))
