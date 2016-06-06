@@ -3,6 +3,7 @@
 from __future__ import (division, absolute_import, unicode_literals,
                         print_function)
 
+import numpy
 import pytest
 
 from file_metadata.image.image_file import ImageFile
@@ -13,31 +14,60 @@ class ImageFileTest(unittest.TestCase):
 
     def setUp(self):
         self.ball_png = ImageFile(fetch_file('ball.png'))
-        self.red_png = ImageFile(fetch_file('red.png'))
-        self.green_png = ImageFile(fetch_file('green.png'))
-        self.blue_png = ImageFile(fetch_file('blue.png'))
 
     def test_ndarray_read(self):
         self.assertEqual(self.ball_png.fetch('ndarray').shape, (226, 226, 4))
 
-    def test_color_average(self):
-        data = self.red_png.analyze_color_average()
+
+class ImageFileColorAverageTest(unittest.TestCase):
+
+    def test_color_average_rgb_image(self):
+        data = ImageFile(fetch_file('red.png')).analyze_color_average()
         self.assertEqual(data['Color:AverageRGB'], (255, 0, 0))
         self.assertEqual(data['Color:ClosestLabeledColor'],
                          'PMS 17-1462 TPX (Flame)')
         self.assertEqual(data['Color:ClosestLabeledColorRGB'], (244, 81, 44))
 
-        data = self.green_png.analyze_color_average()
+        data = ImageFile(fetch_file('green.png')).analyze_color_average()
         self.assertEqual(data['Color:AverageRGB'], (0, 255, 0))
         self.assertEqual(data['Color:ClosestLabeledColor'],
                          'PMS 15-0545 TPX (Jasmine Green)')
         self.assertEqual(data['Color:ClosestLabeledColorRGB'], (129, 204, 69))
 
-        data = self.blue_png.analyze_color_average()
+        data = ImageFile(fetch_file('blue.png')).analyze_color_average()
         self.assertEqual(data['Color:AverageRGB'], (0, 0, 255))
         self.assertEqual(data['Color:ClosestLabeledColor'],
                          'PMS 18-3949 TPX (Dazzling blue)')
         self.assertEqual(data['Color:ClosestLabeledColorRGB'], (46, 77, 167))
+
+    def test_color_average_rgba_image(self):
+        data = ImageFile(fetch_file('ball.png')).analyze_color_average()
+        self.assertEqual(data['Color:AverageRGB'], (113.705, 113.705, 113.705))
+        self.assertEqual(data['Color:ClosestLabeledColor'],
+                         'PMS 18-5102 TPX (Brushed Nickel)')
+        self.assertEqual(data['Color:ClosestLabeledColorRGB'], (122, 118, 117))
+
+    def test_color_average_greyscale_image(self):
+        data = ImageFile(fetch_file('barcode.png')).analyze_color_average()
+        self.assertEqual(data['Color:AverageRGB'], (170.579, 170.579, 170.579))
+        self.assertEqual(data['Color:ClosestLabeledColor'],
+                         'PMS 15-4306 TPX (Belgian Block)')
+        self.assertEqual(data['Color:ClosestLabeledColorRGB'], (167, 173, 170))
+
+    def test_color_average_animated_image(self):
+        data = ImageFile(fetch_file('animated.gif')).analyze_color_average()
+        self.assertEqual(data['Color:AverageRGB'], (227.326, 224.414, 224.414))
+        self.assertEqual(data['Color:ClosestLabeledColor'],
+                         'PMS 13-4108 TPX (Nimbus Cloud)')
+        self.assertEqual(data['Color:ClosestLabeledColorRGB'], (223, 223, 227))
+
+    def test_color_average_unknown_format(self):
+        _file = ImageFile(fetch_file('red.png'))
+        _file.fetch('filename')
+        _file.fetch.cache.update({
+            str((_file, 'ndarray')) + str({}): numpy.ndarray([1])})
+        data = _file.analyze_color_average()
+        self.assertEqual(data, {})
 
 
 # Increase the timeout as the first time it will need to download the
@@ -45,17 +75,14 @@ class ImageFileTest(unittest.TestCase):
 @pytest.mark.timeout(300)
 class ImageFileFaceLandmarksTest(unittest.TestCase):
 
-    def setUp(self):
-        self.mona_lisa = ImageFile(fetch_file('mona_lisa.jpg'))
-        self.baby_face = ImageFile(fetch_file('baby_face.jpg'))
-        self.monkey_face = ImageFile(fetch_file('monkey_face.jpg'))
-
     def test_facial_landmarks_monkey_face(self):
-        data = self.monkey_face.analyze_facial_landmarks()
+        _file = ImageFile(fetch_file('monkey_face.jpg'))
+        data = _file.analyze_facial_landmarks()
         self.assertEqual(data, {})
 
     def test_facial_landmarks_mona_lisa(self):
-        data = self.mona_lisa.analyze_facial_landmarks(with_landmarks=True)
+        _file = ImageFile(fetch_file('mona_lisa.jpg'))
+        data = _file.analyze_facial_landmarks(with_landmarks=True)
         self.assertIn('dlib:Faces', data)
         self.assertEqual(len(data['dlib:Faces']), 1)
         face = data['dlib:Faces'][0]
@@ -66,9 +93,22 @@ class ImageFileFaceLandmarksTest(unittest.TestCase):
         self.assertEqual(face['mouth'], (321, 338))
 
     def test_facial_landmarks_baby_face(self):
-        data = self.baby_face.analyze_facial_landmarks()
+        _file = ImageFile(fetch_file('baby_face.jpg'))
+        data = _file.analyze_facial_landmarks(with_landmarks=False)
         self.assertIn('dlib:Faces', data)
         self.assertEqual(len(data['dlib:Faces']), 1)
+
+        face = data['dlib:Faces'][0]
+        self.assertNotIn('left_eye', face)
+        self.assertNotIn('right_eye', face)
+        self.assertNotIn('nose', face)
+        self.assertNotIn('mouth', face)
+        self.assertIn('position', face)
+
+    def test_facial_landmarks_animated_image(self):
+        _file = ImageFile(fetch_file('animated.gif'))
+        data = _file.analyze_facial_landmarks()
+        self.assertEqual(data, {})
 
 
 class ImageFileBarcodesTest(unittest.TestCase):

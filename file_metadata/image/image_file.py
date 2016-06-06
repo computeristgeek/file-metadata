@@ -60,6 +60,13 @@ class ImageFile(GenericFile):
         elif image_array.ndim == 2:  # Greyscale images
             avg = image_array.mean()
             mean_color = (avg, avg, avg)
+        else:
+            logging.warn('Unsupported image type in "analyze_color_average()".'
+                         ' Expected animated images, greyscale, rgb, or rgba '
+                         'images, but found an image with {0} dimensions and '
+                         'shape {1}.'
+                         .format(image_array.ndim, image_array.shape))
+            return {}
 
         mean_color = mean_color[:3]  # Remove alpha channel if existent
         closest_label, closest_color = PantonePaint().find_closest(mean_color)
