@@ -47,11 +47,13 @@ if platform.system() != 'Linux':
         sys.exit(1)
 
 
-# Make a list of required packages
 required = open('requirements.txt').read().strip().splitlines()
-
 test_required = open('test-requirements.txt').read().strip().splitlines()
 VERSION = open(os.path.join('file_metadata', 'VERSION')).read().strip()
+
+if sys.version_info >= (3,):
+    # mock is not required for python 3
+    test_required.remove('mock')
 
 if __name__ == "__main__":
     setup(name='file-metadata',
