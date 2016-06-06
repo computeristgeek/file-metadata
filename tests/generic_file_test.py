@@ -89,22 +89,42 @@ class GenericFileCreateTest(unittest.TestCase):
 
     def test_create_image_file(self):
         from file_metadata.image.image_file import ImageFile
-        for fname in ['red.png', 'blank.xcf', 'qrcode.jpg', 'example.tiff',
-                      'text_html.svg', 'text_plain.svg', 'image_svg_xml.svg',
-                      'application_xml.svg']:
+        for fname in ['red.png', 'example.tiff']:
             self.assertTrue(isinstance(
                 GenericFile.create(fetch_file(fname)), ImageFile),
-                'File "{0}" was not of type image'.format(fname))
+                'File "{0}" was not of type {1}'.format(fname, ImageFile))
+
+    def test_create_jpeg_file(self):
+        from file_metadata.image.jpeg_file import JPEGFile
+        for fname in ['qrcode.jpg', 'barcode_cmyk.jpg']:
+            self.assertTrue(isinstance(
+                GenericFile.create(fetch_file(fname)), JPEGFile),
+                'File "{0}" was not of type {1}'.format(fname, JPEGFile))
+
+    def test_create_xcf_file(self):
+        from file_metadata.image.xcf_file import XCFFile
+        for fname in ['blank.xcf']:
+            self.assertTrue(isinstance(
+                GenericFile.create(fetch_file(fname)), XCFFile),
+                'File "{0}" was not of type {1}'.format(fname, XCFFile))
+
+    def test_create_svg_file(self):
+        from file_metadata.image.svg_file import SVGFile
+        for fname in ['text_html.svg', 'text_plain.svg', 'image_svg_xml.svg',
+                      'application_xml.svg']:
+            self.assertTrue(isinstance(
+                GenericFile.create(fetch_file(fname)), SVGFile),
+                'File "{0}" was not of type {1}'.format(fname, SVGFile))
 
     def test_create_audio_file(self):
         from file_metadata.audio.audio_file import AudioFile
         for fname in ['drums.mid', 'bell.flac', 'bell.wav']:
             self.assertTrue(isinstance(
                 GenericFile.create(fetch_file(fname)), AudioFile),
-                'File "{0}" was not of type audio'.format(fname))
+                'File "{0}" was not of type {1}'.format(fname, AudioFile))
 
     def test_create_generic_file(self):
         for fname in ['image.pdf', 'text.pdf']:
             self.assertTrue(isinstance(
                 GenericFile.create(fetch_file(fname)), GenericFile),
-                'File "{0}" was not of type generic'.format(fname))
+                'File "{0}" was not of type {1}'.format(fname, GenericFile))

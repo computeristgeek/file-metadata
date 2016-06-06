@@ -156,34 +156,3 @@ class ImageFileBarcodesTest(unittest.TestCase):
                          '2LUS94941+67000000')
         self.assertEqual(data['zxing:Barcodes'][1]['format'], 'ITF')
         self.assertEqual(data['zxing:Barcodes'][1]['data'], '054804124097')
-
-
-class ImageFileCreateTest(unittest.TestCase):
-
-    def test_create_image_file(self):
-        for fname in ['red.png', 'example.tiff']:
-            self.assertTrue(isinstance(
-                ImageFile.create(fetch_file(fname)), ImageFile),
-                'File "{0}" was not of type image'.format(fname))
-
-    def test_create_jpeg_file(self):
-        from file_metadata.image.jpeg_file import JPEGFile
-        for fname in ['qrcode.jpg', 'barcode_cmyk.jpg']:
-            self.assertTrue(isinstance(
-                ImageFile.create(fetch_file(fname)), JPEGFile),
-                'File "{0}" was not of type jpeg'.format(fname))
-
-    def test_create_xcf_file(self):
-        from file_metadata.image.xcf_file import XCFFile
-        for fname in ['blank.xcf']:
-            self.assertTrue(isinstance(
-                ImageFile.create(fetch_file(fname)), XCFFile),
-                'File "{0}" was not of type xcf'.format(fname))
-
-    def test_create_svg_file(self):
-        from file_metadata.image.svg_file import SVGFile
-        for fname in ['text_html.svg', 'text_plain.svg', 'image_svg_xml.svg',
-                      'application_xml.svg']:
-            self.assertTrue(isinstance(
-                ImageFile.create(fetch_file(fname)), SVGFile),
-                'File "{0}" was not of type svg'.format(fname))

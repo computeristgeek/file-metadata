@@ -50,12 +50,3 @@ class XCFFileFaceLandmarksTest(unittest.TestCase):
         # self.assertEqual(face['right_eye'], (411, 292))
         # self.assertEqual(face['nose'], (359, 400))
         # self.assertEqual(face['mouth'], (356, 447))
-
-
-class XCFFileCreateTest(unittest.TestCase):
-
-    def test_create_xcf_file(self):
-        for fname in ['blank.xcf']:
-            self.assertTrue(isinstance(
-                XCFFile.create(fetch_file(fname)), XCFFile),
-                'File "{0}" was not of type xcf'.format(fname))

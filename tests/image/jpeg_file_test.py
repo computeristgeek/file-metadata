@@ -31,12 +31,3 @@ class JPEGFileBarcodesTest(unittest.TestCase):
         self.assertNotIn('zxing:Barcodes', data)
         # Although no barcode is detected, this test is to ensure that the
         # "Unsupported File Format" error doesn't occur for CMYK files.
-
-
-class JPEGFileCreateTest(unittest.TestCase):
-
-    def test_create_jpeg_file(self):
-        for fname in ['qrcode.jpg', 'barcode_cmyk.jpg']:
-            self.assertTrue(isinstance(
-                JPEGFile.create(fetch_file(fname)), JPEGFile),
-                'File "{0}" was not of type jpeg'.format(fname))

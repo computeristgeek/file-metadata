@@ -24,13 +24,3 @@ class SVGFileTest(unittest.TestCase):
     def test_fetch_svg_ndarray_text_plain(self):
         _file = SVGFile(fetch_file('text_plain.svg'))
         self.assertEqual(_file.fetch('ndarray').shape, (300, 300, 3))
-
-
-class SVGFileCreateTest(unittest.TestCase):
-
-    def test_create_svg_file(self):
-        for fname in ['text_html.svg', 'text_plain.svg', 'image_svg_xml.svg',
-                      'application_xml.svg']:
-            self.assertTrue(isinstance(
-                SVGFile.create(fetch_file(fname)), SVGFile),
-                'File "{0}" was not of type svg'.format(fname))
