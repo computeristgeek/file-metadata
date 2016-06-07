@@ -70,9 +70,9 @@ script:
     else
       python -m pytest -k "not bulk_test $EXTRA_PYTEST_KEYWORDS" --cov ;
     fi
-  # - python setup.py sdist
-  # - pip install .
-  # - pip uninstall -y file-metadata
+  - python setup.py sdist bdist bdist_wheel
+  - pip install .
+  - pip uninstall -y file-metadata
 
 after_script:
   - bash <(curl -s https://codecov.io/bash)
