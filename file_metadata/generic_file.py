@@ -9,6 +9,7 @@ import os
 import subprocess
 
 import magic
+from whichcraft import which
 
 from file_metadata.mixins import is_svg
 from file_metadata.utilities import (memoize, PropertyCached, app_dir,
@@ -127,20 +128,27 @@ class GenericFile(object):
 
         :return:      A dictionary containing the exif information.
         """
-        folder = 'Image-ExifTool-10.15'
-        arch = folder + '.tar.gz'
-        arch_path = app_dir('user_data_dir', arch)
-        bin_path = app_dir('user_data_dir', folder, 'exiftool')
+        if which('perl') is not None:
+            folder = 'Image-ExifTool-10.15'
+            arch = folder + '.tar.gz'
+            arch_path = app_dir('user_data_dir', arch)
+            bin_path = app_dir('user_data_dir', folder, 'exiftool')
 
-        if not os.path.exists(bin_path):
-            logging.info('Downloading `exiftool` to analyze exif data.'
-                         'Hence, the first run may take longer than normal.')
-            url = 'http://www.sno.phy.queensu.ca/~phil/exiftool/' + arch
-            download(url, arch_path)
-            targz_decompress(arch_path, app_dir('user_data_dir'))
+            if not os.path.exists(bin_path):
+                logging.info('Downloading `exiftool` to analyze exif data. '
+                             'Hence, the first run may take longer than '
+                             'normal.')
+                url = 'http://www.sno.phy.queensu.ca/~phil/exiftool/' + arch
+                download(url, arch_path)
+                targz_decompress(arch_path, app_dir('user_data_dir'))
+            executable = ('perl', bin_path)
+        elif which('exiftool') is not None:
+            executable = ('exiftool',)
+        else:
+            raise OSError('Neither perl nor exiftool were found.')
 
-        command = ('perl', bin_path, '-G', '-j',
-                   os.path.abspath(self.fetch('filename')))
+        command = executable + ('-G', '-j',
+                                os.path.abspath(self.fetch('filename')))
         try:
             proc = subprocess.check_output(command)
         except subprocess.CalledProcessError as proc_error:
