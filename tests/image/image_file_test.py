@@ -101,26 +101,22 @@ class ImageFileFaceLandmarksTest(unittest.TestCase):
 
 class ImageFileBarcodesTest(unittest.TestCase):
 
-    def setUp(self):
-        self.mona_lisa = ImageFile(fetch_file('mona_lisa.jpg'))
-        self.multibarcodes = ImageFile(fetch_file('multibarcodes.png'))
-        self.barcode = ImageFile(fetch_file('barcode.png'))
-        self.qrcode = ImageFile(fetch_file('qrcode.jpg'))
-        self.dmtx = ImageFile(fetch_file('datamatrix.png'))
-
     def test_mona_lisa(self):
-        data = self.mona_lisa.analyze_barcode()
+        _file = ImageFile(fetch_file('mona_lisa.jpg'))
+        data = _file.analyze_barcode()
         self.assertEqual(data, {})
 
     def test_barcode(self):
-        data = self.barcode.analyze_barcode()
+        _file = ImageFile(fetch_file('barcode.png'))
+        data = _file.analyze_barcode()
         self.assertIn('zxing:Barcodes', data)
         self.assertEqual(len(data['zxing:Barcodes']), 1)
         self.assertEqual(data['zxing:Barcodes'][0]['format'], 'CODABAR')
         self.assertEqual(data['zxing:Barcodes'][0]['data'], '137255')
 
     def test_qrcode(self):
-        data = self.qrcode.analyze_barcode()
+        _file = ImageFile(fetch_file('qrcode.jpg'))
+        data = _file.analyze_barcode()
         self.assertIn('zxing:Barcodes', data)
         self.assertEqual(len(data['zxing:Barcodes']), 1)
         self.assertEqual(data['zxing:Barcodes'][0]['format'], 'QR_CODE')
@@ -128,7 +124,8 @@ class ImageFileBarcodesTest(unittest.TestCase):
                          'http://www.wikipedia.com')
 
     def test_dmtx(self):
-        data = self.dmtx.analyze_barcode()
+        _file = ImageFile(fetch_file('datamatrix.png'))
+        data = _file.analyze_barcode()
         self.assertIn('zxing:Barcodes', data)
         self.assertEqual(len(data['zxing:Barcodes']), 1)
         self.assertEqual(data['zxing:Barcodes'][0]['format'], 'DATA_MATRIX')
@@ -136,7 +133,8 @@ class ImageFileBarcodesTest(unittest.TestCase):
                          'Wikipedia, the free encyclopedia')
 
     def test_multiple_barcodes(self):
-        data = self.multibarcodes.analyze_barcode()
+        _file = ImageFile(fetch_file('multibarcodes.png'))
+        data = _file.analyze_barcode()
         self.assertIn('zxing:Barcodes', data)
         self.assertEqual(len(data['zxing:Barcodes']), 2)
         self.assertEqual(data['zxing:Barcodes'][0]['format'], 'CODE_128')
