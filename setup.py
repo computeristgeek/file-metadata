@@ -12,39 +12,50 @@ import sys
 from setuptools import find_packages, setup
 
 
-# Check if perl is installed.
-try:
-    out = subprocess.check_output(['perl', '-v'])
-except (OSError, subprocess.CalledProcessError):
-    print('`perl` (https://www.perl.org/) needs to be installed and needs '
-          'to be made available in your PATH. '
-          'On Ubuntu, you can do `sudo apt-get install perl`.')
-    sys.exit(1)
-
-# Check if java is installed.
-try:
-    out = subprocess.check_output(['java', '-version'])
-except (OSError, subprocess.CalledProcessError):
-    print('`java` (https://java.com/) needs to be installed and needs to '
-          'be made available in your PATH. If using Ubuntu, you can do '
-          '`sudo apt-get install openjdk-7-jre`')
-    sys.exit(1)
-
-# Check if avprobe of ffprobe is installed if system is not Linux.
-# If it's linux, we use static builds from http://johnvansickle.com/libav/
-if platform.system() != 'Linux':
+with open(os.devnull, 'w') as nul:
+    # Check if exiftool or perl is installed.
     try:
-        out = subprocess.check_output(['ffprobe', '-version'])
+        out = subprocess.check_call(['perl', '-v'], stdout=nul, stderr=nul)
     except (OSError, subprocess.CalledProcessError):
         try:
-            out = subprocess.check_output(['avprobe', '-version'])
+            out = subprocess.check_call(['exiftool', '-ver'], stdout=nul,
+                                        stderr=nul)
         except (OSError, subprocess.CalledProcessError):
-            print('Neither `ffprobe` (https://ffmpeg.org/ffprobe.html) nor '
-                  '`avprobe` (https://libav.org/documentation/avprobe.html) '
-                  'were found. Either one of them needs to be installed and '
-                  'made available in your PATH. If using Ubuntu, you can do '
-                  '`sudo apt-get install libav-tools` to install avprobe.')
+            print('`perl` (https://www.perl.org/) or `exiftool` '
+                  '(http://www.sno.phy.queensu.ca/~phil/exiftool/) '
+                  'need to be installed and made available in your PATH. '
+                  'On Ubuntu, you can install perl with '
+                  '`sudo apt-get install perl` or install exiftool with '
+                  '`sudo apt-get install exiftool`.')
+            sys.exit(1)
+
+    # Check if java is installed.
+    try:
+        out = subprocess.check_call(['java', '-version'], stdout=nul,
+                                    stderr=nul)
+    except (OSError, subprocess.CalledProcessError):
+        print('`java` (https://java.com/) needs to be installed and needs to '
+              'be made available in your PATH. If using Ubuntu, you can do '
+              '`sudo apt-get install openjdk-7-jre`')
         sys.exit(1)
+
+    # Check if avprobe of ffprobe is installed if system is not Linux.
+    # If it's linux, we use static builds from http://johnvansickle.com/libav/
+    if platform.system() != 'Linux':
+        try:
+            out = subprocess.check_call(['ffprobe', '-version'], stdout=nul,
+                                        stderr=nul)
+        except (OSError, subprocess.CalledProcessError):
+            try:
+                out = subprocess.check_output(['avprobe', '-version'],
+                                              stdout=nul, stderr=nul)
+            except (OSError, subprocess.CalledProcessError):
+                print('`ffprobe` (https://ffmpeg.org/ffprobe.html) or '
+                      '`avprobe` (http://libav.org/documentation/avprobe.html)'
+                      'need to be installed and made available in your PATH. '
+                      'If using Ubuntu, you can install avprobe with '
+                      '`sudo apt-get install libav-tools`.')
+            sys.exit(1)
 
 
 def read_reqs(reqs_filename):
