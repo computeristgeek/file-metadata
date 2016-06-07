@@ -47,8 +47,12 @@ if platform.system() != 'Linux':
         sys.exit(1)
 
 
-required = open('requirements.txt').read().strip().splitlines()
-test_required = open('test-requirements.txt').read().strip().splitlines()
+def read_reqs(reqs_filename):
+    reqs = open(reqs_filename).read().strip().splitlines()
+    return list(i for i in reqs if not (i.startswith('#') or len(i) == 0))
+
+required = read_reqs('requirements.txt')
+test_required = read_reqs('test-requirements.txt')
 VERSION = open(os.path.join('file_metadata', 'VERSION')).read().strip()
 
 if sys.version_info >= (3,):
