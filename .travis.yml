@@ -51,15 +51,12 @@ before_install:
     fi
 
 install:
-    # For pip, we use an ugly hack so that pip does not try to install
-    # dlib from requirements.txt. The travis environment faces the issues:
-    # - https://github.com/davisking/dlib/issues/127
-    # - https://github.com/davisking/dlib/issues/129
+    # Install dlib from git (with pip) as there was an issue with libjpeg
+    # Which was solved and not yet released.
   - if [[ "$WITHOUT_DEPS" != "1" ]] ; then
       conda install boost scipy ;
-      conda install -c menpo dlib ;
-      pip install -r test-requirements.txt ;
-      python -c "import pip; list(pip.main(args=['install', pkg]) for pkg in open('requirements.txt').read().strip().splitlines() if pkg != 'dlib')" ;
+      pip install git+https://github.com/davisking/dlib.git@02f6da285149a61bc58728d9c5e77932151118b5
+      pip install -r test-requirements.txt -r requirements.txt;
       if [[ "$BULK_TEST" == "1" ]] ; then
         pip install git+https://github.com/wikimedia/pywikibot-core.git ;
         cp .ci/user-config.py . ;
