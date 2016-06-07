@@ -28,18 +28,6 @@ class ImageFileColorAverageTest(unittest.TestCase):
                          'PMS 17-1462 TPX (Flame)')
         self.assertEqual(data['Color:ClosestLabeledColorRGB'], (244, 81, 44))
 
-        data = ImageFile(fetch_file('green.png')).analyze_color_average()
-        self.assertEqual(data['Color:AverageRGB'], (0, 255, 0))
-        self.assertEqual(data['Color:ClosestLabeledColor'],
-                         'PMS 15-0545 TPX (Jasmine Green)')
-        self.assertEqual(data['Color:ClosestLabeledColorRGB'], (129, 204, 69))
-
-        data = ImageFile(fetch_file('blue.png')).analyze_color_average()
-        self.assertEqual(data['Color:AverageRGB'], (0, 0, 255))
-        self.assertEqual(data['Color:ClosestLabeledColor'],
-                         'PMS 18-3949 TPX (Dazzling blue)')
-        self.assertEqual(data['Color:ClosestLabeledColorRGB'], (46, 77, 167))
-
     def test_color_average_rgba_image(self):
         data = ImageFile(fetch_file('ball.png')).analyze_color_average()
         self.assertEqual(data['Color:AverageRGB'], (113.705, 113.705, 113.705))
