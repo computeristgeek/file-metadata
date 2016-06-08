@@ -7,21 +7,19 @@ metadata that can be used from it.
 Installation
 ============
 
-The easiest way to install the library is using ``pip``. To install the
-latest stable version run::
+Before installing file-metadata, a few dependencies need to be
+installed. For Ubuntu, these can be installed with::
+
+    $ sudo apt-get install perl openjdk-7-jre python-dev pkg-config libfreetype6-dev libpng12-dev liblapack-dev libblas-dev gfortran cmake libboost-python-dev liblzma-dev
+
+Next, use ``pip`` to install the library. To install the latest stable
+version, use::
 
     $ pip install file-metadata
 
-To get nightly builds from the master branch of the github repo, use::
+To get development builds from the master branch of the github repo, use::
 
     $ pip install --pre file-metadata
-
-Note that there are 3 dependencies which need to be manually installed:
-
--  `exiftool <http://www.sno.phy.queensu.ca/~phil/exiftool/>`__
--  `opencv <http://opencv.org/>`__ - v2.x is supported, although v3.x should
-   also work.
--  `java <https://java.com/en/>`__
 
 Usage
 =====
