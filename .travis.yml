@@ -47,7 +47,7 @@ before_install:
 
   # If the branch is "bulk" run bulk tests. This is a special case.
   - if [[ "$TRAVIS_BRANCH" == "bulk" && "$TRAVIS_PYTHON_VERSION" == "2.7" ]] ; then
-      export BULK_TEST=true ;
+      export BULK_TEST=1 ;
     fi
 
 install:
@@ -56,7 +56,7 @@ install:
   - if [[ "$WITHOUT_DEPS" != "1" ]] ; then
       conda install boost scipy ;
       pip install git+https://github.com/davisking/dlib.git@02f6da285149a61bc58728d9c5e77932151118b5#egg=dlib ;
-      pip install -r test-requirements.txt -r requirements.txt;
+      pip install -r test-requirements.txt -r requirements.txt ;
       if [[ "$BULK_TEST" == "1" ]] ; then
         pip install git+https://github.com/wikimedia/pywikibot-core.git ;
         cp .ci/user-config.py . ;
