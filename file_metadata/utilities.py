@@ -219,6 +219,7 @@ def memoized(func=None, is_method=False, hashable=True, cache=None):
     """
     def _args_kwargs_memoized(func, hashable=True, cache=None):
         cache = cache if cache is not None else {}
+
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
             if hashable:
@@ -232,9 +233,9 @@ def memoized(func=None, is_method=False, hashable=True, cache=None):
                 return value
         return wrapper
 
-
     def _args_memoized(func, hashable=True, cache=None):
         cache = cache if cache is not None else {}
+
         @functools.wraps(func)
         def wrapper(*args):
             key = args if hashable else dumps(args, -1)
@@ -247,6 +248,7 @@ def memoized(func=None, is_method=False, hashable=True, cache=None):
 
     def _one_arg_memoized(func, cache=None):
         cache = cache if cache is not None else {}
+
         @functools.wraps(func)
         def wrapper(arg):
             key = arg
@@ -261,27 +263,27 @@ def memoized(func=None, is_method=False, hashable=True, cache=None):
         """
         A fast memoize function when there is only 1 argument.
         """
-        class memodict(dict):
+        class MemoDict(dict):
             def __missing__(self, key):
                 self[key] = ret = func(key)
                 return ret
 
-        return memodict().__getitem__
+        return MemoDict().__getitem__
 
     def _fast_zero_arg_memoized(func):
         """
         Use a fast memoize function which works when there are no arguments.
         """
-        class memodict(dict):
+        class MemoDict(dict):
             def __missing__(self, key):
                 self[key] = ret = func()
                 return ret
 
-        return functools.partial(memodict().__getitem__, None)
+        return functools.partial(MemoDict().__getitem__, None)
 
     if func is None:
         return functools.partial(memoized, is_method=is_method,
-            hashable=hashable, cache=cache)
+                                 hashable=hashable, cache=cache)
 
     spec = inspect.getargspec(func)
     allow_named = bool(spec.defaults)
@@ -290,7 +292,7 @@ def memoized(func=None, is_method=False, hashable=True, cache=None):
 
     nargs = len(spec.args)
     if (nargs > 1 or spec.varargs or spec.defaults or not hashable or
-        nargs == 0 and cache is not None):
+            nargs == 0 and cache is not None):
         return _args_memoized(func, hashable, cache)
 
     if nargs == 1:

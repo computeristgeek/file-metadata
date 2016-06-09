@@ -239,52 +239,52 @@ class BulkCategoryTest(PyWikiBotTestHelper):
 
         dump_log(log, logname=title, header="\n".join(summary))
 
-    def test_mimetype_png_files(self):
+    def test_png_files(self):
         self._test_category('PNG files')
 
-    def test_mimetype_svg_files(self):
+    def test_svg_files(self):
         self._test_category('SVG files')
 
-    def test_mimetype_jpeg_files(self):
+    def test_jpeg_files(self):
         self._test_category('JPEG files')
 
-    def test_mimetype_gif_files(self):
+    def test_gif_files(self):
         self._test_category('GIF files')
 
-    def test_mimetype_tiff_files(self):
+    def test_tiff_files(self):
         self._test_category('TIFF files')
 
-    def test_mimetype_ogv_videos(self):
+    def test_ogv_videos(self):
         self._test_category('Ogv videos')
 
-    def test_mimetype_animated_gif_files(self):
+    def test_animated_gif_files(self):
         self._test_category('Animated GIF files')
 
-    def test_mimetype_animated_png(self):
+    def test_animated_png(self):
         self._test_category('Animated PNG')
 
-    def test_mimetype_animated_svg(self):
+    def test_animated_svg(self):
         self._test_category('Animated SVG')
 
-    def test_mimetype_audio(self):
+    def test_flac_files(self):
         self._test_category('FLAC files')
 
-    def test_mimetype_wav_files(self):
+    def test_wav_files(self):
         self._test_category('WAV files')
 
-    def test_mimetype_ogg_sound_files(self):
+    def test_ogg_sound_files(self):
         self._test_category('Ogg sound files')
 
-    def test_mimetype_midi_files(self):
+    def test_midi_files(self):
         self._test_category('MIDI files')
 
-    def test_mimetype_djvu_files(self):
+    def test_djvu_files(self):
         self._test_category('DjVu files')
 
-    def test_mimetype_xcf_files(self):
+    def test_xcf_files(self):
         self._test_category('XCF files')
 
-    def test_mimetype_pdf_files(self):
+    def test_pdf_files(self):
         self._test_category('PDF files')
 
     def test_barcode(self):

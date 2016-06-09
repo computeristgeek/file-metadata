@@ -232,9 +232,13 @@ class MemoizedTest(unittest.TestCase):
                              "1, [2], {'foo': 3}, 4, z={5,6}", deco)
 
     def test_method(self):
+        incr_calls = self.incr_calls
+
         class X(object):
 
-            def arg0(_self): self.incr_calls()
+            def arg0(self):
+                incr_calls()
+
             bad_mf0 = memoized()(arg0)
             good_mf0 = memoized(is_method=True)(arg0)
 
