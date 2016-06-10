@@ -90,7 +90,8 @@ class PyWikiBotTestHelper(unittest.TestCase):
     @retry((ssl.SSLError, URLError), tries=5)
     def download_page(page, fname=None):
         url = page.fileUrl()
-        fname = fname or page.title(as_filename=True)
+        fname = fname or page.title(as_filename=True).encode('ascii',
+                                                             'replace')
         fpath = os.path.join(CACHE_DIR, fname)
         download(url, fpath)
         return fpath
