@@ -11,11 +11,13 @@ from tests import fetch_file, unittest
 
 class ImageFileTest(unittest.TestCase):
 
-    def setUp(self):
-        self.ball_png = ImageFile(fetch_file('ball.png'))
-
     def test_ndarray_read(self):
-        self.assertEqual(self.ball_png.fetch('ndarray').shape, (226, 226, 4))
+        _file = ImageFile(fetch_file('ball.png'))
+        self.assertEqual(_file.fetch('ndarray').shape, (226, 226, 4))
+
+    def test_huge_ndarray(self):
+        _file = ImageFile(fetch_file('huge.png'))
+        self.assertEqual(_file.fetch('ndarray').shape, (0,))
 
 
 class ImageFileColorAverageTest(unittest.TestCase):

@@ -32,9 +32,15 @@ class GenericFile(object):
         based on the official standard by IANA.
     """
     mimetypes = ()
+    NO_CONFIG = object()
 
-    def __init__(self, fname):
+    def __init__(self, fname, **kwargs):
         self.filename = fname
+        self.options = kwargs
+
+    def config(self, key):
+        defaults = {}
+        return self.options.get(key, defaults[key])
 
     @memoized(is_method=True)
     def fetch(self, key=''):

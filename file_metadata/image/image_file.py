@@ -7,10 +7,13 @@ import logging
 import os
 import re
 import subprocess
+import warnings
 
 import dlib
+import numpy
 import pathlib2
 import skimage.io
+from PIL import Image
 from pycolorname.pantone.pantonepaint import PantonePaint
 
 from file_metadata._compat import makedirs
@@ -19,9 +22,23 @@ from file_metadata.mixins import is_svg
 from file_metadata.utilities import (app_dir, bz2_decompress, download,
                                      to_cstr, memoized)
 
+# A Decompression Bomb is a small compressed image file which when decompressed
+# uses a uge amount of RAM. For example, a monochrome PNG file with 100kx100k
+# pixels. This tells PIL to make this warning into an error.
+warnings.simplefilter('error', Image.DecompressionBombWarning)
+
 
 class ImageFile(GenericFile):
     mimetypes = ()
+
+    def config(self, key):
+        defaults = {
+            "max_decompressed_size": int(1024 ** 3 / 4 / 3)  # In bytes
+        }
+        option = self.options.get(key, defaults.get(key, self.NO_CONFIG))
+        if option is self.NO_CONFIG:
+            return super(ImageFile, self).config(key)
+        return option
 
     @classmethod
     def create(cls, *args, **kwargs):
@@ -48,7 +65,17 @@ class ImageFile(GenericFile):
         elif key == 'filename_zxing':
             return pathlib2.Path(self.fetch('filename_raster')).as_uri()
         elif key == 'ndarray':
-            return skimage.io.imread(self.fetch('filename_raster'))
+            Image.MAX_IMAGE_PIXELS = self.config('max_decompressed_size')
+            try:
+                return skimage.io.imread(self.fetch('filename_raster'))
+            except Image.DecompressionBombWarning:
+                logging.warn('The file "{0}" contains a lot of pixels and '
+                             'can take a lot of memory when decompressed. '
+                             'To allow larger images, modify the '
+                             '"max_decompressed_size" config.'
+                             .format(self.fetch('filename')))
+                # Use empty array as the file cannot be read.
+                return numpy.ndarray(0)
         return super(ImageFile, self).fetch(key)
 
     def analyze_color_average(self):
@@ -65,11 +92,11 @@ class ImageFile(GenericFile):
             avg = image_array.mean()
             mean_color = (avg, avg, avg)
         else:
-            logging.warn('Unsupported image type in "analyze_color_average()".'
-                         ' Expected animated images, greyscale, rgb, or rgba '
-                         'images, but found an image with {0} dimensions and '
-                         'shape {1}.'
-                         .format(image_array.ndim, image_array.shape))
+            msg = ('Unsupported image type in "analyze_color_average()". '
+                   'Expected animated, greyscale, rgb, or rgba images. '
+                   'Found an image with {0} dimensions and shape {1}. '
+                   .format(image_array.ndim, image_array.shape))
+            logging.warn(msg)
             return {}
 
         mean_color = mean_color[:3]  # Remove alpha channel if existent

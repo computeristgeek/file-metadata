@@ -78,6 +78,8 @@ file_download_links = {
     'multibarcodes.png': 'https://upload.wikimedia.org/wikipedia/commons/9/98/DHL_Online-Frankierung_-_Paket_bis_5_kg_-_D-USA.png',
     'barcode_cmyk.jpg': 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/17-barcodes-1-e_ces_2012_01.jpg/524px-17-barcodes-1-e_ces_2012_01.jpg',
 
+    'huge.png': 'https://upload.wikimedia.org/wikipedia/commons/3/31/Grand_paris_express.png',
+
     'blank.xcf': 'https://upload.wikimedia.org/wikipedia/commons/e/e2/Blank_file.xcf',
     'example.tiff': 'https://upload.wikimedia.org/wikipedia/commons/b/b0/Dabigatran_binding_pockets.tiff',
     'text.pdf': 'https://upload.wikimedia.org/wikipedia/commons/a/a7/Life_of_Future.pdf',
