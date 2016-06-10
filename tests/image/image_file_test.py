@@ -135,3 +135,7 @@ class ImageFileBarcodesTest(unittest.TestCase):
                          '2LUS94941+67000000')
         self.assertEqual(data['zxing:Barcodes'][1]['format'], 'ITF')
         self.assertEqual(data['zxing:Barcodes'][1]['data'], '054804124097')
+
+    def test_small_files(self):
+        _file = ImageFile(fetch_file('static.gif'))
+        self.assertEqual(_file.analyze_barcode(), {})

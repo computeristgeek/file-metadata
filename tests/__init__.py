@@ -49,6 +49,7 @@ file_download_links = {
     'animated.svg': 'https://upload.wikimedia.org/wikipedia/commons/f/fd/Animated_pendulum.svg',
     'animated.gif': 'https://upload.wikimedia.org/wikipedia/commons/d/d7/123_Numbers.gif',
     'animated.png': 'https://upload.wikimedia.org/wikipedia/commons/b/b5/Load.png',
+    'static.gif': 'https://upload.wikimedia.org/wikipedia/commons/e/ed/Pix.gif',
 
     # SVG files with different mimetypes
     'image_svg_xml.svg': 'https://upload.wikimedia.org/wikipedia/commons/6/62/Pure_Red.svg',

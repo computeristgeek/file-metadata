@@ -193,6 +193,11 @@ class ImageFile(GenericFile):
         Use ``zxing`` tot find barcodes, qr codes, data matrices, etc.
         from the image.
         """
+        if all(map(lambda x: x < 4, self.fetch('ndarray').shape)):
+            # If the file is less than 4 pixels, it won't contain a barcode.
+            # Small files cause zxing to crash so, we just return empty.
+            return {}
+
         # Make directory for data
         path_data = app_dir('user_data_dir', 'zxing')
         makedirs(path_data, exist_ok=True)
