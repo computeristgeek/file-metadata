@@ -88,12 +88,12 @@ class PyWikiBotTestHelper(unittest.TestCase):
 
     @staticmethod
     @retry((ssl.SSLError, URLError), tries=5)
-    def download_page(page, fname=None):
+    def download_page(page, fname=None, timeout=None):
         url = page.fileUrl()
         fname = fname or page.title(as_filename=True).encode('ascii',
                                                              'replace')
         fpath = os.path.join(CACHE_DIR, fname)
-        download(url, fpath)
+        download(url, fpath, timeout=timeout)
         return fpath
 
     def factory(self, args, fname=None):
@@ -117,7 +117,12 @@ class PyWikiBotTestHelper(unittest.TestCase):
                                                         groupsize=50)
             for page in pregen:
                 if page.exists() and not page.isRedirectPage():
-                    page_path = self.download_page(page, fname=fname)
+                    try:
+                        page_path = self.download_page(page, fname=fname,
+                                                       timeout=15 * 60)
+                    except URLError:
+                        # URLError is raised if the download timesout.
+                        continue
                     yield page, page_path
                     if is_travis():
                         os.remove(page_path)
