@@ -10,10 +10,16 @@ from __future__ import (division, absolute_import, unicode_literals,
 import bz2
 import functools
 import hashlib
+import inspect
 import os
 import tarfile
 import tempfile
 from shutil import copyfileobj
+
+try:
+    from cPickle import dumps
+except ImportError:
+    from pickle import dumps
 
 try:
     import lzma
@@ -161,91 +167,6 @@ def make_temp(suffix="", prefix="tmp", directory=None):
             os.remove(name)
 
 
-def memoize(obj):
-    """
-    A decorator to remember the function call and cache the result based on
-    args and kwargs.
-
-    >>> @memoize
-    ... def func(arg1):
-    ...     print('Running with arg', arg1)
-    ...     return arg1
-    ...
-    >>> func(42)
-    Running with arg 42
-    42
-    >>> func(42)
-    42
-    >>> len(func.cache)
-    1
-    """
-    cache = obj.cache = {}
-
-    @functools.wraps(obj)
-    def memoizer(*args, **kwargs):
-        key = str(args) + str(kwargs)
-        if key not in cache:
-            cache[key] = obj(*args, **kwargs)
-        return cache[key]
-
-    return memoizer
-
-
-class PropertyCached(object):
-    """
-    A decorator than is similar to the ``property`` decorator but saves
-    the return value into the property when called the first time.
-
-    Makes properties that simply have a hidden variable much simpler to
-    handle. For example:
-
-    >>> class OldMethod:
-    ...     @property
-    ...     def answer(self):
-    ...         if not hasattr(self, '_answer'):
-    ...             print("Computing the answer ...")
-    ...             self._answer = 42
-    ...         return self._answer
-    ...
-    >>> old = OldMethod()
-    >>> old.answer
-    Computing the answer ...
-    42
-    >>> old.answer
-    42
-
-    Can now be changed to
-
-    >>> class NewMethod:
-    ...     @PropertyCached
-    ...     def answer(self):
-    ...         print("Computing the answer ...")
-    ...         return 42
-    ...
-    >>> new = NewMethod()
-    >>> new.answer
-    Computing the answer ...
-    42
-    >>> new.answer
-    42
-
-    To delete the cached value, simply do:
-
-    >>> del new.__dict__['answer']
-    >>> new.answer
-    Computing the answer ...
-    42
-    """
-
-    def __init__(self, wrapped_function):
-        self.wrapped_function = wrapped_function
-
-    def __get__(self, instance, _type=None):
-        retval = self.wrapped_function(instance)
-        instance.__dict__[self.wrapped_function.__name__] = retval
-        return retval
-
-
 class DictNoNone(dict):
     """
     Create a dict but don't set the item if a value is ``None``.
@@ -274,3 +195,108 @@ def app_dir(dirtype, *args):
         return None
     path = os.path.abspath(getattr(appdirs, dirtype)('file-metadata'))
     return os.path.join(makedirs(path, exist_ok=True), *args)
+
+
+def memoized(func=None, is_method=False, hashable=True, cache=None):
+    """
+    A generic efficient memoized decorator.
+
+    :param func:
+        If not None it decorates the given callable ``func``, otherwise it
+        returns a decorator. Basically a convenience for creating a
+        decorator with the default parameters as ``@memoized`` instead
+        of ``@memoized()``.
+    :param is_method:
+        Specify whether the decorated function is going to be a class method.
+        Currently this is only used as a hint for returning an efficient
+        implementation for single argument functions (but not methods).
+    :param hashable:
+        Set to False if any parameter may be non-hashable.
+    :param cache:
+        A dict-like instance to be used as the underlying storage for
+        the memoized values. The cache instance must implement ``__getitem__``
+        and ``__setitem__``. Defaults to a new empty dict.
+    """
+    def _args_kwargs_memoized(func, hashable=True, cache=None):
+        cache = cache if cache is not None else {}
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            if hashable:
+                key = (args, frozenset(kwargs.iteritems()))
+            else:
+                key = dumps((args, kwargs), -1)
+            try:
+                return cache[key]
+            except KeyError:
+                cache[key] = value = func(*args, **kwargs)
+                return value
+        return wrapper
+
+
+    def _args_memoized(func, hashable=True, cache=None):
+        cache = cache if cache is not None else {}
+        @functools.wraps(func)
+        def wrapper(*args):
+            key = args if hashable else dumps(args, -1)
+            try:
+                return cache[key]
+            except KeyError:
+                cache[key] = value = func(*args)
+                return value
+        return wrapper
+
+    def _one_arg_memoized(func, cache=None):
+        cache = cache if cache is not None else {}
+        @functools.wraps(func)
+        def wrapper(arg):
+            key = arg
+            try:
+                return cache[key]
+            except KeyError:
+                cache[key] = value = func(arg)
+                return value
+        return wrapper
+
+    def _fast_one_arg_memoized(func):
+        """
+        A fast memoize function when there is only 1 argument.
+        """
+        class memodict(dict):
+            def __missing__(self, key):
+                self[key] = ret = func(key)
+                return ret
+
+        return memodict().__getitem__
+
+    def _fast_zero_arg_memoized(func):
+        """
+        Use a fast memoize function which works when there are no arguments.
+        """
+        class memodict(dict):
+            def __missing__(self, key):
+                self[key] = ret = func()
+                return ret
+
+        return functools.partial(memodict().__getitem__, None)
+
+    if func is None:
+        return functools.partial(memoized, is_method=is_method,
+            hashable=hashable, cache=cache)
+
+    spec = inspect.getargspec(func)
+    allow_named = bool(spec.defaults)
+    if allow_named or spec.keywords:
+        return _args_kwargs_memoized(func, hashable, cache)
+
+    nargs = len(spec.args)
+    if (nargs > 1 or spec.varargs or spec.defaults or not hashable or
+        nargs == 0 and cache is not None):
+        return _args_memoized(func, hashable, cache)
+
+    if nargs == 1:
+        if is_method or cache is not None:
+            return _one_arg_memoized(func, cache)
+        else:
+            return _fast_one_arg_memoized(func)
+
+    return _fast_zero_arg_memoized(func)

@@ -25,9 +25,9 @@ class DerivedFileTest(unittest.TestCase):
     def setUp(self):
         self.uut = DerivedFile(fetch_file('ascii.txt'))
 
-    def test_metadata(self):
-        self.assertEqual(self.uut.metadata, {'test1': 'test1',
-                                             'test2': 'test2'})
+    def test_analyze(self):
+        self.assertEqual(self.uut.analyze(), {'test1': 'test1',
+                                              'test2': 'test2'})
 
 
 class GenericFileTest(unittest.TestCase):
@@ -76,7 +76,7 @@ class GenericFileTest(unittest.TestCase):
         # The `exiftool` property should have all the info, but the
         # analyze method should not.
         self.assertNotIn('ExifTool:Error', data)
-        self.assertIn('ExifTool:Error', self.binary_file.exiftool)
+        self.assertIn('ExifTool:Error', self.binary_file.exiftool())
 
         data = self.text_file.analyze_exiftool()
         self.assertEqual(data['File:FileSize'], '98 bytes')

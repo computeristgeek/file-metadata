@@ -9,7 +9,7 @@ import tempfile
 import wand.image
 
 from file_metadata.image.image_file import ImageFile
-from file_metadata.utilities import memoize
+from file_metadata.utilities import memoized
 
 
 class XCFFile(ImageFile):
@@ -18,7 +18,7 @@ class XCFFile(ImageFile):
     def create(cls, *args, **kwargs):
         return cls(*args, **kwargs)
 
-    @memoize
+    @memoized(is_method=True)
     def fetch(self, key=''):
         if key == 'filename_raster':
             # XCF files are not raste graphics, hence we convert it to one

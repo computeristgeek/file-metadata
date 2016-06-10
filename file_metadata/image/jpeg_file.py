@@ -10,7 +10,7 @@ import pathlib2
 import skimage.io
 
 from file_metadata.image.image_file import ImageFile
-from file_metadata.utilities import memoize
+from file_metadata.utilities import memoized
 
 
 class JPEGFile(ImageFile):
@@ -19,10 +19,10 @@ class JPEGFile(ImageFile):
     def create(cls, *args, **kwargs):
         return cls(*args, **kwargs)
 
-    @memoize
+    @memoized(is_method=True)
     def fetch(self, key=''):
         if key == 'filename_zxing':
-            exif = self.exiftool
+            exif = self.analyze_exiftool()
             if (exif.get('ICC_Profile:ColorSpaceData', None) == 'CMYK' or
                     exif.get('XMP:ColorMode', None) == 'CMYK'):
                 # ZXing cannot handle CMYK encoded JPEG images. Write the RGB

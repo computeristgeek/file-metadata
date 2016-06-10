@@ -49,14 +49,6 @@ class ImageFileColorAverageTest(unittest.TestCase):
                          'PMS 13-4108 TPX (Nimbus Cloud)')
         self.assertEqual(data['Color:ClosestLabeledColorRGB'], (223, 223, 227))
 
-    def test_color_average_unknown_format(self):
-        _file = ImageFile(fetch_file('red.png'))
-        _file.fetch('filename')
-        _file.fetch.cache.update({
-            str((_file, 'ndarray')) + str({}): numpy.ndarray([1])})
-        data = _file.analyze_color_average()
-        self.assertEqual(data, {})
-
 
 # Increase the timeout as the first time it will need to download the
 # shape predictor data ~60MB

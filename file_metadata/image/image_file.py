@@ -17,7 +17,7 @@ from file_metadata._compat import makedirs
 from file_metadata.generic_file import GenericFile
 from file_metadata.mixins import is_svg
 from file_metadata.utilities import (app_dir, bz2_decompress, download,
-                                     to_cstr, memoize)
+                                     to_cstr, memoized)
 
 
 class ImageFile(GenericFile):
@@ -40,7 +40,7 @@ class ImageFile(GenericFile):
             return SVGFile.create(*args, **kwargs)
         return cls(*args, **kwargs)
 
-    @memoize
+    @memoized(is_method=True)
     def fetch(self, key=''):
         if key == 'filename_raster':
             # A raster filename holds the file in a raster graphic format

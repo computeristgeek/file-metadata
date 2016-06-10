@@ -19,13 +19,13 @@ from xml.etree import cElementTree
 from whichcraft import which
 
 from file_metadata.utilities import (app_dir, download, tarxz_decompress,
-                                     DictNoNone, PropertyCached)
+                                     DictNoNone, memoized)
 from file_metadata._compat import ffprobe_parser
 
 
 class FFProbeMixin(object):
 
-    @PropertyCached
+    @memoized(is_method=True)
     def ffprobe(self):
         """
         Read multimedia streams and give information about it using the
@@ -87,11 +87,11 @@ class FFProbeMixin(object):
 
         :return: dict containing all the data from ``ffprobe``.
         """
-        if not self.ffprobe:
+        if not self.ffprobe():
             return {}
 
         def fmt(key):
-            return self.ffprobe['format'].get(key, None)
+            return self.ffprobe()['format'].get(key, None)
 
         data = DictNoNone({
             'FFProbe:Format': fmt('format_name'),
@@ -99,7 +99,7 @@ class FFProbeMixin(object):
             'FFProbe:NumStreams': int(fmt('nb_streams'))})
 
         streams = []
-        for stream in self.ffprobe['streams']:
+        for stream in self.ffprobe()['streams']:
             def strm(key, default=None):
                 return stream.get(key, default)
 

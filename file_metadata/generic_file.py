@@ -12,7 +12,7 @@ import magic
 from whichcraft import which
 
 from file_metadata.mixins import is_svg
-from file_metadata.utilities import (memoize, PropertyCached, app_dir,
+from file_metadata.utilities import (memoized, app_dir,
                                      download, targz_decompress)
 
 
@@ -36,7 +36,7 @@ class GenericFile(object):
     def __init__(self, fname):
         self.filename = fname
 
-    @memoize
+    @memoized(is_method=True)
     def fetch(self, key=''):
         """
         Fetch data about the file based on the key provided. Provides a
@@ -97,17 +97,7 @@ class GenericFile(object):
                 data.update(getattr(self, method)())
         return data
 
-    @PropertyCached
-    def metadata(self):
-        """
-        A python dictionary of all the metadata identified by analyzing
-        the given file. This property is read-only and cannot be modified.
-
-        :return: All the metadata found about the given file.
-        """
-        return self.analyze()
-
-    @PropertyCached
+    @memoized(is_method=True)
     def exiftool(self):
         """
         The exif data from the given file using ``exiftool``. The data it
@@ -215,5 +205,5 @@ class GenericFile(object):
             'SourceFile', 'ExifTool:ExifToolVersion', 'ExifTool:Error',
             'ExifTool:Warning' 'File:FileName', 'File:Directory',
             'File:MIMEType'))
-        return dict((key, val) for key, val in self.exiftool.items()
+        return dict((key, val) for key, val in self.exiftool().items()
                     if key not in ignored_keys)
