@@ -82,6 +82,14 @@ class ImageFile(GenericFile):
         """
         Find the average RGB color of the image and compare with the existing
         Pantone color system to identify the color name.
+
+        :return: dict with the keys:
+
+             - Color:ClosestLabeledColorRGB - The closest RGB value of the
+                color found in the Pantone color palette.
+             - Color:ClosestLabeledColorRGB - The name of the closest color
+                found in the Pantone color palette.
+             - Color:AverageRGB - The average RGB value of the image.
         """
         image_array = self.fetch('ndarray')
         if image_array.ndim == 4:  # Animated images
@@ -115,8 +123,25 @@ class ImageFile(GenericFile):
 
         Note: It works only for frontal faces, not for profile faces, etc.
 
+        :param with_landmarks:
+            Whether to detect the facial landmarks or not. This also computes
+            the location of the other facial features like the nose, mouth,
+            and eyes.
         :param detector_upsample_num_times:
             The number of times to upscale the image by when detecting faces.
+        :return: dict with the keys:
+
+             - dlib:Faces - A dictionary with information about the face:
+                - position - Dict with corner information having the keys
+                    left, right, top, bottom.
+                - score - A score given on the probability of the given
+                    feture being a face.
+                If the kwarg `with_landmarks` is provided, it also gives the
+                following information:
+                - nose - Location of the center of the nose.
+                - left eye - Location of the center of the left eye.
+                - right eye - Location of the center of the right eye.
+                - mouth - Location of the center of the mouth.
         """
         image_array = self.fetch('ndarray')
         if len(image_array.shape) == 4:
@@ -192,6 +217,17 @@ class ImageFile(GenericFile):
         """
         Use ``zxing`` tot find barcodes, qr codes, data matrices, etc.
         from the image.
+
+        :return: dict with the keys:
+
+             - zxing:Barcodes - An array containing information about barcodes.
+                Each barcode is encoded to a dictionary with the keys:
+                - format - The format of the barcode. Example: QR_CODE,
+                    CODABAR, DATA_MATRIX, etc.
+                - data - The text data that is encdoded in the barcode.
+                - bounding box - A dictionary with left, width, top, height.
+                - points - The detection points of the barcode (4 points for
+                    QR codes and Data matrices and 2 points for barcodes).
         """
         if all(map(lambda x: x < 4, self.fetch('ndarray').shape)):
             # If the file is less than 4 pixels, it won't contain a barcode.

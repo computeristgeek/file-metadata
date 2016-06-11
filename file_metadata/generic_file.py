@@ -163,7 +163,7 @@ class GenericFile(object):
 
         :return: dict with the keys:
 
-                  - Size of file - The size of the file in bytes.
+                  - File:FileSize - The size of the file in bytes.
         """
         stat_data = os.stat(self.fetch('filename'))
         return {"File:FileSize": str(stat_data.st_size) + " bytes"}
@@ -180,7 +180,7 @@ class GenericFile(object):
 
         :return: dict with the keys:
 
-                 - MIME type - The IANA mimetype string for this file.
+                 - File:MIMEType - The IANA mimetype string for this file.
         """
         if hasattr(magic, "from_file"):
             # Use https://pypi.python.org/pypi/python-magic
@@ -203,7 +203,8 @@ class GenericFile(object):
         """
         Use ``exiftool`` and return metadata from it.
 
-        :return: dict containing all the data from ``exiftool``.
+        :return: dict containing all the data from ``exiftool``. It also
+                 uses the groups given by exiftool.
         """
         # We remove unimportant data as this is an analysis routine for the
         # file. The method `exiftool` continues to have all the data.
