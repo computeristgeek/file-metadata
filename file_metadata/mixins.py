@@ -74,7 +74,7 @@ class FFProbeMixin(object):
         try:
             proc = subprocess.check_output(command)
         except subprocess.CalledProcessError as proc_error:
-            output = proc_error.output.decode('utf-8')
+            return {}
         else:
             output = proc.decode('utf-8')
 
