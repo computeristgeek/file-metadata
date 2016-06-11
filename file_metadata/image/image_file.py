@@ -242,7 +242,21 @@ class ImageFile(GenericFile):
                                lines[6 + i])
                 point = float(pt.group(1)), float(pt.group(2))
                 points.append(point)
+
+            bbox = {}
+            if num_pts == 2:  # left, right
+                l, r = [(int(i), int(j)) for (i, j) in points]
+                bbox = {"left": l[0], "top": l[1],
+                        "width": r[0] - l[0] + 1, "height": r[1] - l[1] + 1}
+            elif num_pts == 4:  # bottomLeft, topLeft, topRight, bottomRight
+                lb, lt, rt, rb = [(int(i), int(j)) for (i, j) in points]
+                bbox = {"left": min(lb[0], lt[0]),
+                        "top": min(lt[1], rt[1]),
+                        "width": max(rb[0] - lb[0], rt[0] - lt[0]),
+                        "height": max(rb[1] - rt[1], lb[1] - lt[1])}
+
             barcodes.append({'format': _format, 'points': points,
-                             'raw_data': raw_result, 'data': parsed_result})
+                             'raw_data': raw_result, 'data': parsed_result,
+                             'bounding box': bbox})
 
         return {'zxing:Barcodes': barcodes}

@@ -106,6 +106,8 @@ class ImageFileBarcodesTest(unittest.TestCase):
         self.assertEqual(len(data['zxing:Barcodes']), 1)
         self.assertEqual(data['zxing:Barcodes'][0]['format'], 'CODABAR')
         self.assertEqual(data['zxing:Barcodes'][0]['data'], '137255')
+        self.assertEqual(data['zxing:Barcodes'][0]['bounding box'],
+                         {'width': 100, 'top': 29, 'height': 1, 'left': 4})
 
     def test_qrcode(self):
         _file = ImageFile(fetch_file('qrcode.jpg'))
@@ -115,6 +117,8 @@ class ImageFileBarcodesTest(unittest.TestCase):
         self.assertEqual(data['zxing:Barcodes'][0]['format'], 'QR_CODE')
         self.assertEqual(data['zxing:Barcodes'][0]['data'],
                          'http://www.wikipedia.com')
+        self.assertEqual(data['zxing:Barcodes'][0]['bounding box'],
+                         {'width': 264, 'top': 52, 'height': 264, 'left': 50})
 
     def test_dmtx(self):
         _file = ImageFile(fetch_file('datamatrix.png'))
