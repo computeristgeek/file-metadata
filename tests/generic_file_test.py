@@ -71,17 +71,17 @@ class GenericFileTest(unittest.TestCase):
         self.assertRaises(ImportError, self.text_file.analyze_mimetype)
 
     def test_exiftool(self):
-        data = self.binary_file.analyze_exiftool()
+        data = self.binary_file.analyze_exifdata()
         self.assertTrue(data['File:FileSize'], '256 bytes')
         # The `exiftool` property should have all the info, but the
         # analyze method should not.
         self.assertNotIn('ExifTool:Error', data)
         self.assertIn('ExifTool:Error', self.binary_file.exiftool())
 
-        data = self.text_file.analyze_exiftool()
+        data = self.text_file.analyze_exifdata()
         self.assertEqual(data['File:FileSize'], '98 bytes')
 
-        data = self.wav_file.analyze_exiftool()
+        data = self.wav_file.analyze_exifdata()
         self.assertEqual(data['File:FileSize'], '86 kB')
 
 

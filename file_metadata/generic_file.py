@@ -199,7 +199,7 @@ class GenericFile(object):
                               'package.')
         return {"File:MIMEType": mime}
 
-    def analyze_exiftool(self, ignored_keys=()):
+    def analyze_exifdata(self, ignored_keys=()):
         """
         Use ``exiftool`` and return metadata from it.
 

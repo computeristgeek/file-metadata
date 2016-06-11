@@ -147,7 +147,7 @@ class BulkCategoryTest(PyWikiBotTestHelper):
         stats['mime'] = mime
         txt.append("* '''Mime Type''': " + mime)
         if mime == 'application/ogg':
-            _type = _file.analyze_exiftool().get('File:FileType', 'ERROR')
+            _type = _file.analyze_exifdata().get('File:FileType', 'ERROR')
             txt.append("* '''File type''': " + _type)
 
         if isinstance(_file, ImageFile) and mime in {
