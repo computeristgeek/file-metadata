@@ -117,6 +117,13 @@ class DictNoNoneTest(unittest.TestCase):
         data['b'] = None
         self.assertEqual(data, {'a': 1})
 
+    def test_existing_key(self):
+        data = DictNoNone()
+        data['a'] = 1
+        self.assertEqual(data, {'a': 1})
+        data['a'] = None
+        self.assertEqual(data, {})
+
 
 class AppDirTest(unittest.TestCase):
 

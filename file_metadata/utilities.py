@@ -186,11 +186,13 @@ class DictNoNone(dict):
         dict.__init__(self, *args, **kwargs)
         for key, val in self.items():
             if val is None:
-                del self[key]
+                dict.__delitem__(self, key)
 
     def __setitem__(self, key, value):
-        if key in self or value is not None:
+        if value is not None:
             dict.__setitem__(self, key, value)
+        elif key in self and value is None:
+            dict.__delitem__(self, key)
 
 
 def app_dir(dirtype, *args):
