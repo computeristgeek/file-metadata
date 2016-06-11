@@ -27,6 +27,7 @@ except ImportError:
     from backports import lzma
 
 import appdirs
+import six
 from six.moves.urllib.request import urlopen
 
 from file_metadata._compat import makedirs
@@ -36,7 +37,7 @@ from contextlib import contextmanager
 PROJECT_PATH = os.path.abspath(os.path.dirname(__file__))
 
 
-def to_cstr(value):
+def to_cstr(value, encoding='utf-8'):
     """
     Convert a python string into a C style string. Meant for packages which
     expect C strings like boost.python and other python bindings on C
@@ -46,8 +47,17 @@ def to_cstr(value):
 
     >>> to_cstr(u'a')
     'a'
+    >>> to_cstr('a')
+    'a'
+    >>> to_cstr(to_cstr(u"啊"))  # Doesn't raise an error
+    '\\xe5\\x95\\x8a'
     """
-    return value.encode('utf-8')
+    if ((six.PY2 and isinstance(value, unicode)) or
+            (six.PY3 and isinstance(value, str))):
+        return value.encode(encoding)
+    elif ((six.PY2 and isinstance(value, str)) or
+            (six.PY3 and isinstance(value, bytes))):
+        return value
 
 
 def download(url, filename, overwrite=False, timeout=None):
