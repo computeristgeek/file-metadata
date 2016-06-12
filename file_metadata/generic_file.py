@@ -71,7 +71,7 @@ class GenericFile(object):
         _type, subtype = mime.split('/', 1)
 
         if (_type == 'image' or mime == 'application/x-xcf' or
-                is_svg(cls_file)):
+                cls_file.is_type('svg')):
             from file_metadata.image.image_file import ImageFile
             return ImageFile.create(*args, **kwargs)
         elif _type == 'audio':
@@ -156,6 +156,15 @@ class GenericFile(object):
 
         assert len(data) == 1
         return data[0]
+
+    @memoized(is_method=True)
+    def is_type(self, key):
+        """
+        Some checks on whether the file is of a spacific type. Useful for
+        complex structures like "SVG".
+        """
+        if key == "svg":
+            return bool(is_svg(self))
 
     def analyze_os_stat(self):
         """
