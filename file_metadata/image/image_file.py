@@ -42,7 +42,7 @@ class ImageFile(GenericFile):
     @classmethod
     def create(cls, *args, **kwargs):
         cls_file = cls(*args, **kwargs)
-        mime = cls_file.analyze_mimetype()['File:MIMEType']
+        mime = cls_file.mime()
         _type, subtype = mime.split('/', 1)
 
         if mime == 'image/jpeg':

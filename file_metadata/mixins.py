@@ -140,7 +140,7 @@ def is_svg(_file):
     :param _file: A GenericFile object that should be checked for SVG.
     :return:      Boolean corresponding to whether the file is SVG.
     """
-    mime = _file.analyze_mimetype()['File:MIMEType']
+    mime = _file.mime()
     if mime in ('application/svg+xml', 'image/svg+xml'):
         return True
     elif mime in ('application/xml', 'text/xml', 'text/html', 'text/plain'):

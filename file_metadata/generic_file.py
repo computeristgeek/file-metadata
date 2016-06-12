@@ -67,7 +67,7 @@ class GenericFile(object):
         :return:       A class inheriting from GenericFile.
         """
         cls_file = cls(*args, **kwargs)
-        mime = cls_file.analyze_mimetype()['File:MIMEType']
+        mime = cls_file.mime()
         _type, subtype = mime.split('/', 1)
 
         if (_type == 'image' or mime == 'application/x-xcf' or
@@ -158,6 +158,23 @@ class GenericFile(object):
         return data[0]
 
     @memoized(is_method=True)
+    def mime(self):
+        if hasattr(magic, "from_file"):
+            # Use https://pypi.python.org/pypi/python-magic
+            return magic.from_file(self.fetch('filename'), mime=True)
+        elif hasattr(magic, "open"):
+            # Use the python-magic library in distro repos from the `file`
+            # command - http://www.darwinsys.com/file/
+            magic_instance = magic.open(magic.MAGIC_MIME)
+            magic_instance.load()
+            return magic_instance.file(self.fetch('filename'))
+
+        raise ImportError(
+            'The `magic` module that was found is not the expected pypi '
+            'package python-magic (https://pypi.python.org/pypi/python-magic) '
+            'nor file\'s (http://www.darwinsys.com/file/) package.')
+
+    @memoized(is_method=True)
     def is_type(self, key):
         """
         Some checks on whether the file is of a spacific type. Useful for
@@ -191,22 +208,7 @@ class GenericFile(object):
 
                  - File:MIMEType - The IANA mimetype string for this file.
         """
-        if hasattr(magic, "from_file"):
-            # Use https://pypi.python.org/pypi/python-magic
-            mime = magic.from_file(self.fetch('filename'), mime=True)
-        elif hasattr(magic, "open"):
-            # Use the python-magic library in distro repos from the `file`
-            # command - http://www.darwinsys.com/file/
-            magic_instance = magic.open(magic.MAGIC_MIME)
-            magic_instance.load()
-            mime = magic_instance.file(self.fetch('filename'))
-        else:
-            raise ImportError('The `magic` module that was found is not the '
-                              'expected pypi package python-magic '
-                              '(https://pypi.python.org/pypi/python-magic) '
-                              'nor file\'s (http://www.darwinsys.com/file/) '
-                              'package.')
-        return {"File:MIMEType": mime}
+        return {"File:MIMEType": self.mime()}
 
     def analyze_exifdata(self, ignored_keys=()):
         """
