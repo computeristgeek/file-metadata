@@ -84,7 +84,26 @@ file_download_links = {
     'blank.xcf': 'https://upload.wikimedia.org/wikipedia/commons/e/e2/Blank_file.xcf',
     'example.tiff': 'https://upload.wikimedia.org/wikipedia/commons/b/b0/Dabigatran_binding_pockets.tiff',
     'text.pdf': 'https://upload.wikimedia.org/wikipedia/commons/a/a7/Life_of_Future.pdf',
-    'image.pdf': 'https://upload.wikimedia.org/wikipedia/commons/4/40/AugerTransition1.pdf'}
+    'image.pdf': 'https://upload.wikimedia.org/wikipedia/commons/4/40/AugerTransition1.pdf',
+
+    # Files created by some software
+    'bitmap_from_inkscape.png': 'https://upload.wikimedia.org/wikipedia/commons/4/41/Joetsu_Shinkansen_icon.png',
+    'created_with_inkscape.svg': 'https://upload.wikimedia.org/wikipedia/commons/9/9a/Db-omega.svg',
+    'created_with_matlab.png': 'https://upload.wikimedia.org/wikipedia/commons/d/d1/Fat_absoprtion.png',
+    'created_with_imagemagick.png': 'https://upload.wikimedia.org/wikipedia/commons/9/99/Groz-01.PNG',
+    'created_with_adobe_imageready.png': 'https://upload.wikimedia.org/wikipedia/commons/2/29/Holtz.png',
+    'created_with_adobe_photoshop.jpg': 'https://upload.wikimedia.org/wikipedia/commons/6/64/Cervicomanubriotomie.jpg',
+    'created_with_adobe_photoshop_express.jpg': 'https://upload.wikimedia.org/wikipedia/commons/b/b5/Politecnico_di_Milano_Bovisa_4.jpg',
+    'created_with_adobe_photoshop_elements.jpg': 'https://upload.wikimedia.org/wikipedia/commons/4/49/1010_Bazylika_archikatedralna_%C5%9Bw_Jakuba_Szczecin_sygnaturka_0.jpg',
+    'created_with_picasa.jpg': 'https://upload.wikimedia.org/wikipedia/commons/1/1f/08_Ny_Alesund_prn.JPG',
+    'created_with_gimp.jpg': 'https://upload.wikimedia.org/wikipedia/commons/d/d5/2013-04-25_21-09-18-ecl-lune-mosaic.jpg',
+    'created_with_gnu_octave.svg': 'https://upload.wikimedia.org/wikipedia/commons/5/52/Beta_versus_rapidity.svg',
+    'created_with_gnuplot.svg': 'https://upload.wikimedia.org/wikipedia/commons/a/a5/2005_H-1B_admissions_by_country_of_citizenship.svg',
+    'created_with_chemtool.svg': 'https://upload.wikimedia.org/wikipedia/commons/0/00/Chitobiose_glucosamine.svg',
+    'created_with_vectorfieldplot.svg': 'https://upload.wikimedia.org/wikipedia/commons/8/83/VFPt_minus.svg',
+    'created_with_stella.png': 'https://upload.wikimedia.org/wikipedia/commons/e/e8/10-3_deltohedron.png',
+    'created_with_microsoft_image_composite_editor.jpg': 'https://upload.wikimedia.org/wikipedia/commons/7/7c/Bochnia_kopalnia_kaplica_2.jpg',
+}
 
 
 def fetch_file(name, overwrite=False):

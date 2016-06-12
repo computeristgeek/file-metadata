@@ -20,6 +20,91 @@ class ImageFileTest(unittest.TestCase):
         self.assertEqual(_file.fetch('ndarray').shape, (0,))
 
 
+class ImageFileSoftwaresTest(unittest.TestCase):
+
+    def test_created_with_unknown(self):
+        _file = ImageFile(fetch_file('red.svg'))
+        self.assertEqual(_file.analyze_softwares(), {})
+
+    def test_created_with_inkscape(self):
+        _file = ImageFile(fetch_file('created_with_inkscape.svg'))
+        data = _file.analyze_softwares().get('Composite:Softwares', None)
+        self.assertEqual(data, 'Inkscape')
+
+    def test_created_with_matlab(self):
+        _file = ImageFile(fetch_file('created_with_matlab.png'))
+        data = _file.analyze_softwares().get('Composite:Softwares', None)
+        self.assertEqual(data, 'MATLAB')
+
+    def test_created_with_imagemagick(self):
+        _file = ImageFile(fetch_file('created_with_imagemagick.png'))
+        data = _file.analyze_softwares().get('Composite:Softwares', None)
+        self.assertEqual(data, 'ImageMagick')
+
+    def test_created_with_adobe_imageready(self):
+        _file = ImageFile(fetch_file('created_with_adobe_imageready.png'))
+        data = _file.analyze_softwares().get('Composite:Softwares', None)
+        self.assertEqual(data, 'Adobe ImageReady')
+
+    def test_created_with_adobe_photoshop(self):
+        _file = ImageFile(fetch_file('created_with_adobe_photoshop.jpg'))
+        data = _file.analyze_softwares().get('Composite:Softwares', None)
+        self.assertEqual(data, 'Adobe Photoshop')
+
+    def test_created_with_adobe_photoshop_express(self):
+        _file = ImageFile(fetch_file(
+            'created_with_adobe_photoshop_express.jpg'))
+        data = _file.analyze_softwares().get('Composite:Softwares', None)
+        self.assertEqual(data, 'Adobe Photoshop Express')
+
+    def test_created_with_adobe_photoshop_elements(self):
+        _file = ImageFile(fetch_file(
+            'created_with_adobe_photoshop_elements.jpg'))
+        data = _file.analyze_softwares().get('Composite:Softwares', None)
+        self.assertEqual(data, 'Adobe Photoshop Elements')
+
+    def test_created_with_picasa(self):
+        _file = ImageFile(fetch_file('created_with_picasa.jpg'))
+        data = _file.analyze_softwares().get('Composite:Softwares', None)
+        self.assertEqual(data, 'Picasa')
+
+    def test_created_with_gimp(self):
+        _file = ImageFile(fetch_file('created_with_gimp.jpg'))
+        data = _file.analyze_softwares().get('Composite:Softwares', None)
+        self.assertEqual(data, 'GIMP')
+
+    def test_created_with_gnu_octave(self):
+        _file = ImageFile(fetch_file('created_with_gnu_octave.svg'))
+        data = _file.analyze_softwares().get('Composite:Softwares', None)
+        self.assertEqual(data, 'GNU Plot')
+
+    def test_created_with_gnuplot(self):
+        _file = ImageFile(fetch_file('created_with_gnuplot.svg'))
+        data = _file.analyze_softwares().get('Composite:Softwares', None)
+        self.assertEqual(data, 'GNU Plot')
+
+    def test_created_with_chemtool(self):
+        _file = ImageFile(fetch_file('created_with_chemtool.svg'))
+        data = _file.analyze_softwares().get('Composite:Softwares', None)
+        self.assertEqual(data, 'Chemtool')
+
+    def test_created_with_vectorfieldplot(self):
+        _file = ImageFile(fetch_file('created_with_vectorfieldplot.svg'))
+        data = _file.analyze_softwares().get('Composite:Softwares', None)
+        self.assertEqual(data, 'VectorFieldPlot')
+
+    def test_created_with_stella(self):
+        _file = ImageFile(fetch_file('created_with_stella.png'))
+        data = _file.analyze_softwares().get('Composite:Softwares', None)
+        self.assertEqual(data, 'Stella')
+
+    def test_created_with_microsoft_image_composite_editor(self):
+        _file = ImageFile(fetch_file(
+            'created_with_microsoft_image_composite_editor.jpg'))
+        data = _file.analyze_softwares().get('Composite:Softwares', None)
+        self.assertEqual(data, 'Microsoft ICE')
+
+
 class ImageFileColorAverageTest(unittest.TestCase):
 
     def test_color_average_rgb_image(self):

@@ -77,6 +77,69 @@ class ImageFile(GenericFile):
                 return numpy.ndarray(0)
         return super(ImageFile, self).fetch(key)
 
+    def analyze_softwares(self):
+        """
+        Find the software used to create the given file with. It uses the exif
+        data to find the softare that was used to create the file. It gives out
+        a curated a list of softwares.
+
+        :return: dict with the keys:
+
+             - Composite:Softwares - Tuple with the names of the softwares
+                detected that have been used with this file.
+                The possible softwares that can be found are:
+                    Inkscape, MATLAB, ImageMagick, Adobe ImageReady,
+                    Adobe Photoshop Elements, Adobe Photoshop Express,
+                    Adobe Photoshop, Picasa, GIMP, Microsoft ICE, GNU Plot,
+                    Chemtool, VectorFieldPlot, and Stella.
+        """
+        exif = self.exiftool()
+        softwares = []
+
+        if (exif.get('SVG:Output_extension', '') ==
+                'org.inkscape.output.svg.inkscape'):
+            softwares.append('Inkscape')
+
+        for sw_key in ('PNG:Software', 'EXIF:Software'):
+            sw = exif.get(sw_key, '').lower()
+            if sw.startswith('matlab'):
+                softwares.append('MATLAB')
+            elif sw.startswith('imagemagick'):
+                softwares.append('ImageMagick')
+            elif sw.startswith('adobe imageready'):
+                softwares.append('Adobe ImageReady')
+            elif sw.startswith('adobe photoshop'):
+                if sw.startswith('adobe photoshop elements'):
+                    softwares.append('Adobe Photoshop Elements')
+                elif sw.startswith('adobe photoshop express'):
+                    softwares.append('Adobe Photoshop Express')
+                else:
+                    softwares.append('Adobe Photoshop')
+            elif sw.startswith('picasa'):
+                softwares.append('Picasa')
+            elif sw.startswith('gimp'):
+                softwares.append('GIMP')
+            elif sw.startswith('microsoft ice '):
+                softwares.append('Microsoft ICE')
+
+        desc = exif.get('SVG:Desc', '').lower()
+        if ' gnuplot ' in desc:
+            softwares.append('GNU Plot')
+        elif ' chemtool ' in desc:
+            softwares.append('Chemtool')
+        elif ' vectorfieldplot ' in desc:
+            softwares.append('VectorFieldPlot')
+
+        comment = exif.get('PNG:Comment', '').lower()
+        if ' stella4d ' in comment:
+            softwares.append('Stella')
+
+        if len(softwares) == 0:
+            return {}
+
+        return {'Composite:Softwares':
+                tuple(softwares) if len(softwares) > 1 else softwares[0]}
+
     def analyze_color_average(self):
         """
         Find the average RGB color of the image and compare with the existing
