@@ -30,14 +30,12 @@ warnings.simplefilter('error', Image.DecompressionBombWarning)
 class ImageFile(GenericFile):
     mimetypes = ()
 
-    def config(self, key):
+    def config(self, key, new_defaults=()):
         defaults = {
             "max_decompressed_size": int(1024 ** 3 / 4 / 3)  # In bytes
         }
-        option = self.options.get(key, defaults.get(key, self.NO_CONFIG))
-        if option is self.NO_CONFIG:
-            return super(ImageFile, self).config(key)
-        return option
+        defaults.update(dict(new_defaults))  # Update the defaults from child
+        return super(ImageFile, self).config(key, new_defaults=defaults)
 
     @classmethod
     def create(cls, *args, **kwargs):

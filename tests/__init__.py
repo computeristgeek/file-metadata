@@ -19,6 +19,8 @@ try:  # Python 3
 except ImportError:  # Python 2
     import mock  # flake8: noqa (unused import)
 
+from whichcraft import which
+
 from file_metadata._compat import makedirs
 from file_metadata.utilities import download
 
@@ -149,15 +151,12 @@ def fetch_file(name, overwrite=False):
     return filepath
 
 
-def importable(modulename):
-    """
-    Check if the given module can be imported or not.
-    """
-    try:
-        _ = __import__(modulename)
-        return True
-    except ImportError:
-        return False
+def which_sideeffect(unavailable_executables):
+    def wrapper(command, *args, **kwargs):
+        if command in unavailable_executables:
+            return None
+        return which(command, *args, **kwargs)
+    return wrapper
 
 
 def is_toolserver():

@@ -38,9 +38,13 @@ class GenericFile(object):
         self.filename = fname
         self.options = kwargs
 
-    def config(self, key):
+    def config(self, key, new_defaults=()):
         defaults = {}
-        return self.options.get(key, defaults[key])
+        defaults.update(dict(new_defaults))  # Update the defaults from child
+        try:
+            return self.options[key]
+        except KeyError:
+            return defaults[key]
 
     @memoized(is_method=True)
     def fetch(self, key=''):

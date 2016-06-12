@@ -9,15 +9,7 @@ from whichcraft import which
 
 from file_metadata.generic_file import GenericFile
 from file_metadata.mixins import is_svg, FFProbeMixin
-from tests import fetch_file, mock, unittest
-
-
-def which_sideeffect(unavailable_executables):
-    def wrapper(command, *args, **kwargs):
-        if command in unavailable_executables:
-            return None
-        return which(command, *args, **kwargs)
-    return wrapper
+from tests import fetch_file, mock, unittest, which_sideeffect
 
 
 class FFProbeMixinTest(unittest.TestCase):
@@ -33,11 +25,11 @@ class FFProbeMixinTest(unittest.TestCase):
         self.bin_file = FFProbeMixin()
         self.bin_file.filename = fetch_file('file.bin')
 
-    def test_bin(self, mock_check_output, mock_system=None):
+    def test_bin(self, mock_which, mock_system=None):
         data = self.bin_file.analyze_ffprobe()
         self.assertEqual(data, {})
 
-    def test_ogg(self, mock_check_output, mock_system=None):
+    def test_ogg(self, mock_which, mock_system=None):
         data = self.wikiexample_file.analyze_ffprobe()
         self.assertIn('FFProbe:Format', data)
         self.assertEqual(data['FFProbe:Format'], 'ogg')
@@ -51,7 +43,7 @@ class FFProbeMixinTest(unittest.TestCase):
         self.assertIn('44100', stream['Rate'])
         self.assertEqual(round(stream['Duration']), 6)
 
-    def test_wav(self, mock_check_output, mock_system=None):
+    def test_wav(self, mock_which, mock_system=None):
         data = self.wav_file.analyze_ffprobe()
         self.assertIn('FFProbe:Format', data)
         self.assertEqual(data['FFProbe:Format'], 'wav')
@@ -65,7 +57,7 @@ class FFProbeMixinTest(unittest.TestCase):
         self.assertIn('44100', stream['Rate'])
         self.assertEqual(round(stream['Duration']), 1)
 
-    def test_ogv(self, mock_check_output, mock_system=None):
+    def test_ogv(self, mock_which, mock_system=None):
         data = self.veins_file.analyze_ffprobe()
         self.assertIn('FFProbe:Format', data)
         self.assertEqual(data['FFProbe:Format'], 'ogg')
