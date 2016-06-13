@@ -117,7 +117,7 @@ class GenericFileCreateTest(unittest.TestCase):
 
     def test_create_jpeg_file(self):
         from file_metadata.image.jpeg_file import JPEGFile
-        for fname in ['qrcode.jpg', 'barcode_cmyk.jpg']:
+        for fname in ['qrcode.jpg', 'cmyk.jpg', 'unknown_cmyk.jpg']:
             self.assertTrue(isinstance(
                 GenericFile.create(fetch_file(fname)), JPEGFile),
                 'File "{0}" was not of type {1}'.format(fname, JPEGFile))

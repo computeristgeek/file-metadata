@@ -22,9 +22,10 @@ class JPEGFile(ImageFile):
     @memoized(is_method=True)
     def fetch(self, key=''):
         if key == 'filename_zxing':
-            exif = self.analyze_exifdata()
-            if (exif.get('ICC_Profile:ColorSpaceData', None) == 'CMYK' or
-                    exif.get('XMP:ColorMode', None) == 'CMYK'):
+            exif = self.exiftool()
+            if (exif.get('APP14:ColorTransform') == 'Unknown (RGB or CMYK)' or
+                    exif.get('ICC_Profile:ColorSpaceData') == 'CMYK' or
+                    exif.get('XMP:ColorMode') == 'CMYK'):
                 # ZXing cannot handle CMYK encoded JPEG images. Write the RGB
                 # data to a tempfile and use that.
                 fd, name = tempfile.mkstemp(
