@@ -80,7 +80,6 @@ def dump_log(data, logname, _type='text', header=None):
 
 @pytest.mark.timeout(60 * 60)
 class PyWikiBotTestHelper(unittest.TestCase):
-    __test__ = True
 
     def setUp(self):
         self.site = pywikibot.Site()

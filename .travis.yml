@@ -66,9 +66,9 @@ install:
 script:
   - flake8 setup.py file_metadata tests
   - if [[ "$BULK_TEST" == "1" ]] ; then
-      python -m pytest -k "bulk_test $EXTRA_PYTEST_KEYWORDS" -vvv --capture=no --cov ;
+      python -m pytest tests/bulk.py -k "$PYTEST_KEYWORDS" -vvv --capture=no;
     else
-      python -m pytest -k "not bulk_test $EXTRA_PYTEST_KEYWORDS" --cov ;
+      python -m pytest --cov ;
     fi
   - python setup.py sdist bdist bdist_wheel
   - pip install .
