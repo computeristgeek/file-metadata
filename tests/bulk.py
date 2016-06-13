@@ -10,6 +10,7 @@ from __future__ import (division, absolute_import, unicode_literals,
 
 import datetime
 import json
+import logging
 import os
 import ssl
 import subprocess
@@ -249,7 +250,11 @@ class BulkCategoryTest(PyWikiBotTestHelper):
             print(count + 1, '. Analyzing', page.title(underscore=False))
             if (count + 1) % 500 == 1:
                 log.append('== {0} to {1} =='.format(count + 1, count + 500))
-            _log, _stat = self._test_file(page, path)
+            try:
+                _log, _stat = self._test_file(page, path)
+            except Exception as err:
+                logging.exception(err)
+                continue
             log += _log
 
             stats['count'] = count + 1
