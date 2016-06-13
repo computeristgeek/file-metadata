@@ -13,6 +13,7 @@ import json
 import os
 import ssl
 import subprocess
+import tempfile
 import types
 from collections import Counter
 
@@ -25,7 +26,7 @@ from file_metadata._compat import makedirs
 from file_metadata.generic_file import GenericFile
 from file_metadata.image.image_file import ImageFile
 from file_metadata.utilities import download
-from tests import is_travis, unittest, CACHE_DIR
+from tests import is_travis, is_toolserver, unittest, CACHE_DIR
 
 try:
     import pywikibot
@@ -79,22 +80,23 @@ def dump_log(data, logname, _type='text', header=None):
 
 @pytest.mark.timeout(60 * 60)
 class PyWikiBotTestHelper(unittest.TestCase):
-
-    __test__ = False
+    __test__ = True
 
     def setUp(self):
         self.site = pywikibot.Site()
         self.site.login()
+        if is_toolserver():
+            self.cache_dir = tempfile.mkdtemp(prefix="dir_file_metadata_")
+        else:
+            self.cache_dir = CACHE_DIR
+        makedirs(self.cache_dir, exist_ok=True)
 
-        makedirs(CACHE_DIR, exist_ok=True)
-
-    @staticmethod
     @retry((ssl.SSLError, URLError), tries=5)
-    def download_page(page, fname=None, timeout=None):
+    def download_page(self, page, fname=None, timeout=None):
         url = page.fileUrl()
         fname = fname or page.title(as_filename=True).encode('ascii',
                                                              'replace')
-        fpath = os.path.join(CACHE_DIR, fname)
+        fpath = os.path.join(self.cache_dir, fname)
         download(url, fpath, timeout=timeout)
         return fpath
 
@@ -111,6 +113,7 @@ class PyWikiBotTestHelper(unittest.TestCase):
         for arg in args:
             gen_factory.handleArg(arg)
 
+        parsed_pages = set()
         generator = gen_factory.getCombinedGenerator()
         if not generator:
             self.fail('No generator was asked from the factory.')
@@ -119,6 +122,8 @@ class PyWikiBotTestHelper(unittest.TestCase):
                                                         groupsize=50)
             for page in pregen:
                 if page.exists() and not page.isRedirectPage():
+                    if page.title() in parsed_pages:
+                        continue
                     try:
                         page_path = self.download_page(page, fname=fname,
                                                        timeout=15 * 60)
@@ -126,6 +131,7 @@ class PyWikiBotTestHelper(unittest.TestCase):
                         # URLError is raised if the download timesout.
                         continue
                     yield page, page_path
+                    parsed_pages.add(page.title())
                     if is_travis():
                         os.remove(page_path)
 
@@ -139,10 +145,12 @@ class BulkCategoryTest(PyWikiBotTestHelper):
         # First cell has text info
         # Second cell has image bounding boxes if applicable
 
+        start_time = datetime.datetime.now()
         _file = GenericFile.create(path)
         log.append('===== {0} ====='.format(
                    page.title(asLink=True, textlink=True)))
 
+        # Analyze mime and file type
         mime = _file.analyze_mimetype().get('File:MIMEType', "ERROR")
         stats['mime'] = mime
         txt.append("* '''Mime Type''': " + mime)
@@ -150,61 +158,82 @@ class BulkCategoryTest(PyWikiBotTestHelper):
             _type = _file.analyze_exifdata().get('File:FileType', 'ERROR')
             txt.append("* '''File type''': " + _type)
 
-        if isinstance(_file, ImageFile) and mime in {
-                'image/jpeg', 'image/png', 'image/gif', 'image/tiff'}:
-            # Can read the pixel data of the image ...
+        if isinstance(_file, ImageFile):
+            # Analyze softwares
+            softwares = _file.analyze_softwares()
+            if 'Composite:Softwares' in softwares:
+                softwares = softwares['Composite:Softwares']
+                if isinstance(softwares, tuple):
+                    softwares = ", ".join(softwares)
+                txt.append("* '''Softwares''': " + softwares)
 
-            height, width = _file.fetch('ndarray').shape[:2]
-            if width > height:
-                scale = min(200, width) * 1.0 / width
-            else:
-                scale = min(200, height) * 1.0 / height
-            scaled_h, scaled_w = int(height * scale), int(width * scale)
+            # Analyze color
+            col_avg = _file.analyze_color_average()
+            if col_avg:
+                txt.append("* '''Average RGB value''': " +
+                           ', '.join(map(str, col_avg['Color:AverageRGB'])))
+                txt.append("* '''Closest Pantone color''': " +
+                           ', '.join(col_avg['Color:ClosestLabeledColor']))
 
-            im.append('<div style="position:relative;">')
-            im.append('{0}|{1}x{2}px]]'.format(
-                      page.title(underscore=False, asLink=True)[:-2],
-                      scaled_w, scaled_h))
-            box = ('<div class="position-marker {cls}" '
-                   'style="position:absolute; '
-                   'left:{l}px; top:{t}px; width:{w}px; height:{h}px; '
-                   'border:2px solid #{col};"></div>')
+            # Fill second column (image cell) for ImageFiles
+            if _file.fetch('ndarray').ndim in (2, 3):
+                # Only for 2 dimension images (ndim 2 or 3)
+                height, width = _file.fetch('ndarray').shape[:2]
+                if width > height:
+                    scale = min(200, width) * 1.0 / width
+                else:
+                    scale = min(200, height) * 1.0 / height
+                scaled_h, scaled_w = int(height * scale), int(width * scale)
 
-            # Analyze barcodes
-            barcode_data = {}
-            try:
-                barcode_data = _file.analyze_barcode()
-            except subprocess.CalledProcessError:
-                txt.append("* '''Barcodes ERROR:''' Unsupported file type")
-            barcodes = barcode_data.get('zxing:Barcodes', None)
-            if barcodes is not None and len(barcodes) > 0:
-                txt.append("* '''Barcodes found:'''")
-                for bar in barcodes:
-                    txt.append("** Data: " + bar['data'])
-                    txt.append("** Format: " + str(bar['format']))
-                    txt.append("** Position: " + str(bar['points']))
-                    if len(bar['points']) == 2:
-                        # left, right
-                        l, r = [(int(i * scale), int(j * scale))
-                                for (i, j) in bar['points']]
-                        im.append(box.format(
-                            cls='barcode', col='ff0000', l=l[0], t=l[1],
-                            w=r[0] - l[0] + 2, h=r[1] - l[1] + 2))
-                    elif len(bar['points']) == 4:
-                        # bottomLeft, topLeft, topRight, bottomRight
-                        lb, lt, rt, rb = [(int(i * scale), int(j * scale))
-                                          for (i, j) in bar['points']]
-                        im.append(box.format(
-                            cls='barcode', col='ff0000',
-                            l=min(lb[0], lt[0]), t=min(lt[1], rt[1]),
-                            w=max(rb[0] - lb[0], rt[0] - lt[0]),
-                            h=max(rb[1] - rt[1], lb[1] - lt[1])))
+                im.append('<div style="position:relative;">')
+                im.append('{0}|{1}x{2}px]]'.format(
+                          page.title(underscore=False, asLink=True)[:-2],
+                          scaled_w, scaled_h))
+                box = ('<div class="position-marker file-meta-{css_class}" '
+                       'style="position:absolute; '
+                       'left:{left}px; top:{top}px; width:{width}px; '
+                       'height:{height}px; border:2px solid #{color};"></div>')
 
-            # Make a table for text and image
-            log += ['{| class="wikitable"', '|'] + txt + ['|'] + im + ['|}']
-        else:
-            # Image cell is empty as it's not an image
-            log += ['{| class="wikitable"', '|'] + txt + ['|', '', '|}']
+                # Analyze barcodes
+                barcode_data = {}
+                try:
+                    barcode_data = _file.analyze_barcode()
+                except subprocess.CalledProcessError:
+                    txt.append("* '''Barcodes ERROR:''' Unsupported file type")
+                barcodes = barcode_data.get('zxing:Barcodes', [])
+                if len(barcodes) > 0:
+                    txt.append("* '''Barcodes found:'''")
+                for ibar, bar in enumerate(barcodes):
+                    txt.append("** Barcode #" + str(ibar + 1))
+                    txt.append("*** Data: " + bar['data'])
+                    txt.append("*** Format: " + str(bar['format']))
+                    txt.append("*** Bounding Box: " + str(bar['bounding box']))
+                    box_kwargs = {k: int(v * scale)
+                                  for k, v in bar['bounding box'].items()}
+                    box_kwargs.update({"color": "ff0000",
+                                       "css_class": "barcode"})
+                    im.append(box.format(**box_kwargs))
+
+                # Analyze faces
+                faces = _file.analyze_facial_landmarks().get('dlib:Faces', [])
+                if len(faces) > 0:
+                    txt.append("* '''Faces found:'''")
+                for iface, face in enumerate(faces):
+                    txt.append("** Face #" + str(iface + 1))
+                    txt.append("** Score: " + str(round(face['score'], 2)))
+                    txt.append("** Bounding Box: " + str(face['position']))
+                    box_kwargs = {k: int(v * scale)
+                                  for k, v in face['position'].items()}
+                    box_kwargs.update({"color": "00ff00",
+                                       "css_class": "face"})
+                    im.append(box.format(**box_kwargs))
+
+        end_time = datetime.datetime.now()
+        secs = (end_time - start_time).total_seconds()
+        txt.append("* '''Time taken''': " + str(secs))
+
+        # Make a table for text and image
+        log += (['{| class="wikitable"', '|'] + txt + ['|'] + im + ['|}'])
         return log, stats
 
     def _test_category(self, category, limit=10000):
@@ -263,7 +292,7 @@ class BulkCategoryTest(PyWikiBotTestHelper):
         self._test_category('TIFF files')
 
     def test_ogv_videos(self):
-        self._test_category('Ogv videos')
+        self._test_category('Ogv videos', 2000)  # Takes ~1Hr in travis
 
     def test_animated_gif_files(self):
         self._test_category('Animated GIF files')
@@ -281,19 +310,22 @@ class BulkCategoryTest(PyWikiBotTestHelper):
         self._test_category('WAV files')
 
     def test_ogg_sound_files(self):
-        self._test_category('Ogg sound files')
+        self._test_category('Ogg sound files', 8000)  # Takes ~1Hr in travis
 
     def test_midi_files(self):
         self._test_category('MIDI files')
 
     def test_djvu_files(self):
-        self._test_category('DjVu files')
+        self._test_category('DjVu files', 5000)  # Takes ~1Hr in travis
 
     def test_xcf_files(self):
         self._test_category('XCF files')
 
     def test_pdf_files(self):
-        self._test_category('PDF files')
+        self._test_category('PDF files', 5000)
 
     def test_barcode(self):
         self._test_category('Barcode')
+
+    def test_images_from_the_state_library_of_queensland(self):
+        self._test_category('Images from the State Library of Queensland')
