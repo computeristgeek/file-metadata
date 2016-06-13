@@ -246,8 +246,8 @@ class ImageFile(GenericFile):
             fdata = {
                 'position': {'left': face.left(),
                              'top': face.top(),
-                             'right': face.right(),
-                             'bottom': face.bottom()},
+                             'width': face.right() - face.left() + 1,
+                             'height': face.bottom() - face.top() + 1},
                 'score': score}
 
             # dlib's shape detector uses the ibug dataset to detect shape.
