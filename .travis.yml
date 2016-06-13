@@ -58,7 +58,7 @@ install:
       pip install git+https://github.com/davisking/dlib.git@02f6da285149a61bc58728d9c5e77932151118b5#egg=dlib ;
       pip install -r test-requirements.txt -r requirements.txt ;
       if [[ "$BULK_TEST" == "1" ]] ; then
-        pip install git+https://github.com/wikimedia/pywikibot-core.git ;
+        pip install git+https://github.com/wikimedia/pywikibot-core.git#egg=pywikibot ;
         cp .ci/user-config.py . ;
       fi ;
     fi
