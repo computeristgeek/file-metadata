@@ -238,7 +238,7 @@ class BulkCategoryTest(PyWikiBotTestHelper):
 
         end_time = datetime.datetime.now()
         secs = (end_time - start_time).total_seconds()
-        txt.append("* '''Time taken''': " + str(secs))
+        txt.append("* '''Time taken''': " + str(secs) + " sec")
 
         # Make a table for text and image
         log += (['{| class="wikitable"', '|'] + txt + ['|'] + im + ['|}'])
