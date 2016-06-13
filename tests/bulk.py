@@ -194,6 +194,12 @@ class BulkCategoryTest(PyWikiBotTestHelper):
                        'left:{left}px; top:{top}px; width:{width}px; '
                        'height:{height}px; border:2px solid #{color};"></div>')
 
+                def _str_bbox(bbox):
+                    return ("Left:" + str(bbox['left']) + 
+                            ", Top:" + str(bbox['top']) + 
+                            ", Width:" + str(bbox['width']) + 
+                            ", Height:" + str(bbox['height']))
+
                 # Analyze barcodes
                 barcode_data = {}
                 try:
@@ -207,7 +213,8 @@ class BulkCategoryTest(PyWikiBotTestHelper):
                     txt.append("** Barcode #" + str(ibar + 1))
                     txt.append("*** Data: " + bar['data'])
                     txt.append("*** Format: " + str(bar['format']))
-                    txt.append("*** Bounding Box: " + str(bar['bounding box']))
+                    txt.append("*** Bounding Box: " +
+                               _str_bbox(bar['bounding box']))
                     box_kwargs = {k: int(v * scale)
                                   for k, v in bar['bounding box'].items()}
                     box_kwargs.update({"color": "ff0000",
@@ -221,7 +228,8 @@ class BulkCategoryTest(PyWikiBotTestHelper):
                 for iface, face in enumerate(faces):
                     txt.append("** Face #" + str(iface + 1))
                     txt.append("** Score: " + str(round(face['score'], 2)))
-                    txt.append("** Bounding Box: " + str(face['position']))
+                    txt.append("** Bounding Box: " +
+                               _str_bbox(face['position']))
                     box_kwargs = {k: int(v * scale)
                                   for k, v in face['position'].items()}
                     box_kwargs.update({"color": "00ff00",
