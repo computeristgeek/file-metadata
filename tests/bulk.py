@@ -173,7 +173,7 @@ class BulkCategoryTest(PyWikiBotTestHelper):
                 txt.append("* '''Average RGB value''': " +
                            ', '.join(map(str, col_avg['Color:AverageRGB'])))
                 txt.append("* '''Closest Pantone color''': " +
-                           ', '.join(col_avg['Color:ClosestLabeledColor']))
+                           col_avg['Color:ClosestLabeledColor'])
 
             # Fill second column (image cell) for ImageFiles
             if _file.fetch('ndarray').ndim in (2, 3):
