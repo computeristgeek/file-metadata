@@ -45,31 +45,16 @@ before_install:
   - source activate py$TRAVIS_PYTHON_VERSION
   - if [[ "$(python --version 2>&1)" != *"$TRAVIS_PYTHON_VERSION"* ]]; then exit 1; fi
 
-  # If the branch is "bulk" run bulk tests. This is a special case.
-  - if [[ "$TRAVIS_BRANCH" == "bulk" && "$TRAVIS_PYTHON_VERSION" == "2.7" ]] ; then
-      export BULK_TEST=1 ;
-    fi
-
 install:
-    # Install dlib from git (with pip) as there was an issue with libjpeg
-    # Which was solved and not yet released.
-  - if [[ "$WITHOUT_DEPS" != "1" ]] ; then
-      conda install boost scipy ;
-      pip install git+https://github.com/davisking/dlib.git@02f6da285149a61bc58728d9c5e77932151118b5#egg=dlib ;
-      pip install -r test-requirements.txt -r requirements.txt ;
-      if [[ "$BULK_TEST" == "1" ]] ; then
-        pip install git+https://github.com/wikimedia/pywikibot-core.git#egg=pywikibot ;
-        cp .ci/user-config.py . ;
-      fi ;
-    fi
+  - conda install boost scipy ;
+  # Install dlib from git (with pip) as there was an issue with libjpeg
+  # Which was solved and not yet released.
+  - pip install git+https://github.com/davisking/dlib.git@02f6da285149a61bc58728d9c5e77932151118b5#egg=dlib ;
+  - pip install -r test-requirements.txt -r requirements.txt ;
 
 script:
   - flake8 setup.py file_metadata tests
-  - if [[ "$BULK_TEST" == "1" ]] ; then
-      python -m pytest tests/bulk.py -k "$PYTEST_KEYWORDS" -vvv --capture=no;
-    else
-      python -m pytest --cov ;
-    fi
+  - python -m pytest --cov ;
   - python setup.py sdist bdist bdist_wheel
   - pip install .
   - pip uninstall -y file-metadata
