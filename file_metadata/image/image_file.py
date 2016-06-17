@@ -209,7 +209,8 @@ class ImageFile(GenericFile):
                          'dependency OpenCV to be installed.')
             return []
 
-        directory = (directory if directory is not None
+        directory = (
+            directory if directory is not None
             else os.path.abspath(os.path.join(
                 os.path.realpath(cv2.__file__),
                 *([os.pardir] * 4 + ['share', 'OpenCV', 'haarcascades']))))
@@ -223,7 +224,7 @@ class ImageFile(GenericFile):
         eye, upper body, etc..
         """
         try:
-            import cv2
+            import cv2  # flake8: noqa (unused import)
             from cv2 import cv
         except ImportError:
             logging.warn('HAAR Cascade analysis requires the optional '

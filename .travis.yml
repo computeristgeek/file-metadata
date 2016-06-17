@@ -49,6 +49,7 @@ before_install:
 install:
   - conda install boost scipy ;
   - conda install -c menpo opencv ;
+  - pip install -U pip;
   # Install dlib from git (with pip) as there was an issue with libjpeg
   # Which was solved and not yet released.
   - pip install git+https://github.com/davisking/dlib.git@02f6da285149a61bc58728d9c5e77932151118b5#egg=dlib ;

@@ -8,6 +8,7 @@ pathlib2
 six>=1.8.0
 numpy
 scipy
+matplotlib
 dlib
 backports.lzma
 scikit-image
