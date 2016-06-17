@@ -81,6 +81,7 @@ file_download_links = {
     'barcode.png': 'https://upload.wikimedia.org/wikipedia/commons/1/1f/Rationalized-codabar.png',
     'datamatrix.png': 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/Datamatrix.svg/200px-Datamatrix.svg.png',
     'multibarcodes.png': 'https://upload.wikimedia.org/wikipedia/commons/9/98/DHL_Online-Frankierung_-_Paket_bis_5_kg_-_D-USA.png',
+    'vertical_barcode.jpg': 'https://upload.wikimedia.org/wikipedia/commons/9/9c/Final_Ida_Pasto_vs._Santa_Fe.jpg',
 
     'huge.png': 'https://upload.wikimedia.org/wikipedia/commons/3/31/Grand_paris_express.png',
 

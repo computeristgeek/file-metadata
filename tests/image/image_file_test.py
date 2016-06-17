@@ -228,3 +228,34 @@ class ImageFileBarcodeZXingTest(unittest.TestCase):
     def test_barcode_zxing_small_files(self):
         _file = ImageFile(fetch_file('static.gif'))
         self.assertEqual(_file.analyze_barcode_zxing(), {})
+
+
+@pytest.mark.timeout(60)
+class ImageFileBarcodeZBarTest(unittest.TestCase):
+
+    def test_barcode_zbar_mona_lisa(self):
+        _file = ImageFile(fetch_file('mona_lisa.jpg'))
+        data = _file.analyze_barcode_zbar()
+        self.assertEqual(data, {})
+
+    def test_barcode_zbar_vertical(self):
+        _file = ImageFile(fetch_file('vertical_barcode.jpg'))
+        data = _file.analyze_barcode_zbar()
+        self.assertIn('zbar:Barcodes', data)
+        self.assertEqual(len(data['zbar:Barcodes']), 2)
+        self.assertEqual(data['zbar:Barcodes'][0]['format'], 'I25')
+        self.assertEqual(data['zbar:Barcodes'][0]['data'],
+                         '29430622992369')
+        self.assertEqual(data['zbar:Barcodes'][1]['format'], 'I25')
+        self.assertEqual(data['zbar:Barcodes'][1]['data'], '29322290481762')
+
+    def test_barcode_zbar_qrcode(self):
+        _file = ImageFile(fetch_file('qrcode.jpg'))
+        data = _file.analyze_barcode_zbar()
+        self.assertIn('zbar:Barcodes', data)
+        self.assertEqual(len(data['zbar:Barcodes']), 1)
+        self.assertEqual(data['zbar:Barcodes'][0]['format'], 'QRCODE')
+        self.assertEqual(data['zbar:Barcodes'][0]['data'],
+                         'http://www.wikipedia.com')
+        self.assertEqual(data['zbar:Barcodes'][0]['bounding box'],
+                         {'width': 350, 'top': 9, 'height': 350, 'left': 7})

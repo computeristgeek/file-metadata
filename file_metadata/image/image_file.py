@@ -12,7 +12,10 @@ import warnings
 import dlib
 import numpy
 import pathlib2
+import skimage
 import skimage.io
+import skimage.color
+import zbar
 from PIL import Image
 from pycolorname.pantone.pantonepaint import PantonePaint
 
@@ -64,7 +67,12 @@ class ImageFile(GenericFile):
         elif key == 'ndarray':
             Image.MAX_IMAGE_PIXELS = self.config('max_decompressed_size')
             try:
-                return skimage.io.imread(self.fetch('filename_raster'))
+                image_array = skimage.io.imread(self.fetch('filename_raster'))
+                if image_array.shape == (2,):
+                    # Assume this is related to
+                    # https://github.com/scikit-image/scikit-image/issues/2154
+                    return image_array[0]
+                return image_array
             except Image.DecompressionBombWarning:
                 logging.warn('The file "{0}" contains a lot of pixels and '
                              'can take a lot of memory when decompressed. '
@@ -356,3 +364,42 @@ class ImageFile(GenericFile):
                              'bounding box': bbox})
 
         return {'zxing:Barcodes': barcodes}
+
+    def analyze_barcode_zbar(self):
+        """
+        Use ``zbar`` to find barcodes and qr codes from the image.
+
+        :return: dict with the keys:
+
+             - zbar:Barcodes - An array containing information about barcodes.
+                Each barcode is encoded to a dictionary with the keys:
+                - format - The format of the barcode. Example: QRCODE,
+                    I25, etc.
+                - data - The text data that is encdoded in the barcode.
+                - bounding box - A dictionary with left, width, top, height.
+                - confidence - The quality of the barcode. The higher it is
+                    the more accurate the detection is.
+        """
+        with warnings.catch_warnings():
+            # Supress warning about precision lost in float -> ubyte
+            warnings.simplefilter("ignore")
+            image_array = skimage.img_as_ubyte(
+                skimage.color.rgb2grey(self.fetch('ndarray')))
+        height, width = image_array.shape
+        zbar_img = zbar.Image(width, height, 'Y800', image_array.tobytes())
+        scanner = zbar.ImageScanner()
+        scanner.parse_config('enable')
+        if scanner.scan(zbar_img) == 0:
+            return {}
+
+        barcodes = []
+        for barcode in zbar_img:
+            p = numpy.array(barcode.location)
+            bbox = {"left": min(p[:, 0]), "top": min(p[:, 1]),
+                    "width": max(p[:, 0]) - min(p[:, 0]),
+                    "height": max(p[:, 1]) - min(p[:, 1])}
+            barcodes.append({'data': barcode.data,
+                             'bounding box': bbox,
+                             'confidence': barcode.quality,
+                             'format': str(barcode.type)})
+        return {'zbar:Barcodes': barcodes}
