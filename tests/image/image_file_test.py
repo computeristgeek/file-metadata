@@ -136,6 +136,51 @@ class ImageFileColorAverageTest(unittest.TestCase):
         self.assertEqual(data['Color:ClosestLabeledColorRGB'], (223, 223, 227))
 
 
+class ImageFileFaceHAARCascadesTest(unittest.TestCase):
+
+    def test_face_haarcascade_charlie_chaplin(self):
+        with ImageFile(fetch_file('charlie_chaplin.jpg')) as uut:
+            data = uut.analyze_face_haarcascades()
+            self.assertIn('OpenCV:Faces', data)
+            self.assertEqual(len(data['OpenCV:Faces']), 1)
+
+            face = data['OpenCV:Faces'][0]
+            print(face)
+            self.assertIn((662, 558), face['eyes'])
+            self.assertEqual(face['nose'], (776, 688))
+            self.assertEqual(face['mouth'], (735, 794))
+
+    def test_face_haarcascade_mona_lisa(self):
+        with ImageFile(fetch_file('mona_lisa.jpg')) as uut:
+            data = uut.analyze_face_haarcascades()
+            self.assertIn('OpenCV:Faces', data)
+            self.assertEqual(len(data['OpenCV:Faces']), 1)
+
+            face = data['OpenCV:Faces'][0]
+            self.assertEqual(face['nose'], (318, 310))
+            self.assertEqual(face['mouth'], (325, 341))
+
+    def test_face_haarcascade_monkey_face(self):
+        _file = ImageFile(fetch_file('monkey_face.jpg'))
+        data = _file.analyze_face_haarcascades()
+        self.assertEqual(data, {})
+
+    def test_face_haarcascade_baby_face(self):
+        _file = ImageFile(fetch_file('baby_face.jpg'))
+        data = _file.analyze_face_haarcascades()
+        self.assertIn('OpenCV:Faces', data)
+        self.assertEqual(len(data['OpenCV:Faces']), 1)
+
+        face = data['OpenCV:Faces'][0]
+        self.assertEqual(face['mouth'], (851, 1381))
+        self.assertIn('position', face)
+
+    def test_face_haarcascade_animated_image(self):
+        _file = ImageFile(fetch_file('animated.gif'))
+        data = _file.analyze_face_haarcascades()
+        self.assertEqual(data, {})
+
+
 # Increase the timeout as the first time it will need to download the
 # shape predictor data ~60MB
 @pytest.mark.timeout(300)
@@ -153,8 +198,9 @@ class ImageFileFaceLandmarksTest(unittest.TestCase):
         self.assertEqual(len(data['dlib:Faces']), 1)
         face = data['dlib:Faces'][0]
 
-        self.assertEqual(face['left_eye'], (288, 252))
-        self.assertEqual(face['right_eye'], (361, 251))
+        self.assertEqual((face['eyes']), 2)
+        self.assertIn((288, 252), face['eyes'])
+        self.assertIn((361, 251), face['eyes'])
         self.assertEqual(face['nose'], (325, 318))
         self.assertEqual(face['mouth'], (321, 338))
 
@@ -165,8 +211,7 @@ class ImageFileFaceLandmarksTest(unittest.TestCase):
         self.assertEqual(len(data['dlib:Faces']), 1)
 
         face = data['dlib:Faces'][0]
-        self.assertNotIn('left_eye', face)
-        self.assertNotIn('right_eye', face)
+        self.assertNotIn('eyes', face)
         self.assertNotIn('nose', face)
         self.assertNotIn('mouth', face)
         self.assertIn('position', face)

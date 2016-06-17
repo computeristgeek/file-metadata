@@ -15,6 +15,7 @@ import pathlib2
 import skimage
 import skimage.io
 import skimage.color
+import skimage.transform
 import zbar
 from PIL import Image
 from pycolorname.pantone.pantonepaint import PantonePaint
@@ -81,6 +82,11 @@ class ImageFile(GenericFile):
                              .format(self.fetch('filename')))
                 # Use empty array as the file cannot be read.
                 return numpy.ndarray(0)
+        elif key == 'ndarray_grey':
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                return skimage.img_as_ubyte(
+                    skimage.color.rgb2grey(self.fetch('ndarray')))
         return super(ImageFile, self).fetch(key)
 
     def analyze_softwares(self):
@@ -183,6 +189,173 @@ class ImageFile(GenericFile):
             'Color:ClosestLabeledColor': closest_label,
             'Color:AverageRGB': tuple(round(i, 3) for i in mean_color)}
 
+    @staticmethod
+    def _haarcascade(image, filename, directory=None, **kwargs):
+        """
+        Use OpenCV's haarcascade classifiers to detect certain features.
+
+        :param image:     Image to use when detecting with the haarcascade.
+        :param filename:  The file to create the CascadeClassifier with.
+        :param directory: The directory of the haarcascade file.
+        :param kwagrs:    Keyword args to pass to cascade's detectMultiScale().
+        :return:          List of rectangles of the detected objects. A rect
+                          is defined by an array with 4 values i the order:
+                          left, top, width, height.
+        """
+        try:
+            import cv2
+        except ImportError:
+            logging.warn('HAAR Cascade analysis requires the optional '
+                         'dependency OpenCV to be installed.')
+            return []
+
+        directory = (directory if directory is not None
+            else os.path.abspath(os.path.join(
+                os.path.realpath(cv2.__file__),
+                *([os.pardir] * 4 + ['share', 'OpenCV', 'haarcascades']))))
+        cascade = cv2.CascadeClassifier(os.path.join(directory, filename),)
+        features = cascade.detectMultiScale(image, **kwargs)
+        return features
+
+    def analyze_face_haarcascades(self):
+        """
+        Use opencv's haar cascade filters to identify faces, right eye, left
+        eye, upper body, etc..
+        """
+        try:
+            import cv2
+            from cv2 import cv
+        except ImportError:
+            logging.warn('HAAR Cascade analysis requires the optional '
+                         'dependency OpenCV 2.x to be installed.')
+            return {}
+
+        image_array = self.fetch('ndarray_grey')
+        if image_array.ndim == 3:
+            logging.warn('Faces cannot be detected in animated images '
+                         'using haarcascades yet.')
+            return {}
+
+        # The "scale" given here is relevant for the detection rate.
+        scale = max(1.0, numpy.average(image_array.shape) / 500.0)
+
+        # Equalize the histogram and make the size smaller
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            img_shape = map(lambda x: int(x / scale), image_array.shape)
+            img = skimage.img_as_ubyte(
+                skimage.exposure.equalize_hist(
+                    skimage.transform.resize(image_array,
+                                             output_shape=img_shape,
+                                             preserve_range=True)))
+
+        def haar(im, key, single=False, **kwargs):
+            cascades = {
+                'frontal_face': 'haarcascade_frontalface_alt.xml',
+                'profile_face': 'haarcascade_profileface.xml',
+                'nested': 'haarcascade_eye_tree_eyeglasses.xml',
+                'mouth': 'haarcascade_mcs_mouth.xml',
+                'nose': 'haarcascade_mcs_nose.xml',
+                'right_eye': 'haarcascade_righteye_2splits.xml',
+                'left_eye': 'haarcascade_lefteye_2splits.xml',
+                'left_ear': 'haarcascade_mcs_leftear.xml',
+                'right_ear': 'haarcascade_mcs_rightear.xml',
+                'upper_body': 'haarcascade_upperbody.xml',
+                'lower_body': 'haarcascade_lowerbody.xml'}
+            # Set some default kwargs
+            kwargs['scaleFactor'] = kwargs.get('scaleFactor', 1.1)
+            kwargs['minNeighbors'] = kwargs.get('minNeighbors', 2)
+            kwargs['minSize'] = kwargs.get('minSize', (30, 30))
+            flags = cv.CV_HAAR_SCALE_IMAGE
+            if single:
+                flags = (flags | cv.CV_HAAR_FIND_BIGGEST_OBJECT |
+                         cv.CV_HAAR_DO_ROUGH_SEARCH)
+            kwargs['flags'] = kwargs.get('flags', flags)
+            return list(self._haarcascade(im, cascades[key], **kwargs))
+
+        def drop_overlapping_regions(regions):
+            drop = set()
+            # Sort regions by area (leftmost is smallest and dropped first)
+            regions = sorted(regions, key=lambda x: x[-1] * x[-2])
+            # overlap: Neither range is completely greater than the other
+            overlap = (lambda x_min, x_width, y_min, y_width:
+                       x_min <= y_min + y_width and y_min <= x_min + x_width)
+            for i1, reg1 in enumerate(regions):
+                for i2, reg2 in enumerate(regions[:i1]):
+                    if (i2 not in drop and
+                            overlap(reg1[0], reg1[2], reg2[0], reg2[2]) and
+                            overlap(reg1[1], reg1[3], reg2[1], reg2[3])):
+                        drop.add(i2)
+            for i, reg in enumerate(regions):
+                if i not in drop:
+                    yield reg
+
+        frontal = haar(img, 'frontal_face')
+        profile = haar(img, 'profile_face')
+        faces = list(drop_overlapping_regions(frontal + profile))
+
+        if len(faces) == 0:
+            return {}
+
+        data = []
+        for face in faces:
+            scaled_face = list(map(lambda x: int(x * scale), face))
+            fdata = {'position': {
+                'left': scaled_face[0], 'top': scaled_face[1],
+                'width': scaled_face[2], 'height': scaled_face[3]}}
+            roi = list(map(int, [
+                max(0, face[0] - (face[2] / 8)),
+                max(0, face[1] - (face[3] / 8)),
+                min(img.shape[0], face[2] + (2 * face[2] / 8)),
+                min(img.shape[1], face[3] + (2 * face[3] / 8))]))
+            face_img = img[roi[1]:roi[1] + roi[3] - 1,
+                           roi[0]:roi[0] + roi[2] - 1]
+
+            def feat_mid(rect, offx, offy):
+                return (int(scale * (roi[0] + rect[0] + offx + rect[2] / 2)),
+                        int(scale * (roi[1] + rect[1] + offy + rect[3] // 2)))
+
+            eye_img = face_img[:roi[3] // 2, :]
+            nested = list(drop_overlapping_regions(haar(eye_img, 'nested')))
+            if len(nested) == 2:
+                nested = sorted(nested, key=lambda x: x[0])
+                fdata['eyes'] = (feat_mid(nested[0], 0, 0),
+                                 feat_mid(nested[1], 0, 0))
+            else:
+                eyes_found = []
+                for eye in ['left_eye', 'right_eye']:
+                    eye_feats = haar(eye_img, eye, single=True)
+                    if len(eye_feats) == 1:
+                        eyes_found.append(feat_mid(eye_feats[0], 0, 0))
+                if len(eyes_found) > 0:
+                    fdata['eyes'] = tuple(eyes_found)
+
+            ear_offy = roi[3] // 8
+            ear_img = face_img[ear_offy:roi[3] * 7 // 8, :]
+            ears_found = []
+            for ear in ['left_ear', 'right_ear']:
+                ear_feats = haar(ear_img, ear, single=True)
+                if len(ear_feats) == 1:
+                    ears_found.append(feat_mid(ear_feats[0], 0, ear_offy))
+            if len(ears_found) > 0:
+                fdata['ears'] = tuple(ears_found)
+
+            nose_offx, nose_offy = roi[2] // 4, roi[3] // 4
+            nose_img = face_img[nose_offy:roi[3] * 3 // 4,
+                                nose_offx:roi[2] * 3 // 4]
+            nose_feats = haar(nose_img, 'nose', single=True)
+            if len(nose_feats) == 1:
+                fdata['nose'] = feat_mid(nose_feats[0], nose_offx, nose_offy)
+
+            mouth_offy = roi[3] // 2
+            mouth_img = face_img[mouth_offy:, :]
+            mouth_feats = haar(mouth_img, 'mouth', single=True)
+            if len(mouth_feats) == 1:
+                fdata['mouth'] = feat_mid(mouth_feats[0], 0, mouth_offy)
+
+            data.append(fdata)
+        return {'OpenCV:Faces': data}
+
     def analyze_facial_landmarks(self,
                                  with_landmarks=True,
                                  detector_upsample_num_times=0):
@@ -272,9 +445,9 @@ class ImageFile(GenericFile):
                 # Point 34 is the tip of the nose
                 fdata['nose'] = tup(shape.part(34))
                 # Point 40 and 37 are the two corners of the left eye
-                fdata['left_eye'] = tup2(shape.part(40), shape.part(37))
                 # Point 46 and 43 are the two corners of the right eye
-                fdata['right_eye'] = tup2(shape.part(46), shape.part(43))
+                fdata['eyes'] = (tup2(shape.part(40), shape.part(37)),
+                                 tup2(shape.part(46), shape.part(43)))
                 # Point 49 and 55 are the two outer corners of the mouth
                 fdata['mouth'] = tup2(shape.part(49), shape.part(55))
             data.append(fdata)
@@ -380,11 +553,11 @@ class ImageFile(GenericFile):
                 - confidence - The quality of the barcode. The higher it is
                     the more accurate the detection is.
         """
-        with warnings.catch_warnings():
-            # Supress warning about precision lost in float -> ubyte
-            warnings.simplefilter("ignore")
-            image_array = skimage.img_as_ubyte(
-                skimage.color.rgb2grey(self.fetch('ndarray')))
+        image_array = self.fetch('ndarray_grey')
+        if image_array.ndim == 3:
+            logging.warn('Barcodes cannot be detected in animated images '
+                         'using zbar.')
+            return {}
         height, width = image_array.shape
         zbar_img = zbar.Image(width, height, 'Y800', image_array.tobytes())
         scanner = zbar.ImageScanner()
