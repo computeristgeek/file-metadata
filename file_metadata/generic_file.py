@@ -37,6 +37,18 @@ class GenericFile(object):
     def __init__(self, fname, **kwargs):
         self.filename = fname
         self.options = kwargs
+        self.temp_filenames = set()  # Temporary files created for analysis
+
+    def close(self):
+        while self.temp_filenames:
+            path = self.temp_filenames.pop()
+            os.remove(path)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, _type, value, _traceback):
+        self.close()
 
     def config(self, key, new_defaults=()):
         defaults = {}

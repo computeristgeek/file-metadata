@@ -31,6 +31,7 @@ class SVGFile(ImageFile):
                     prefix='tmp_file_metadata')
                 os.close(fd)
                 svg_image.save(filename=name)
+                self.temp_filenames.add(name)
                 return name
 
         return super(SVGFile, self).fetch(key)

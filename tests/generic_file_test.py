@@ -3,6 +3,9 @@
 from __future__ import (division, absolute_import, unicode_literals,
                         print_function)
 
+import os
+import tempfile
+
 from file_metadata.generic_file import GenericFile, magic
 from tests import fetch_file, mock, unittest, which_sideeffect
 
@@ -21,6 +24,26 @@ class GenericFileTest(unittest.TestCase):
     def test_derived_file_analyze(self):
         uut = DerivedFile(fetch_file('ascii.txt'))
         self.assertEqual(uut.analyze(), {'test1': 'test1'})
+
+    def test_file_close(self):
+        uut = GenericFile(fetch_file('ascii.txt'))
+        fd, name = tempfile.mkstemp(
+            suffix=os.path.split(uut.fetch('filename'))[-1] + '.png')
+        os.close(fd)
+        uut.temp_filenames.add(name)
+        self.assertTrue(os.path.exists(name))
+        uut.close()
+        self.assertFalse(os.path.exists(name))
+
+    def test_enter_exit(self):
+        name = None
+        with GenericFile(fetch_file('ascii.txt')) as uut:
+            fd, name = tempfile.mkstemp(
+                suffix=os.path.split(uut.fetch('filename'))[-1] + '.png')
+            os.close(fd)
+            uut.temp_filenames.add(name)
+            self.assertTrue(os.path.exists(name))
+        self.assertFalse(os.path.exists(name))
 
     def test_config(self):
         uut = GenericFile(fetch_file('ascii.txt'), option1='one')
@@ -107,6 +130,16 @@ class GenericFileInstalledExiftoolTest(unittest.TestCase):
 
 
 class GenericFileCreateTest(unittest.TestCase):
+
+    def test_create_enter_exit(self):
+        name = None
+        with GenericFile.create(fetch_file('ascii.txt')) as uut:
+            fd, name = tempfile.mkstemp(
+                suffix=os.path.split(uut.fetch('filename'))[-1] + '.png')
+            os.close(fd)
+            uut.temp_filenames.add(name)
+            self.assertTrue(os.path.exists(name))
+        self.assertFalse(os.path.exists(name))
 
     def test_create_image_file(self):
         from file_metadata.image.image_file import ImageFile

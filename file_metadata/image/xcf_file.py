@@ -31,6 +31,7 @@ class XCFFile(ImageFile):
                     prefix='tmp_file_metadata')
                 os.close(fd)
                 xcf_image.save(filename=name)
+                self.temp_filenames.add(name)
                 return name
 
         return super(XCFFile, self).fetch(key)

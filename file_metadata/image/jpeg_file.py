@@ -33,6 +33,7 @@ class JPEGFile(ImageFile):
                     prefix='tmp_file_metadata')
                 os.close(fd)
                 skimage.io.imsave(name, self.fetch('ndarray'))
+                self.temp_filenames.add(name)
                 return pathlib2.Path(name).as_uri()
 
         return super(JPEGFile, self).fetch(key)
