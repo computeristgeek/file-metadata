@@ -12,3 +12,4 @@ dlib
 backports.lzma
 scikit-image
 wand
+zbar

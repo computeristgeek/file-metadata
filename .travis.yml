@@ -20,6 +20,7 @@ addons:
       - libav-tools
       - ffmpeg
       - libmagickwand-dev
+      - libzbar-dev
 
 before_install:
   - export PYTHONIOENCODING=UTF-8

@@ -273,9 +273,9 @@ class ImageFile(GenericFile):
 
         return {'dlib:Faces': data}
 
-    def analyze_barcode(self):
+    def analyze_barcode_zxing(self):
         """
-        Use ``zxing`` tot find barcodes, qr codes, data matrices, etc.
+        Use ``zxing`` to find barcodes, qr codes, data matrices, etc.
         from the image.
 
         :return: dict with the keys:

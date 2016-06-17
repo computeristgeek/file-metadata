@@ -10,7 +10,7 @@ Installation
 Before installing file-metadata, a few dependencies need to be
 installed. For Ubuntu, these can be installed with::
 
-    $ sudo apt-get install perl openjdk-7-jre python-dev pkg-config libfreetype6-dev libpng12-dev liblapack-dev libblas-dev gfortran cmake libboost-python-dev liblzma-dev
+    $ sudo apt-get install perl openjdk-7-jre python-dev pkg-config libfreetype6-dev libpng12-dev liblapack-dev libblas-dev gfortran cmake libboost-python-dev liblzma-dev libzbar-dev
 
 Next, use ``pip`` to install the library. To install the latest stable
 version, use::
@@ -44,9 +44,9 @@ file is an image file, and uses the ``ImageFile`` class::
 
 Now, to find possible analysis routines supported for the file, ``help(qr)``
 can be checked. All routines beginning with ``analyze_`` perform analysis.
-As the example we have is a qrcode, let us use ``analyze_barcode()``::
+As the example we have is a qrcode, let us use ``analyze_barcode_zxing()``::
 
-    >>> qr.analyze_barcode()
+    >>> qr.analyze_barcode_zxing()
     {'zxing:Barcodes': [{'data': 'http://www.wikipedia.com',
        'format': 'QR_CODE',
        'points': [(50.0, 316.0), (50.0, 52.0), (314.0, 52.0), (278.0, 280.0)],
