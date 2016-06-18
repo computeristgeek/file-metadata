@@ -58,7 +58,7 @@ class ImageFile(GenericFile):
             return SVGFile.create(*args, **kwargs)
         return cls(*args, **kwargs)
 
-    @memoized(is_method=True)
+    @memoized
     def fetch(self, key=''):
         if key == 'filename_raster':
             # A raster filename holds the file in a raster graphic format

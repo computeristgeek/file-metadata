@@ -10,16 +10,10 @@ from __future__ import (division, absolute_import, unicode_literals,
 import bz2
 import functools
 import hashlib
-import inspect
 import os
 import tarfile
 import tempfile
 from shutil import copyfileobj
-
-try:
-    from cPickle import dumps
-except ImportError:
-    from pickle import dumps
 
 try:
     import lzma
@@ -209,108 +203,39 @@ def app_dir(dirtype, *args):
     return os.path.join(makedirs(path, exist_ok=True), *args)
 
 
-def memoized(func=None, is_method=False, hashable=True, cache=None):
+class memoized(object):  # flake8: noqa (class names should use CapWords)
     """
-    A generic efficient memoized decorator.
+    Cache the return value of a method.
 
-    :param func:
-        If not None it decorates the given callable ``func``, otherwise it
-        returns a decorator. Basically a convenience for creating a
-        decorator with the default parameters as ``@memoized`` instead
-        of ``@memoized()``.
-    :param is_method:
-        Specify whether the decorated function is going to be a class method.
-        Currently this is only used as a hint for returning an efficient
-        implementation for single argument functions (but not methods).
-    :param hashable:
-        Set to False if any parameter may be non-hashable.
-    :param cache:
-        A dict-like instance to be used as the underlying storage for
-        the memoized values. The cache instance must implement ``__getitem__``
-        and ``__setitem__``. Defaults to a new empty dict.
+    This class is meant to be used as a decorator of methods. The return value
+    from a given method invocation will be cached on the instance whose method
+    was invoked. All arguments passed to a method decorated with this decorator
+    must be hashable.
+
+    If a cached method is invoked directly on its class the result will not
+    be cached. Instead the method will be invoked like a static method.
+
+    Taken from: http://code.activestate.com/recipes/
+    577452-a-memoize-decorator-for-instance-methods/
     """
-    def _args_kwargs_memoized(func, hashable=True, cache=None):
-        func.cache = cache if cache is not None else {}
 
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            if hashable:
-                key = (args, frozenset(kwargs.iteritems()))
-            else:
-                key = dumps((args, kwargs), -1)
-            try:
-                return func.cache[key]
-            except KeyError:
-                func.cache[key] = value = func(*args, **kwargs)
-                return value
-        return wrapper
+    def __init__(self, func):
+        self.func = func
 
-    def _args_memoized(func, hashable=True, cache=None):
-        func.cache = cache if cache is not None else {}
+    def __get__(self, obj, objtype=None):
+        if obj is None:
+            return self.func
+        return functools.partial(self, obj)
 
-        @functools.wraps(func)
-        def wrapper(*args):
-            key = args if hashable else dumps(args, -1)
-            try:
-                return func.cache[key]
-            except KeyError:
-                func.cache[key] = value = func(*args)
-                return value
-        return wrapper
-
-    def _one_arg_memoized(func, cache=None):
-        func.cache = cache if cache is not None else {}
-
-        @functools.wraps(func)
-        def wrapper(arg):
-            key = arg
-            try:
-                return func.cache[key]
-            except KeyError:
-                func.cache[key] = value = func(arg)
-                return value
-        return wrapper
-
-    def _fast_one_arg_memoized(func):
-        """
-        A fast memoize function when there is only 1 argument.
-        """
-        class MemoDict(dict):
-            def __missing__(self, key):
-                self[key] = ret = func(key)
-                return ret
-        func.cache = MemoDict()
-        return func.cache.__getitem__
-
-    def _fast_zero_arg_memoized(func):
-        """
-        Use a fast memoize function which works when there are no arguments.
-        """
-        class MemoDict(dict):
-            def __missing__(self, key):
-                self[key] = ret = func()
-                return ret
-        func.cache = MemoDict()
-        return functools.partial(func.cache.__getitem__, None)
-
-    if func is None:
-        return functools.partial(memoized, is_method=is_method,
-                                 hashable=hashable, cache=cache)
-
-    spec = inspect.getargspec(func)
-    allow_named = bool(spec.defaults)
-    if allow_named or spec.keywords:
-        return _args_kwargs_memoized(func, hashable, cache)
-
-    nargs = len(spec.args)
-    if (nargs > 1 or spec.varargs or spec.defaults or not hashable or
-            nargs == 0 and cache is not None):
-        return _args_memoized(func, hashable, cache)
-
-    if nargs == 1:
-        if is_method or cache is not None:
-            return _one_arg_memoized(func, cache)
-        else:
-            return _fast_one_arg_memoized(func)
-
-    return _fast_zero_arg_memoized(func)
+    def __call__(self, *args, **kw):
+        obj = args[0]
+        try:
+            cache = obj.__cache
+        except AttributeError:
+            cache = obj.__cache = {}
+        key = (self.func, args[1:], frozenset(kw.items()))
+        try:
+            res = cache[key]
+        except KeyError:
+            res = cache[key] = self.func(*args, **kw)
+        return res

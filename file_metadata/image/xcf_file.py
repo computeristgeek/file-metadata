@@ -18,7 +18,7 @@ class XCFFile(ImageFile):
     def create(cls, *args, **kwargs):
         return cls(*args, **kwargs)
 
-    @memoized(is_method=True)
+    @memoized
     def fetch(self, key=''):
         if key == 'filename_raster':
             # XCF files are not raste graphics, hence we convert it to one

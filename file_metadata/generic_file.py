@@ -58,12 +58,12 @@ class GenericFile(object):
         except KeyError:
             return defaults[key]
 
-    @memoized(is_method=True)
+    @memoized
     def fetch(self, key=''):
         """
         Fetch data about the file based on the key provided. Provides a
         uniform location where all the conversions of filetype, reading, etc.
-        can happen efficiently and also it gets cached as it's memoized.
+        can happen efficiently and also it gets cached.
 
         :param key: The key decides what data is fetched.
         """
@@ -119,7 +119,7 @@ class GenericFile(object):
                 data.update(getattr(self, method)())
         return data
 
-    @memoized(is_method=True)
+    @memoized
     def exiftool(self):
         """
         The exif data from the given file using ``exiftool``. The data it
@@ -173,7 +173,7 @@ class GenericFile(object):
         assert len(data) == 1
         return data[0]
 
-    @memoized(is_method=True)
+    @memoized
     def mime(self):
         if hasattr(magic, "from_file"):
             # Use https://pypi.python.org/pypi/python-magic
@@ -190,7 +190,7 @@ class GenericFile(object):
             'package python-magic (https://pypi.python.org/pypi/python-magic) '
             'nor file\'s (http://www.darwinsys.com/file/) package.')
 
-    @memoized(is_method=True)
+    @memoized
     def is_type(self, key):
         """
         Some checks on whether the file is of a spacific type. Useful for

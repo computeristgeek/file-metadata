@@ -19,7 +19,7 @@ class JPEGFile(ImageFile):
     def create(cls, *args, **kwargs):
         return cls(*args, **kwargs)
 
-    @memoized(is_method=True)
+    @memoized
     def fetch(self, key=''):
         if key == 'filename_zxing':
             exif = self.exiftool()

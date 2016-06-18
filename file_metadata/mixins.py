@@ -25,7 +25,7 @@ from file_metadata._compat import ffprobe_parser
 
 class FFProbeMixin(object):
 
-    @memoized(is_method=True)
+    @memoized
     def ffprobe(self):
         """
         Read multimedia streams and give information about it using the

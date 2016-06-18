@@ -154,110 +154,16 @@ class AppDirTest(unittest.TestCase):
 
 class MemoizedTest(unittest.TestCase):
 
-    def setUp(self):
-        self.calls = 0
-        self.arg0 = lambda: self.incr_calls()
-        self.arg1 = lambda x: self.incr_calls() or x
-        self.arg2 = lambda x, y = 0: self.incr_calls() or (x, y)
-        # self.argv = lambda x, y, z = 0: self.incr_calls() or (x, y, z)
-        self.kwargv = lambda *a: self.incr_calls() or a
-        self.argv_kwargv = lambda x, y = 0, *a, **k: (
-            self.incr_calls() or (x, y, a, k))
+    def test_memoized_decorator(self):
 
-    def incr_calls(self):
-        self.calls += 1
+        class AbcClass:
+            val = 0
 
-    def multicall(self, func, args_expr, expected_calls, num_calls=10):
-        self.calls = 0
-        results = [eval("f(%s)" % args_expr, {}, {"f": func})
-                   for _ in xrange(num_calls)]
-        self.assertEqual(self.calls, expected_calls)
-        self.assertTrue(all(r == results[0] for r in results))
-        return results[0]
+            @memoized
+            def inc_val(self, arg):
+                self.val += 1
+                return self.val + arg
 
-    def assert_memoized(self, func, args_expr, deco=None):
-        deco = deco or memoized
-        self.assertEqual(self.multicall(func, args_expr, 10, 10),
-                         self.multicall(deco(func), args_expr, 1, 10))
-
-    def test_zero_arg(self):
-        for func in self.arg0, self.kwargv:
-            self.assert_memoized(func, "")
-
-    def test_one_arg_pos(self):
-        for f in self.arg1, self.arg2, self.kwargv, self.argv_kwargv:
-            self.assert_memoized(f, "1")
-
-    def test_one_arg_name(self):
-        for f in self.arg2, self.argv_kwargv:
-            self.assert_memoized(f, "x=1")
-
-    def test_two_args_pos(self):
-        for f in self.arg2, self.kwargv, self.argv_kwargv:
-            self.assert_memoized(f, "1, 2")
-
-    def test_two_args_named(self):
-        for f in self.arg2, self.argv_kwargv:
-            self.assert_memoized(f, "1, y=2")
-            self.assert_memoized(f, "x=1, y=2")
-
-    def test_varargs(self):
-        for f in self.kwargv, self.argv_kwargv:
-            self.assert_memoized(f, "*range(10)")
-
-    def test_varargs_kwargs(self):
-        self.assert_memoized(self.argv_kwargv, "x=1, z=5")
-        self.assert_memoized(self.argv_kwargv, "1, 2, 3, 4, z=5")
-
-    def test_unhashable(self):
-        deco = memoized(hashable=False)
-        for f in self.arg1, self.arg2, self.kwargv, self.argv_kwargv:
-            self.assert_memoized(f, "[2]", deco)
-            self.assert_memoized(f, "{'foo': 3}", deco)
-        for f in self.arg2, self.argv_kwargv:
-            self.assert_memoized(f, "x=[2]", deco)
-            self.assert_memoized(f, "x={'foo': 3}", deco)
-        for f in self.arg2, self.kwargv, self.argv_kwargv:
-            self.assert_memoized(f, "[2], {'foo': 3}", deco)
-        for f in self.arg2, self.argv_kwargv:
-            self.assert_memoized(f, "[2], y={'foo': 3}", deco)
-            self.assert_memoized(f, "x=[2], y={'bar': 2}", deco)
-
-        for f in self.kwargv, self.argv_kwargv:
-            self.assert_memoized(f, "[2], {'foo': 3}, 3", deco)
-
-        for f in (self.argv_kwargv,):
-            self.assert_memoized(f, "[2], {'foo': 3}, z={1,2}", deco)
-            self.assert_memoized(f, "[2], y={'foo': 3}, z={1,2}", deco)
-            self.assert_memoized(f, "x=[2], y={'foo': 3}, z={1,2}", deco)
-
-        for f in self.kwargv, self.argv_kwargv:
-            self.assert_memoized(f, "*[[] for _ in range(10)]", deco)
-
-        self.assert_memoized(self.argv_kwargv, "x=[2], z={'foo': 3}", deco)
-        self.assert_memoized(self.argv_kwargv,
-                             "1, [2], {'foo': 3}, 4, z={5,6}", deco)
-
-    def test_method(self):
-        incr_calls = self.incr_calls
-
-        class X(object):
-
-            def arg0(self):
-                incr_calls()
-
-            bad_mf0 = memoized()(arg0)
-            good_mf0 = memoized(is_method=True)(arg0)
-
-        x = X()
-        self.assertEqual(self.multicall(x.arg0, "", 10),
-                         self.multicall(x.good_mf0, "", 1))
-
-        with self.assertRaises(TypeError):
-            x.bad_mf0()
-
-    def test_default_decorator(self):
-        @memoized
-        def func():
-            return self.arg0()
-        self.multicall(func, "", 1)
+        uut = AbcClass()
+        self.assertEqual(uut.inc_val(2), uut.inc_val(2))
+        self.assertNotEqual(AbcClass.inc_val(uut, 2), AbcClass.inc_val(uut, 2))
