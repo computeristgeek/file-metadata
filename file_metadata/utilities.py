@@ -230,7 +230,7 @@ def memoized(func=None, is_method=False, hashable=True, cache=None):
         and ``__setitem__``. Defaults to a new empty dict.
     """
     def _args_kwargs_memoized(func, hashable=True, cache=None):
-        cache = cache if cache is not None else {}
+        func.cache = cache if cache is not None else {}
 
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
@@ -239,35 +239,35 @@ def memoized(func=None, is_method=False, hashable=True, cache=None):
             else:
                 key = dumps((args, kwargs), -1)
             try:
-                return cache[key]
+                return func.cache[key]
             except KeyError:
-                cache[key] = value = func(*args, **kwargs)
+                func.cache[key] = value = func(*args, **kwargs)
                 return value
         return wrapper
 
     def _args_memoized(func, hashable=True, cache=None):
-        cache = cache if cache is not None else {}
+        func.cache = cache if cache is not None else {}
 
         @functools.wraps(func)
         def wrapper(*args):
             key = args if hashable else dumps(args, -1)
             try:
-                return cache[key]
+                return func.cache[key]
             except KeyError:
-                cache[key] = value = func(*args)
+                func.cache[key] = value = func(*args)
                 return value
         return wrapper
 
     def _one_arg_memoized(func, cache=None):
-        cache = cache if cache is not None else {}
+        func.cache = cache if cache is not None else {}
 
         @functools.wraps(func)
         def wrapper(arg):
             key = arg
             try:
-                return cache[key]
+                return func.cache[key]
             except KeyError:
-                cache[key] = value = func(arg)
+                func.cache[key] = value = func(arg)
                 return value
         return wrapper
 
@@ -279,8 +279,8 @@ def memoized(func=None, is_method=False, hashable=True, cache=None):
             def __missing__(self, key):
                 self[key] = ret = func(key)
                 return ret
-
-        return MemoDict().__getitem__
+        func.cache = MemoDict()
+        return func.cache.__getitem__
 
     def _fast_zero_arg_memoized(func):
         """
@@ -290,8 +290,8 @@ def memoized(func=None, is_method=False, hashable=True, cache=None):
             def __missing__(self, key):
                 self[key] = ret = func()
                 return ret
-
-        return functools.partial(MemoDict().__getitem__, None)
+        func.cache = MemoDict()
+        return functools.partial(func.cache.__getitem__, None)
 
     if func is None:
         return functools.partial(memoized, is_method=is_method,
