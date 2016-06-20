@@ -143,7 +143,7 @@ class GenericFileCreateTest(unittest.TestCase):
 
     def test_create_image_file(self):
         from file_metadata.image.image_file import ImageFile
-        for fname in ['red.png', 'example.tiff']:
+        for fname in ['red.png']:
             self.assertTrue(isinstance(
                 GenericFile.create(fetch_file(fname)), ImageFile),
                 'File "{0}" was not of type {1}'.format(fname, ImageFile))
@@ -169,6 +169,13 @@ class GenericFileCreateTest(unittest.TestCase):
             self.assertTrue(isinstance(
                 GenericFile.create(fetch_file(fname)), SVGFile),
                 'File "{0}" was not of type {1}'.format(fname, SVGFile))
+
+    def test_create_tiff_file(self):
+        from file_metadata.image.tiff_file import TIFFFile
+        for fname in ['example.tiff']:
+            self.assertTrue(isinstance(
+                GenericFile.create(fetch_file(fname)), TIFFFile),
+                'File "{0}" was not of type {1}'.format(fname, TIFFFile))
 
     def test_create_audio_file(self):
         from file_metadata.audio.audio_file import AudioFile

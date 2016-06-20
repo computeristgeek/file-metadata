@@ -53,6 +53,9 @@ class ImageFile(GenericFile):
         elif _type in ('image', 'application') and subtype == 'x-xcf':
             from file_metadata.image.xcf_file import XCFFile
             return XCFFile.create(*args, **kwargs)
+        elif mime == 'image/tiff':
+            from file_metadata.image.tiff_file import TIFFFile
+            return TIFFFile.create(*args, **kwargs)
         elif cls_file.is_type('svg'):
             from file_metadata.image.svg_file import SVGFile
             return SVGFile.create(*args, **kwargs)
