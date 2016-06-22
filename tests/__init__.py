@@ -107,6 +107,12 @@ file_download_links = {
     'created_with_vectorfieldplot.svg': 'https://upload.wikimedia.org/wikipedia/commons/8/83/VFPt_minus.svg',
     'created_with_stella.png': 'https://upload.wikimedia.org/wikipedia/commons/e/e8/10-3_deltohedron.png',
     'created_with_microsoft_image_composite_editor.jpg': 'https://upload.wikimedia.org/wikipedia/commons/7/7c/Bochnia_kopalnia_kaplica_2.jpg',
+
+    # Line drawings
+    'simple_line_drawing.jpg': 'https://upload.wikimedia.org/wikipedia/commons/c/c6/Destilacija_rakije.jpg',
+    'detailed_line_drawing.jpg': 'https://upload.wikimedia.org/wikipedia/commons/d/db/Compound_Microscope_1876.JPG',
+    'very_detailed_line_drawing.jpg': 'https://upload.wikimedia.org/wikipedia/commons/c/cb/Hospital_ward_on_Red_Rover.jpg',
+    'dark_line_drawing.jpg': 'https://upload.wikimedia.org/wikipedia/commons/3/3e/Bird_in_flight_line_drawing_art.jpg',
 }
 
 

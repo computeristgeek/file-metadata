@@ -8,13 +8,16 @@ import os
 import re
 import subprocess
 import warnings
+from itertools import chain
 
 import dlib
 import numpy
 import pathlib2
 import skimage
-import skimage.io
 import skimage.color
+import skimage.exposure
+import skimage.feature
+import skimage.io
 import skimage.transform
 import zbar
 from PIL import Image
@@ -22,8 +25,8 @@ from pycolorname.pantone.pantonepaint import PantonePaint
 
 from file_metadata._compat import makedirs
 from file_metadata.generic_file import GenericFile
-from file_metadata.utilities import (app_dir, bz2_decompress, download,
-                                     to_cstr, memoized)
+from file_metadata.utilities import (DictNoNone, app_dir, bz2_decompress,
+                                     download, to_cstr, memoized)
 
 # A Decompression Bomb is a small compressed image file which when decompressed
 # uses a uge amount of RAM. For example, a monochrome PNG file with 100kx100k
@@ -155,11 +158,23 @@ class ImageFile(GenericFile):
         return {'Composite:Softwares':
                 tuple(softwares) if len(softwares) > 1 else softwares[0]}
 
-    def analyze_color_average(self):
+    def analyze_color_info(self,
+                           grey_shade_threshold=0.05,
+                           freq_colors_threshold=0.1,
+                           edge_ratio_gaussian_sigma=1):
         """
         Find the average RGB color of the image and compare with the existing
         Pantone color system to identify the color name.
 
+        :param grey_shade_threshold:
+            The threshold to select a grey shade in NumberOfGreyShades.
+            Percent of the most frequent shade (Range from 0 to 1).
+        :param freq_colors_threshold:
+            The threshold to select a peak in PercentFrequentColors.
+            Percent of the most frequent shade (Range from 0 to 1).
+        :param edge_ratio_gaussian_sigma:
+            The sigma to use in gaussian blurring in Canny edge detection
+            for EdgeRatio.
         :return: dict with the keys:
 
              - Color:ClosestLabeledColorRGB - The closest RGB value of the
@@ -167,6 +182,14 @@ class ImageFile(GenericFile):
              - Color:ClosestLabeledColorRGB - The name of the closest color
                 found in the Pantone color palette.
              - Color:AverageRGB - The average RGB value of the image.
+             - Color:NumberOfGreyShades - The number of grey shades that are
+                present more than a threshold percent of the most popular
+                greyscale in a greyscale image with intensities from 0 - 255.
+             - Color:PercentFrequentColors - The ratio of the number of colors
+                which occur frequently to the number of colors in the
+                palette.
+             - Color:EdgeRatio - The percentage of pixels in the picture where
+                edges are found.
         """
         image_array = self.fetch('ndarray')
         if image_array.ndim == 4:  # Animated images
@@ -177,20 +200,72 @@ class ImageFile(GenericFile):
             avg = image_array.mean()
             mean_color = (avg, avg, avg)
         else:
-            msg = ('Unsupported image type in "analyze_color_average()". '
+            msg = ('Unsupported image type in "analyze_color_info()". '
                    'Expected animated, greyscale, rgb, or rgba images. '
                    'Found an image with {0} dimensions and shape {1}. '
                    .format(image_array.ndim, image_array.shape))
             logging.warn(msg)
             return {}
 
+        # Find the mean color and the closest color in the known palette
         mean_color = mean_color[:3]  # Remove alpha channel if existent
         closest_label, closest_color = PantonePaint().find_closest(mean_color)
 
-        return {
+        grey_array = self.fetch('ndarray_grey')
+        _full_histogram = lambda img: numpy.histogram(img, bins=range(256))[0]
+
+        if image_array.ndim == 3 or image_array.ndim == 2:
+            # Find the edge ratio by applying the canny filter and finding
+            # bright spots. Not applicable to animated images.
+            scale = max(1.0, numpy.average(image_array.shape[:2]) / 500.0)
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                img_shape = map(lambda x: int(x / scale), grey_array.shape[:2])
+                grey_img = skimage.transform.resize(grey_array,
+                                                    output_shape=img_shape,
+                                                    preserve_range=True)
+            edge_img = skimage.feature.canny(grey_img,
+                                             sigma=edge_ratio_gaussian_sigma)
+            edge_ratio = (edge_img > 0).mean()
+
+            # Find the number of grey shades in the imag eusing the histogram.
+            grey_hist = _full_histogram(grey_array)
+            grey_hist_max = grey_shade_threshold * grey_hist.max()
+            num_grey_shades = (grey_hist > grey_hist_max).sum()
+        else:
+            edge_ratio = None
+            num_grey_shades = None
+
+        # Find the peaks_percent using a histogram
+        if image_array.ndim == 4:  # Animated images
+            hist = {
+                "red": _full_histogram(image_array[:, :, :, 0]),
+                "green": _full_histogram(image_array[:, :, :, 1]),
+                "blue": _full_histogram(image_array[:, :, :, 2])
+            }
+        elif image_array.ndim == 3:  # Static images
+            hist = {
+                "red": _full_histogram(image_array[:, :, 0]),
+                "green": _full_histogram(image_array[:, :, 1]),
+                "blue": _full_histogram(image_array[:, :, 2])
+            }
+        elif image_array.ndim == 2:  # Greyscale images
+            hist = {"grey": _full_histogram(image_array)}
+
+        # Calculate peaks by finding the number of colors which occur
+        # more than a given threshold. The threshold is chosen to be 1% of
+        # the color that occurs most number of times. 
+        hist_concat = numpy.concatenate(tuple(hist.values()))
+        peaks_hist_max = freq_colors_threshold * hist_concat.max()
+        peaks_percent = (hist_concat > peaks_hist_max).mean()
+
+        return DictNoNone({
             'Color:ClosestLabeledColorRGB': closest_color,
             'Color:ClosestLabeledColor': closest_label,
-            'Color:AverageRGB': tuple(round(i, 3) for i in mean_color)}
+            'Color:AverageRGB': tuple(round(i, 3) for i in mean_color),
+            'Color:NumberOfGreyShades': num_grey_shades,
+            'Color:PercentFrequentColors': peaks_percent,
+            'Color:EdgeRatio': edge_ratio})
 
     @staticmethod
     def _haarcascade(image, filename, directory=None, **kwargs):

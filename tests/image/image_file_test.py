@@ -105,35 +105,107 @@ class ImageFileSoftwaresTest(unittest.TestCase):
         self.assertEqual(data, 'Microsoft ICE')
 
 
-class ImageFileColorAverageTest(unittest.TestCase):
+class ImageFileColorInfoTest(unittest.TestCase):
 
-    def test_color_average_rgb_image(self):
-        data = ImageFile(fetch_file('red.png')).analyze_color_average()
+    def test_color_info_rgb_image(self):
+        data = ImageFile(fetch_file('red.png')).analyze_color_info()
+        self.assertIn('Color:AverageRGB', data)
         self.assertEqual(data['Color:AverageRGB'], (255, 0, 0))
         self.assertEqual(data['Color:ClosestLabeledColor'],
                          'PMS 17-1462 TPX (Flame)')
         self.assertEqual(data['Color:ClosestLabeledColorRGB'], (244, 81, 44))
+        self.assertEqual(data['Color:NumberOfGreyShades'], 1)
+        self.assertEqual(round(data['Color:PercentFrequentColors'], 3), 0.004)
+        self.assertEqual(round(data['Color:EdgeRatio'], 3), 0)
 
-    def test_color_average_rgba_image(self):
-        data = ImageFile(fetch_file('ball.png')).analyze_color_average()
+    def test_color_info_rgba_image(self):
+        data = ImageFile(fetch_file('ball.png')).analyze_color_info()
+        self.assertIn('Color:AverageRGB', data)
         self.assertEqual(data['Color:AverageRGB'], (113.705, 113.705, 113.705))
         self.assertEqual(data['Color:ClosestLabeledColor'],
                          'PMS 18-5102 TPX (Brushed Nickel)')
         self.assertEqual(data['Color:ClosestLabeledColorRGB'], (122, 118, 117))
+        self.assertEqual(data['Color:NumberOfGreyShades'], 2)
+        self.assertEqual(round(data['Color:PercentFrequentColors'], 3), 0.008)
+        self.assertEqual(round(data['Color:EdgeRatio'], 3), 0.016)
 
-    def test_color_average_greyscale_image(self):
-        data = ImageFile(fetch_file('barcode.png')).analyze_color_average()
+    def test_color_info_greyscale_image(self):
+        data = ImageFile(fetch_file('barcode.png')).analyze_color_info()
+        self.assertIn('Color:AverageRGB', data)
         self.assertEqual(data['Color:AverageRGB'], (170.579, 170.579, 170.579))
         self.assertEqual(data['Color:ClosestLabeledColor'],
                          'PMS 15-4306 TPX (Belgian Block)')
         self.assertEqual(data['Color:ClosestLabeledColorRGB'], (167, 173, 170))
+        self.assertEqual(data['Color:NumberOfGreyShades'], 2)
+        self.assertEqual(round(data['Color:PercentFrequentColors'], 3), 0.008)
+        self.assertEqual(round(data['Color:EdgeRatio'], 3), 0.268)
 
-    def test_color_average_animated_image(self):
-        data = ImageFile(fetch_file('animated.gif')).analyze_color_average()
+    def test_color_info_animated_image(self):
+        data = ImageFile(fetch_file('animated.gif')).analyze_color_info()
+        self.assertIn('Color:AverageRGB', data)
         self.assertEqual(data['Color:AverageRGB'], (227.326, 224.414, 224.414))
         self.assertEqual(data['Color:ClosestLabeledColor'],
                          'PMS 13-4108 TPX (Nimbus Cloud)')
         self.assertEqual(data['Color:ClosestLabeledColorRGB'], (223, 223, 227))
+        self.assertEqual(round(data['Color:PercentFrequentColors'], 3), 0.008)
+        self.assertNotIn('Color:EdgeRatio', data)
+        self.assertNotIn('Color:NumberOfGreyShades', data)
+
+    def test_color_info_non_line_drawings(self):
+        data = ImageFile(fetch_file('mona_lisa.jpg')).analyze_color_info()
+        self.assertIn('Color:AverageRGB', data)
+        self.assertEqual(data['Color:AverageRGB'], (82.457, 74.157, 63.756))
+        self.assertEqual(data['Color:NumberOfGreyShades'], 204)
+        self.assertEqual(round(data['Color:PercentFrequentColors'], 3), 0.626)
+        self.assertEqual(round(data['Color:EdgeRatio'], 3), 0.290)
+
+        data = ImageFile(fetch_file('baby_face.jpg')).analyze_color_info()
+        self.assertIn('Color:AverageRGB', data)
+        self.assertEqual(data['Color:AverageRGB'], (131.434, 130.707, 120.324))
+        self.assertEqual(data['Color:NumberOfGreyShades'], 203)
+        self.assertEqual(round(data['Color:PercentFrequentColors'], 3), 0.442)
+        self.assertEqual(round(data['Color:EdgeRatio'], 3), 0.303)
+
+        data = ImageFile(fetch_file(
+            'michael_jackson.jpg')).analyze_color_info()
+        self.assertIn('Color:AverageRGB', data)
+        self.assertEqual(data['Color:AverageRGB'], (120.288, 65.377, 70.155))
+        self.assertEqual(data['Color:NumberOfGreyShades'], 83)
+        self.assertEqual(round(data['Color:PercentFrequentColors'], 3), 0.154)
+        self.assertEqual(round(data['Color:EdgeRatio'], 3), 0.273)
+
+    def test_color_info_line_drawings(self):
+        data = ImageFile(fetch_file(
+            'simple_line_drawing.jpg')).analyze_color_info()
+        self.assertIn('Color:AverageRGB', data)
+        self.assertEqual(data['Color:AverageRGB'], (243.131, 243.131, 243.131))
+        self.assertEqual(data['Color:NumberOfGreyShades'], 5)
+        self.assertEqual(round(data['Color:PercentFrequentColors'], 3), 0.016)
+        self.assertEqual(round(data['Color:EdgeRatio'], 3), 0.191)
+
+        data = ImageFile(fetch_file(
+            'detailed_line_drawing.jpg')).analyze_color_info()
+        self.assertIn('Color:AverageRGB', data)
+        self.assertEqual(data['Color:AverageRGB'], (229.461, 229.461, 229.461))
+        self.assertEqual(data['Color:NumberOfGreyShades'], 1)
+        self.assertEqual(round(data['Color:PercentFrequentColors'], 3), 0.004)
+        self.assertEqual(round(data['Color:EdgeRatio'], 3), 0.112)
+
+        data = ImageFile(fetch_file(
+            'very_detailed_line_drawing.jpg')).analyze_color_info()
+        self.assertIn('Color:AverageRGB', data)
+        self.assertEqual(data['Color:AverageRGB'], (135.896, 135.896, 135.896))
+        self.assertEqual(data['Color:NumberOfGreyShades'], 8)
+        self.assertEqual(round(data['Color:PercentFrequentColors'], 3), 0.012)
+        self.assertEqual(round(data['Color:EdgeRatio'], 3), 0.283)
+
+        data = ImageFile(fetch_file(
+            'dark_line_drawing.jpg')).analyze_color_info()
+        self.assertIn('Color:AverageRGB', data)
+        self.assertEqual(data['Color:AverageRGB'], (204.207, 204.207, 204.207))
+        self.assertEqual(data['Color:NumberOfGreyShades'], 2)
+        self.assertEqual(round(data['Color:PercentFrequentColors'], 3), 0.008)
+        self.assertEqual(round(data['Color:EdgeRatio'], 3), 0.093)
 
 
 class ImageFileFaceHAARCascadesTest(unittest.TestCase):
