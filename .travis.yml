@@ -13,12 +13,14 @@ cache:
   directories:
     - /home/travis/miniconda
 
+services:
+  - docker
+
 addons:
   apt:
     packages:
       - libimage-exiftool-perl
       - libav-tools
-      - ffmpeg
       - libmagickwand-dev
       - libzbar-dev
 
@@ -61,6 +63,17 @@ script:
   - flake8 setup.py setupdeps.py file_metadata tests
   - python -m pytest --cov ;
   - python setup.py sdist bdist bdist_wheel
+  # Upload to docker using the env variables in the settings if it's on the master branch
+  - if [[ "$TRAVIS_BRANCH" == "ajk/docker" && "$TRAVIS_PULL_REQUEST" == "false" ]] ; then
+      COMMIT=${TRAVIS_COMMIT::8} ;
+      REPO=abdealijk/file-metadata ;
+      docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS ;
+      docker build -f Dockerfile -t $REPO:$COMMIT . ;
+      docker tag $REPO:$COMMIT $REPO:latest ;
+      docker tag $REPO:$COMMIT $REPO:travis-$TRAVIS_BUILD_NUMBER ;
+      docker images ;
+    fi
+# docker push $REPO ;
 
 after_script:
   - bash <(curl -s https://codecov.io/bash)
