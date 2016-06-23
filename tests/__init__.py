@@ -62,7 +62,13 @@ file_download_links = {
     'application_xml.svg': 'https://upload.wikimedia.org/wikipedia/commons/0/0b/Sieve_of_Eratosthenes_animation.svg',
 
     # Images with special exifdata:
-    'canon_face.jpg': 'https://upload.wikimedia.org/wikipedia/commons/7/7b/Annagrah-2_041.JPG',
+    'sony_face.jpg': 'https://upload.wikimedia.org/wikipedia/commons/7/74/2015_NAMM_Show_-_DSC00396_%2816344792356%29.jpg',
+    'fujifilm_face.jpg': 'https://upload.wikimedia.org/wikipedia/commons/f/f4/Gabriele_Paolini_Roma_20-9-2015_2.jpg',
+    'nikon_face.jpg': 'https://upload.wikimedia.org/wikipedia/commons/a/a8/Alexander_Fomichev_2011-10-27.JPG',
+    'panasonic_face.jpg': 'https://upload.wikimedia.org/wikipedia/commons/c/cb/9th_Coventry_Wikimeet_07.jpg',
+    'pentax_face.jpg': 'https://upload.wikimedia.org/wikipedia/commons/e/e9/Quentin_Bryce_and_Neil_Willmett.JPG',
+    'canon_new_face.jpg': 'https://upload.wikimedia.org/wikipedia/commons/7/7b/Annagrah-2_041.JPG',
+    'olympus_face.jpg': 'https://upload.wikimedia.org/wikipedia/commons/d/de/Myriam_Chalek.jpg',
 
     # Images of faces
     'mona_lisa.jpg': 'https://upload.wikimedia.org/wikipedia/commons/7/7d/Mona_Lisa_color_restoration.jpg',

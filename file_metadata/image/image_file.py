@@ -533,6 +533,95 @@ class ImageFile(GenericFile):
 
         return {'dlib:Faces': data}
 
+    def analyze_face_exif(self):
+        """
+        Use exifdata to find faces detected by the camera.
+        """
+        # Code at http://u88.n24.queensu.ca/pub/facetest.pl with description at
+        # post http://u88.n24.queensu.ca/exiftool/forum/index.php?topic=3156.0
+        exif = self.exiftool()
+        exif_keys = set(exif.keys())
+
+        def _has_exif(*keys_to_find):
+            return set(keys_to_find).issubset(exif_keys)
+
+        # EXIF data that are definitely needed for this analysis
+        if not _has_exif('EXIF:Make', 'File:ImageHeight', 'File:ImageWidth'):
+            return {}
+
+        make = exif['EXIF:Make'].lower()
+        height = exif['File:ImageHeight']
+        width = exif['File:ImageWidth']
+        data = []
+
+        if make == 'sony':
+            if not _has_exif('MakerNotes:FacesDetected',
+                             'MakerNotes:Face1Position'):
+                return {}
+            face_i = 0
+            while True:
+                face_i += 1
+                tag = 'MakerNotes:Face{0}Position'.format(face_i)
+                if not _has_exif(tag):
+                    break
+                y1, x1, yd, xd = map(int, exif[tag].split())
+                data.append({'position': {
+                    'left': x1, 'top': y1, 'width': xd, 'height': yd}})
+        elif make == 'fujifilm':
+            if (not _has_exif('MakerNotes:FacesDetected',
+                              'MakerNotes:FacePositions') or 
+                    exif.get('MakerNotes:FacesDetected', 0) < 1):
+                return {}
+            pos = map(int, exif['MakerNotes:FacePositions'].split())
+            for face_i in range(int(exif['MakerNotes:FacesDetected'])):
+                data.append({"position": {
+                    "left": pos[face_i * 4],
+                    "top": pos[face_i * 4 + 1],
+                    "width": pos[face_i * 4 + 2] - pos[face_i * 4],
+                    "height": pos[face_i * 4 + 3] - pos[face_i * 4 + 1]}})
+        elif make == 'nikon':
+            if (not _has_exif('MakerNotes:FacesDetected',
+                              'MakerNotes:FaceDetectFrameSize',
+                              'MakerNotes:Face1Position') or 
+                    exif.get('MakerNotes:FacesDetected', 0) < 1):
+                return {}
+            fwidth, fheight = map(
+                float, exif['MakerNotes:FaceDetectFrameSize'].split())
+            scalew, scaleh = width / min(fwidth, fheight), height / min(fwidth, fheight)
+            print(height, width, fheight, fwidth, scaleh, scalew)
+            face_i = 0
+            while True:
+                face_i += 1
+                tag = 'MakerNotes:Face{0}Position'.format(face_i)
+                if not _has_exif(tag):
+                    break
+                x1, y1, xd, yd = map(int, exif[tag].split())
+                print(x1, y1, xd, yd)
+                data.append({'position': {
+                    'left': int(x1 * scalew), 'top': int(y1 * scaleh),
+                    'width': int(xd * scalew), 'height': int(yd * scaleh)}})
+        elif make == 'panasonic':
+            if (not _has_exif('MakerNotes:FacesDetected',
+                              'MakerNotes:FaceDetectFrameSize',
+                              'MakerNotes:Face1Position') or 
+                    exif.get('MakerNotes:FacesDetected', 0) < 1):
+                return {}
+            fwidth, fheight = map(
+                float, exif['MakerNotes:FaceDetectFrameSize'].split())
+            scalew, scaleh = width / fwidth, height / fheight
+            face_i = 0
+            while True:
+                face_i += 1
+                tag = 'MakerNotes:Face{0}Position'.format(face_i)
+                if not _has_exif(tag):
+                    break
+                x1, y1, xd, yd = map(int, exif[tag].split())
+                data.append({'position': {
+                    'left': int(x1 * scalew), 'top': int(y1 * scaleh),
+                    'width': int(xd * scalew), 'height': int(yd * scaleh)}})
+
+        return {'CompositeMakerNotes:Faces': data}
+
     def analyze_barcode_zxing(self):
         """
         Use ``zxing`` to find barcodes, qr codes, data matrices, etc.

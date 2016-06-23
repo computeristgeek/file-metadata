@@ -292,6 +292,86 @@ class ImageFileFaceLandmarksTest(unittest.TestCase):
         self.assertEqual(data, {})
 
 
+class ImageFileFaceEXIFTest(unittest.TestCase):
+
+    def test_face_exif_sony(self):
+        with ImageFile(fetch_file('sony_face.jpg')) as uut:
+            data = uut.analyze_face_exif()
+            self.assertIn('CompositeMakerNotes:Faces', data)
+            self.assertEqual(len(data['CompositeMakerNotes:Faces']), 1)
+
+            face = data['CompositeMakerNotes:Faces'][0]
+            self.assertEqual(face['position'],
+                             {'left': 941, 'top': 1644,
+                              'width': 496,  'height': 496})
+
+    def test_face_exif_fujifilm(self):
+        with ImageFile(fetch_file('fujifilm_face.jpg')) as uut:
+            data = uut.analyze_face_exif()
+            self.assertIn('CompositeMakerNotes:Faces', data)
+            self.assertEqual(len(data['CompositeMakerNotes:Faces']), 1)
+
+            face = data['CompositeMakerNotes:Faces'][0]
+            self.assertEqual(face['position'], 
+                             {'left': 0, 'top': 0,
+                              'width': 0,  'height': 0})
+
+    def test_face_exif_nikon(self):
+        with ImageFile(fetch_file('nikon_face.jpg')) as uut:
+            data = uut.analyze_face_exif()
+            self.assertIn('CompositeMakerNotes:Faces', data)
+            self.assertEqual(len(data['CompositeMakerNotes:Faces']), 1)
+
+            face = data['CompositeMakerNotes:Faces'][0]
+            self.assertEqual(face['position'],
+                             {'left': 0, 'top': 0,
+                              'width': 0,  'height': 0})
+
+    def test_face_exif_panasonic(self):
+        with ImageFile(fetch_file('panasonic_face.jpg')) as uut:
+            data = uut.analyze_face_exif()
+            self.assertIn('CompositeMakerNotes:Faces', data)
+            self.assertEqual(len(data['CompositeMakerNotes:Faces']), 1)
+
+            face = data['CompositeMakerNotes:Faces'][0]
+            self.assertEqual(face['position'],
+                             {'left': 0, 'top': 0,
+                              'width': 0,  'height': 0})
+
+    def test_face_exif_pentax(self):
+        with ImageFile(fetch_file('pentax_face.jpg')) as uut:
+            data = uut.analyze_face_exif()
+            self.assertIn('CompositeMakerNotes:Faces', data)
+            self.assertEqual(len(data['CompositeMakerNotes:Faces']), 1)
+
+            face = data['CompositeMakerNotes:Faces'][0]
+            self.assertEqual(face['position'],
+                             {'left': 0, 'top': 0,
+                              'width': 0,  'height': 0})
+
+    def test_face_exif_canon_new(self):
+        with ImageFile(fetch_file('canon_new_face.jpg')) as uut:
+            data = uut.analyze_face_exif()
+            self.assertIn('CompositeMakerNotes:Faces', data)
+            self.assertEqual(len(data['CompositeMakerNotes:Faces']), 1)
+
+            face = data['CompositeMakerNotes:Faces'][0]
+            self.assertEqual(face['position'],
+                             {'left': 0, 'top': 0,
+                              'width': 0,  'height': 0})
+
+    def test_face_exif_olympus(self):
+        with ImageFile(fetch_file('olympus_face.jpg')) as uut:
+            data = uut.analyze_face_exif()
+            self.assertIn('CompositeMakerNotes:Faces', data)
+            self.assertEqual(len(data['CompositeMakerNotes:Faces']), 1)
+
+            face = data['CompositeMakerNotes:Faces'][0]
+            self.assertEqual(face['position'],
+                             {'left': 0, 'top': 0,
+                              'width': 0,  'height': 0})
+
+
 class ImageFileBarcodeZXingTest(unittest.TestCase):
 
     def test_barcode_zxing_mona_lisa(self):
