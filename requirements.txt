@@ -2,7 +2,6 @@ setuptools
 appdirs
 python-magic
 pycolorname>=0.1.0
-retry
 pathlib2
 six>=1.8.0
 numpy

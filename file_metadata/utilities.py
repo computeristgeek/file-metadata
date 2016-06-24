@@ -239,3 +239,27 @@ class memoized(object):  # flake8: noqa (class names should use CapWords)
         except KeyError:
             res = cache[key] = self.func(*args, **kw)
         return res
+
+
+def retry(exceptions=Exception, tries=-1):
+    """
+    A retry decorator which retried a function if one of the given exceptions
+    were raised.
+
+    :param exceptions: An exception or a tuple of exceptions to catch.
+    :param tries:      The maximum number of attempts, -1 for infinite.
+    :returns:          A retry decorator.
+    """
+    def retry_decorator(f):
+        @functools.wraps(f)
+        def wrapper(*fargs, **fkwargs):
+            _tries = tries
+            while _tries:
+                try:
+                    return f(*fargs, **fkwargs)
+                except exceptions as err:
+                    _tries -= 1
+                    if not _tries:
+                        raise
+        return wrapper
+    return retry_decorator

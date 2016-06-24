@@ -14,7 +14,8 @@ from io import StringIO
 from six.moves.urllib.error import URLError
 
 from file_metadata.utilities import (app_dir, bz2_decompress, make_temp,
-                                     download, md5sum, memoized, DictNoNone)
+                                     download, md5sum, memoized, retry,
+                                     DictNoNone)
 from tests import mock, unittest
 
 
@@ -167,3 +168,24 @@ class MemoizedTest(unittest.TestCase):
         uut = AbcClass()
         self.assertEqual(uut.inc_val(2), uut.inc_val(2))
         self.assertNotEqual(AbcClass.inc_val(uut, 2), AbcClass.inc_val(uut, 2))
+
+
+class RetryTest(unittest.TestCase):
+
+    def test_retry_tries(self):
+        def func():
+            func.count += 1
+            if func.count > 5:
+                return True
+            else:
+                raise AssertionError
+
+        func.count = 0
+        uut = retry(tries=6)(func)
+        self.assertTrue(uut())
+        self.assertEqual(func.count, 6)
+
+        func.count = 0
+        uut = retry(tries=2)(func)
+        self.assertRaises(AssertionError, uut)
+        self.assertEqual(func.count, 2)
