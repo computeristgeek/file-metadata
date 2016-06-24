@@ -1,15 +1,21 @@
 setuptools
-appdirs
-python-magic
-pycolorname>=0.1.0
+
+# For backporting
 pathlib2
-six>=1.8.0
-numpy
-scipy
-matplotlib
-dlib
-pillow>=2.5.0
 backports.lzma
-scikit-image
+
+# Not directly used by us, but required by dependencies
+matplotlib>=1.3.1
+
+appdirs>=1.1.0
+pycolorname>=0.1.0
+
+python-magic
+six>=1.8.0
+pillow>=2.5.0
+numpy>=1.7.2
+scipy>=0.9.0
+dlib
+scikit-image>=0.12
 wand
 zbar
