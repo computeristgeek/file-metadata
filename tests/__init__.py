@@ -3,21 +3,23 @@
 from __future__ import (division, absolute_import, unicode_literals,
                         print_function)
 
+# flake8: noqa (unused import and line too long due to links)
+
 import os
 import random
 import string
 import struct
 import wave
 
-try:  # Python 2
-    import unittest2 as unittest
-except ImportError:
+try:
     import unittest
+except ImportError:
+    import unittest2 as unittest
 
-try:  # Python 3
-    import unittest.mock as mock  # flake8: noqa (unused import)
-except ImportError:  # Python 2
-    import mock  # flake8: noqa (unused import)
+try:
+    import unittest.mock as mock
+except ImportError:
+    import mock
 
 from file_metadata._compat import makedirs, which
 from file_metadata.utilities import download

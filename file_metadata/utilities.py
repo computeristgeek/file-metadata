@@ -203,7 +203,7 @@ def app_dir(dirtype, *args):
     return os.path.join(makedirs(path, exist_ok=True), *args)
 
 
-class memoized(object):  # flake8: noqa (class names should use CapWords)
+class memoized(object):  # noqa (class names should use CapWords)
     """
     Cache the return value of a method.
 
@@ -257,7 +257,7 @@ def retry(exceptions=Exception, tries=-1):
             while _tries:
                 try:
                     return f(*fargs, **fkwargs)
-                except exceptions as err:
+                except exceptions:
                     _tries -= 1
                     if not _tries:
                         raise

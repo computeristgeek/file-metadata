@@ -8,7 +8,6 @@ import os
 import re
 import subprocess
 import warnings
-from itertools import chain
 
 import dlib
 import numpy
@@ -212,7 +211,9 @@ class ImageFile(GenericFile):
         closest_label, closest_color = PantonePaint().find_closest(mean_color)
 
         grey_array = self.fetch('ndarray_grey')
-        _full_histogram = lambda img: numpy.histogram(img, bins=range(256))[0]
+
+        def _full_histogram(img):
+            return numpy.histogram(img, bins=range(256))[0]
 
         if image_array.ndim == 3 or image_array.ndim == 2:
             # Find the edge ratio by applying the canny filter and finding
@@ -254,7 +255,7 @@ class ImageFile(GenericFile):
 
         # Calculate peaks by finding the number of colors which occur
         # more than a given threshold. The threshold is chosen to be 1% of
-        # the color that occurs most number of times. 
+        # the color that occurs most number of times.
         hist_concat = numpy.concatenate(tuple(hist.values()))
         peaks_hist_max = freq_colors_threshold * hist_concat.max()
         peaks_percent = (hist_concat > peaks_hist_max).mean()
@@ -302,7 +303,7 @@ class ImageFile(GenericFile):
         eye, upper body, etc..
         """
         try:
-            import cv2  # flake8: noqa (unused import)
+            import cv2  # noqa (unused import)
             from cv2 import cv
         except ImportError:
             logging.warn('HAAR Cascade analysis requires the optional '
