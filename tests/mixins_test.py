@@ -5,8 +5,7 @@ from __future__ import (division, absolute_import, unicode_literals,
 
 import platform
 
-from whichcraft import which
-
+from file_metadata._compat import which
 from file_metadata.generic_file import GenericFile
 from file_metadata.mixins import is_svg, FFProbeMixin
 from tests import fetch_file, mock, unittest, which_sideeffect

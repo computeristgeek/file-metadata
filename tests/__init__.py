@@ -19,9 +19,7 @@ try:  # Python 3
 except ImportError:  # Python 2
     import mock  # flake8: noqa (unused import)
 
-from whichcraft import which
-
-from file_metadata._compat import makedirs
+from file_metadata._compat import makedirs, which
 from file_metadata.utilities import download
 
 CACHE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'files')

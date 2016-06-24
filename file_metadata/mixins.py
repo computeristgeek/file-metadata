@@ -16,11 +16,9 @@ import platform
 import subprocess
 from xml.etree import cElementTree
 
-from whichcraft import which
-
 from file_metadata.utilities import (app_dir, download, tarxz_decompress,
                                      DictNoNone, memoized)
-from file_metadata._compat import ffprobe_parser
+from file_metadata._compat import ffprobe_parser, which
 
 
 class FFProbeMixin(object):

@@ -9,8 +9,8 @@ import os
 import subprocess
 
 import magic
-from whichcraft import which
 
+from file_metadata._compat import which
 from file_metadata.mixins import is_svg
 from file_metadata.utilities import (memoized, app_dir,
                                      download, targz_decompress)
