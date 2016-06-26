@@ -54,6 +54,28 @@ def to_cstr(value, encoding='utf-8'):
         return value
 
 
+def from_cstr(value, encoding='utf-8'):
+    """
+    Convert a C style string to a python string. Meant for packages which
+    give C strings like boost.python and other python bindings on C
+    libraries.
+    C strings are 8 byte ansii. Hence, we convert that into unicode.
+
+    >>> from_cstr(u'a')
+    u'a'
+    >>> from_cstr('a')
+    u'a'
+    >>> from_cstr(from_cstr("啊"))  # Doesn't raise an error
+    u'\\u554a'
+    """
+    if ((six.PY2 and isinstance(value, unicode)) or
+            (six.PY3 and isinstance(value, str))):
+        return value
+    elif ((six.PY2 and isinstance(value, str)) or
+            (six.PY3 and isinstance(value, bytes))):
+        return value.decode(encoding)
+
+
 def download(url, filename, overwrite=False, timeout=None):
     """
     Download the given URL to the given filename. If the file exists,

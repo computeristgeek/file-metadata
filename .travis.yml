@@ -23,7 +23,6 @@ addons:
       - libzbar-dev
 
 before_install:
-  - export PYTHONIOENCODING=UTF-8
   - export PATH="$HOME/miniconda/bin:$PATH"
   # Download and install conda if necessary
   - if ! ( conda -V && which conda ); then

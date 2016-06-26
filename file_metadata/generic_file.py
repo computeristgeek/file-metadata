@@ -143,11 +143,15 @@ class GenericFile(object):
             raise OSError('Neither perl nor exiftool were found.')
 
         try:
-            proc = subprocess.check_output([
+            output = subprocess.check_output([
                 executable, '-G', '-j', self.fetch('filename')])
-            output = proc
         except subprocess.CalledProcessError as proc_error:
             output = proc_error.output
+
+        # Need to decode with replacement because older version of exiftool
+        # (in ubuntu-precise) doesn't encode strings inside exiftool
+        # correctly.
+        output = output.decode('utf-8', 'replace')
 
         data = json.loads(output)
         assert len(data) == 1
