@@ -4,7 +4,6 @@ from __future__ import (division, absolute_import, unicode_literals,
                         print_function)
 
 import json
-import logging
 import os
 import subprocess
 
@@ -12,8 +11,7 @@ import magic
 
 from file_metadata._compat import which
 from file_metadata.mixins import is_svg
-from file_metadata.utilities import (memoized, app_dir,
-                                     download, targz_decompress)
+from file_metadata.utilities import memoized
 
 
 class GenericFile(object):
@@ -140,36 +138,18 @@ class GenericFile(object):
 
         :return:      A dictionary containing the exif information.
         """
-        if which('perl') is not None:
-            folder = 'Image-ExifTool-10.15'
-            arch = folder + '.tar.gz'
-            arch_path = app_dir('user_data_dir', arch)
-            bin_path = app_dir('user_data_dir', folder, 'exiftool')
-
-            if not os.path.exists(bin_path):
-                logging.info('Downloading `exiftool` to analyze exif data. '
-                             'Hence, the first run may take longer than '
-                             'normal.')
-                url = 'http://www.sno.phy.queensu.ca/~phil/exiftool/' + arch
-                download(url, arch_path)
-                targz_decompress(arch_path, app_dir('user_data_dir'))
-            executable = ('perl', bin_path)
-        elif which('exiftool') is not None:
-            executable = ('exiftool',)
-        else:
+        executable = which('exiftool')
+        if executable is None:
             raise OSError('Neither perl nor exiftool were found.')
 
-        command = executable + ('-G', '-j',
-                                os.path.abspath(self.fetch('filename')))
         try:
-            proc = subprocess.check_output(command)
+            proc = subprocess.check_output([
+                executable, '-G', '-j', self.fetch('filename')])
+            output = proc
         except subprocess.CalledProcessError as proc_error:
-            output = proc_error.output.decode('utf-8').rstrip('\r\n')
-        else:
-            output = proc.decode('utf-8').rstrip('\r\n')
+            output = proc_error.output
 
         data = json.loads(output)
-
         assert len(data) == 1
         return data[0]
 

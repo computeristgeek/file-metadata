@@ -67,7 +67,7 @@ class GenericFileTest(unittest.TestCase):
         self.assertRaises(ImportError, _file.analyze_mimetype)
 
     @mock.patch('file_metadata.generic_file.which',
-                side_effect=which_sideeffect(['perl', 'exiftool']))
+                side_effect=which_sideeffect(['exiftool']))
     def test_exiftool_not_found(self, mock_which):
         _file = GenericFile(fetch_file('ascii.txt'))
         self.assertRaises(OSError, _file.analyze_exifdata)
@@ -100,33 +100,31 @@ class GenericFilePkgMgrMagicTest(GenericFileMagicTest):
 
 
 class GenericFileExiftoolTest(unittest.TestCase):
-    __test__ = False
 
-    def test_exiftool_binary(self, mock_which=None):
-        data = self.binary_file.analyze_exifdata()
+    def test_exiftool_binary(self):
+        _file = GenericFile(fetch_file('file.bin'))
+        data = _file.analyze_exifdata()
         self.assertTrue(data['File:FileSize'], '256 bytes')
         # The `exiftool` property should have all the info, but the
         # analyze method should not.
         self.assertNotIn('ExifTool:Error', data)
-        self.assertIn('ExifTool:Error', self.binary_file.exiftool())
+        self.assertIn('ExifTool:Error', _file.exiftool())
 
-    def test_exiftool_text_plain(self, mock_which=None):
-        data = self.text_file.analyze_exifdata()
+    def test_exiftool_text_plain(self):
+        data = GenericFile(fetch_file('ascii.txt')).analyze_exifdata()
         self.assertEqual(data['File:FileSize'], '98 bytes')
 
-    def test_exiftool_audio_wav(self, mock_which=None):
-        data = self.wav_file.analyze_exifdata()
+    def test_exiftool_audio_wav(self):
+        data = GenericFile(fetch_file('noise.wav')).analyze_exifdata()
         self.assertEqual(data['File:FileSize'], '86 kB')
 
-
-class GenericFileDownloadedExiftoolTest(unittest.TestCase):
-    __test__ = True
-
-
-@mock.patch('file_metadata.generic_file.which',
-            side_effect=which_sideeffect(['perl']))
-class GenericFileInstalledExiftoolTest(unittest.TestCase):
-    __test__ = True
+    def test_exiftool_encoding(self):
+        _file = GenericFile(fetch_file('created_with_gimp.jpg'))
+        # Test with a file that has non-ascii characters in the exif
+        # information
+        data = _file.analyze_exifdata()
+        self.assertEqual(data['XMP:State'], 'Franche-Comté')
+        self.assertIn('Éclipse', data['XMP:Description'])
 
 
 class GenericFileCreateTest(unittest.TestCase):
