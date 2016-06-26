@@ -53,14 +53,14 @@ install:
   # Install dlib from git (with pip) as there was an issue with libjpeg
   # Which was solved and not yet released.
   - pip install git+https://github.com/davisking/dlib.git@02f6da285149a61bc58728d9c5e77932151118b5#egg=dlib ;
-  - pip install -r test-requirements.txt -r requirements.txt ;
-
-script:
-  - flake8 setup.py file_metadata tests
-  - python -m pytest --cov ;
-  - python setup.py sdist bdist bdist_wheel
+  - pip install -r test-requirements.txt ;
   - pip install .
   - pip uninstall -y file-metadata
+
+script:
+  - flake8 setup.py setupdeps.py file_metadata tests
+  - python -m pytest --cov ;
+  - python setup.py sdist bdist bdist_wheel
 
 after_script:
   - bash <(curl -s https://codecov.io/bash)
