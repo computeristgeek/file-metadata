@@ -3,33 +3,27 @@
 from __future__ import (division, absolute_import, unicode_literals,
                         print_function)
 
-import platform
-
 from file_metadata._compat import which
 from file_metadata.generic_file import GenericFile
 from file_metadata.mixins import is_svg, FFProbeMixin
 from tests import fetch_file, mock, unittest, which_sideeffect
 
 
+class FFProbeTestFile(GenericFile, FFProbeMixin):
+    pass
+
+
 class FFProbeMixinTest(unittest.TestCase):
     __test__ = False
 
-    def setUp(self):
-        self.wikiexample_file = FFProbeMixin()
-        self.wikiexample_file.filename = fetch_file('wikiexample.ogg')
-        self.wav_file = FFProbeMixin()
-        self.wav_file.filename = fetch_file('noise.wav')
-        self.veins_file = FFProbeMixin()
-        self.veins_file.filename = fetch_file('veins.ogv')
-        self.bin_file = FFProbeMixin()
-        self.bin_file.filename = fetch_file('file.bin')
-
-    def test_bin(self, mock_which, mock_system=None):
-        data = self.bin_file.analyze_ffprobe()
+    def test_bin(self, mock_which):
+        _file = FFProbeTestFile(fetch_file('file.bin'))
+        data = _file.analyze_ffprobe()
         self.assertEqual(data, {})
 
-    def test_ogg(self, mock_which, mock_system=None):
-        data = self.wikiexample_file.analyze_ffprobe()
+    def test_ogg(self, mock_which):
+        _file = FFProbeTestFile(fetch_file('wikiexample.ogg'))
+        data = _file.analyze_ffprobe()
         self.assertIn('FFProbe:Format', data)
         self.assertEqual(data['FFProbe:Format'], 'ogg')
         self.assertEqual(round(data['FFProbe:Duration']), 6)
@@ -42,8 +36,9 @@ class FFProbeMixinTest(unittest.TestCase):
         self.assertIn('44100', stream['Rate'])
         self.assertEqual(round(stream['Duration']), 6)
 
-    def test_wav(self, mock_which, mock_system=None):
-        data = self.wav_file.analyze_ffprobe()
+    def test_wav(self, mock_which):
+        _file = FFProbeTestFile(fetch_file('noise.wav'))
+        data = _file.analyze_ffprobe()
         self.assertIn('FFProbe:Format', data)
         self.assertEqual(data['FFProbe:Format'], 'wav')
         self.assertEqual(data['FFProbe:Duration'], 1)
@@ -56,8 +51,9 @@ class FFProbeMixinTest(unittest.TestCase):
         self.assertIn('44100', stream['Rate'])
         self.assertEqual(round(stream['Duration']), 1)
 
-    def test_ogv(self, mock_which, mock_system=None):
-        data = self.veins_file.analyze_ffprobe()
+    def test_ogv(self, mock_which):
+        _file = FFProbeTestFile(fetch_file('veins.ogv'))
+        data = _file.analyze_ffprobe()
         self.assertIn('FFProbe:Format', data)
         self.assertEqual(data['FFProbe:Format'], 'ogg')
         self.assertEqual(round(data['FFProbe:Duration']), 11)
@@ -79,7 +75,6 @@ class FFProbeMixinTest(unittest.TestCase):
 @unittest.skipIf(which('ffprobe') is None, '`ffprobe` not found.')
 @mock.patch('file_metadata.mixins.which',
             side_effect=which_sideeffect(['avprobe']))
-@mock.patch('file_metadata.mixins.platform.system', return_value='NOT Linux')
 class FFProbeMixinWithFFProbeTest(FFProbeMixinTest):
     __test__ = True
 
@@ -87,30 +82,16 @@ class FFProbeMixinWithFFProbeTest(FFProbeMixinTest):
 @unittest.skipIf(which('avprobe') is None, '`avprobe` not found.')
 @mock.patch('file_metadata.mixins.which',
             side_effect=which_sideeffect(['ffprobe']))
-@mock.patch('file_metadata.mixins.platform.system', return_value='NOT Linux')
 class FFProbeMixinWithAVProbeTest(FFProbeMixinTest):
     __test__ = True
 
 
-@unittest.skipIf(not (platform.system() == 'Linux' and
-                      platform.architecture()[0] in ('32bit', '64bit')),
-                 'Only 32bit and 64bit Linux static builds are available')
 @mock.patch('file_metadata.mixins.which',
             side_effect=which_sideeffect(['ffprobe', 'avprobe']))
-class FFProbeMixinWithStaticBuildTest(FFProbeMixinTest):
-    __test__ = True
-
-
-@mock.patch('file_metadata.mixins.which',
-            side_effect=which_sideeffect(['ffprobe', 'avprobe']))
-@mock.patch('file_metadata.mixins.platform.system', return_value='NOT Linux')
 class FFProbeMixinWithoutBackendsTest(unittest.TestCase):
-    def setUp(self):
-        self.wav_file = FFProbeMixin()
-        self.wav_file.filename = fetch_file('noise.wav')
-
     def test_wav(self, mock_check_output, mock_system=None):
-        self.assertRaises(OSError, self.wav_file.analyze_ffprobe)
+        _file = FFProbeTestFile(fetch_file('noise.wav'))
+        self.assertRaises(OSError, _file.analyze_ffprobe)
 
 
 class IsSvgTest(unittest.TestCase):
