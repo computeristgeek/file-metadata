@@ -431,10 +431,9 @@ class ScikitImage(SetupPackage):
         return 'Will be installed with pip.'
 
     def get_install_requires(self):
-        # For some reason matplotlib - a dependency of scikit-image doesn't
-        # get installed by pip automatically:
-        # https://github.com/scikit-image/scikit-image/issues/2155
-        return ['matplotlib', 'scikit-image>=0.12']
+        # For some reason some dependencies of scikit-image aren't installed
+        # by pip: https://github.com/scikit-image/scikit-image/issues/2155
+        return ['scipy', 'matplotlib', 'scikit-image>=0.12']
 
 
 class MagickWand(SetupPackage):
