@@ -22,10 +22,9 @@ import zbar
 from PIL import Image
 from pycolorname.pantone.pantonepaint import PantonePaint
 
-from file_metadata._compat import makedirs
 from file_metadata.generic_file import GenericFile
 from file_metadata.utilities import (DictNoNone, app_dir, bz2_decompress,
-                                     download, to_cstr, memoized)
+                                     download, to_cstr, memoized, DATA_PATH)
 
 # A Decompression Bomb is a small compressed image file which when decompressed
 # uses a uge amount of RAM. For example, a monochrome PNG file with 100kx100k
@@ -555,28 +554,8 @@ class ImageFile(GenericFile):
             # Small files cause zxing to crash so, we just return empty.
             return {}
 
-        # Make directory for data
-        path_data = app_dir('user_data_dir', 'zxing')
-        makedirs(path_data, exist_ok=True)
-
-        def download_jar(path, name, ver):
-            logging.info('Downloading the zxing jar file to analyze barcodes. '
-                         'Hence, the first run may take longer '
-                         'than normal.')
-            data = {'name': name, 'ver': ver, 'path': path}
-            fname = os.path.join(path_data, '{name}-{ver}.jar'.format(**data))
-            download('http://central.maven.org/maven2/{path}/{name}/{ver}/'
-                     '{name}-{ver}.jar'.format(**data),
-                     fname)
-            return fname
-
-        # Download all important jar files
-        path_core = download_jar('com/google/zxing', 'core', '3.2.1')
-        path_javase = download_jar('com/google/zxing', 'javase', '3.2.1')
-        path_jcomm = download_jar('com/beust', 'jcommander', '1.48')
-
         output = subprocess.check_output([
-            'java', '-cp', ':'.join([path_core, path_javase, path_jcomm]),
+            'java', '-cp', os.path.join(DATA_PATH, '*'),
             'com.google.zxing.client.j2se.CommandLineRunner', '--multi',
             self.fetch('filename_zxing')])
 

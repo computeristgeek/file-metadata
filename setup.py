@@ -38,6 +38,7 @@ install_deps = [
     setupdeps.LibZBar(),
     setupdeps.ZBar(),
     setupdeps.JavaJRE(),
+    setupdeps.ZXing(),
     setupdeps.PyColorName(),
     # Audio video deps
     setupdeps.FFProbe(),
@@ -98,6 +99,13 @@ if __name__ == '__main__':
 
     log.info('Check dependencies required for using file-metadata:')
     install_required = get_install_requires(install_deps)
+
+    log.info('Downloading 3rd party data files:')
+    for dep in install_deps:
+        data_msg = dep.get_data_files()
+        if data_msg:
+            log.info(dep.name + ' - ' + data_msg)
+
     test_required = read_reqs('test-requirements.txt')
     VERSION = open(os.path.join('file_metadata', 'VERSION')).read().strip()
 
@@ -121,7 +129,8 @@ if __name__ == '__main__':
           tests_require=test_required,
           # Setuptools has a bug where they use isinstance(x, str) instead
           # of basestring. Because of this we convert it to str for Py2.
-          package_data={str('file_metadata'): [str("VERSION")]},
+          package_data={str('file_metadata'): [str("VERSION"),
+                                               str("datafiles/*")]},
           # from http://pypi.python.org/pypi?%3Aaction=list_classifiers
           classifiers=[
               'Development Status :: 4 - Beta',

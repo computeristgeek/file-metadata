@@ -29,6 +29,7 @@ from contextlib import contextmanager
 
 
 PROJECT_PATH = os.path.abspath(os.path.dirname(__file__))
+DATA_PATH = os.path.join(PROJECT_PATH, 'datafiles')
 
 
 def to_cstr(value, encoding='utf-8'):

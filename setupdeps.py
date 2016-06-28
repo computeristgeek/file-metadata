@@ -20,6 +20,16 @@ except ImportError:  # Python 2
     from urllib2 import urlopen
 
 
+PROJECT_PATH = os.path.abspath(os.path.dirname(__file__))
+
+
+def data_path():
+    name = os.path.join(PROJECT_PATH, 'file_metadata', 'datafiles')
+    if not os.path.exists(name):
+        os.makedirs(name)
+    return name
+
+
 def which(cmd):
     try:
         from shutil import which
@@ -45,13 +55,13 @@ def setup_install(packages):
         return True
     try:
         subprocess.call([sys.executable, "-m", "pip", "install",
-                         "-t", os.getcwd()] + packages)
+                         "-t", PROJECT_PATH] + packages)
         return True
     except subprocess.CalledProcessError:
         return False
 
 
-def download(url, filename, overwrite=False, timeout=None, md5=None):
+def download(url, filename, overwrite=False, sha1=None):
     """
     Download the given URL to the given filename. If the file exists,
     it won't be downloaded unless asked to overwrite. Both, text data
@@ -62,23 +72,29 @@ def download(url, filename, overwrite=False, timeout=None, md5=None):
     :param filename:  The file to store the downloaded file to.
     :param overwrite: Set to True if the file should be downloaded even if it
                       already exists.
-    :param md5:       The md5 checksum to verify the file using.
+    :param sha1:      The sha1 checksum to verify the file using.
     """
     blocksize = 16 * 1024
-    _hash = hashlib.md5()
-    if not os.path.exists(filename) or overwrite:
-        if timeout is None:
-            response = urlopen(url)
-        else:
-            response = urlopen(url, timeout=timeout)
-        with open(filename, 'wb') as out_file:
-            while 1:
-                buf = response.read(blocksize)
-                if not buf:
+    _hash = hashlib.sha1()
+    if os.path.exists(filename) and not overwrite:
+        # Do a pass for the hash if it already exists
+        with open(filename, "rb") as downloaded_file:
+            while True:
+                block = downloaded_file.read(blocksize)
+                if not block:
                     break
-                out_file.write(buf)
-                _hash.update(buf)
-    return _hash.hexdigest() == md5
+                _hash.update(block)
+    else:
+        # If it doesn't exist, or overwrite=True, find hash while downloading
+        response = urlopen(url)
+        with open(filename, 'wb') as out_file:
+            while True:
+                block = response.read(blocksize)
+                if not block:
+                    break
+                out_file.write(block)
+                _hash.update(block)
+    return _hash.hexdigest() == sha1
 
 
 class CheckFailed(Exception):
@@ -180,6 +196,13 @@ class SetupPackage(object):
         package if it is not installed on top of the setup.py script.
         """
         return []
+
+    def get_data_files(self):
+        """
+        Perform required actions to add the data files into the directory
+        given by ``data_path()``.
+        """
+        pass
 
     def install_help_msg(self):
         """
@@ -530,6 +553,38 @@ class JavaJRE(SetupPackage):
             raise CheckFailed('Needs to be installed manually.')
         else:
             return 'Found at {0}.'.format(java_path)
+
+
+class ZXing(SetupPackage):
+    name = 'zxing'
+
+    def check(self):
+        return 'Will be downloaded from their maven repositories.'
+
+    @staticmethod
+    def download_jar(data_folder, path, name, ver, **kwargs):
+        data = {'name': name, 'ver': ver, 'path': path}
+        fname = os.path.join(data_folder, '{name}-{ver}.jar'.format(**data))
+        url = ('http://central.maven.org/maven2/{path}/{name}/{ver}/'
+               '{name}-{ver}.jar'.format(**data))
+        download(url, fname, **kwargs)
+        return fname
+
+    def get_data_files(self):
+        msg = 'Unable to download "{0}" correctly.'
+        if not self.download_jar(
+                data_path(), 'com/google/zxing', 'core', '3.2.1',
+                sha1='2287494d4f5f9f3a9a2bb6980e3f32053721b315'):
+            return msg.format('zxing-core')
+        if not self.download_jar(
+                data_path(), 'com/google/zxing', 'javase', '3.2.1',
+                sha1='78e98099b87b4737203af1fcfb514954c4f479d9'):
+            return msg.format('zxing-javase')
+        if not self.download_jar(
+                data_path(), 'com/beust', 'jcommander', '1.48',
+                sha1='bfcb96281ea3b59d626704f74bc6d625ff51cbce'):
+            return msg.format('jcommander')
+        return 'Successfully downloaded zxing-javase, zxing-core, jcommander.'
 
 
 class FFProbe(SetupPackage):
