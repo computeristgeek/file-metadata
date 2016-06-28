@@ -53,8 +53,9 @@ install:
   # Which was solved and not yet released.
   - pip install git+https://github.com/davisking/dlib.git@02f6da285149a61bc58728d9c5e77932151118b5#egg=dlib ;
   - pip install -r test-requirements.txt ;
-  - pip install .
+  - pip install -v -e .
   - pip uninstall -y file-metadata
+  - ls -l file_metadata/datafiles
 
 script:
   - flake8 setup.py setupdeps.py file_metadata tests
