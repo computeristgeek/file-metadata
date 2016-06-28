@@ -10,7 +10,7 @@ Installation
 Before installing file-metadata, a few dependencies need to be
 installed. For Ubuntu, these can be installed with::
 
-    $ sudo apt-get install perl openjdk-7-jre python-dev pkg-config libfreetype6-dev libpng12-dev liblapack-dev libblas-dev gfortran cmake libboost-python-dev liblzma-dev libzbar-dev
+    $ sudo apt-get install perl openjdk-7-jre python-dev pkg-config libfreetype6-dev libpng12-dev liblapack-dev libblas-dev gfortran cmake libboost-python-dev libzbar-dev
 
 Next, use ``pip`` to install the library. To install the latest stable
 version, use::

@@ -27,8 +27,6 @@ install_deps = [
     setupdeps.AppDirs(),
     # Image deps
     setupdeps.PathLib(),
-    setupdeps.LibLZMA(),
-    setupdeps.LZMA(),
     setupdeps.Pillow(),
     setupdeps.Numpy(),
     setupdeps.Dlib(),

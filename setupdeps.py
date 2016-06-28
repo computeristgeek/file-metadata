@@ -312,49 +312,6 @@ class AppDirs(SetupPackage):
         return ['appdirs']
 
 
-class LibLZMA(SetupPackage):
-    name = 'liblzma'
-    pkg_names = {
-        "apt-get": 'xz-utils',
-        "yum": 'xz',
-        "dnf": 'xz',
-        "pacman": None,
-        "zypper": None,
-        "brew": 'xz',
-        "port": None,
-        "windows_url": None
-    }
-
-    def check(self):
-        try:
-            import lzma  # noqa (unused import)
-            return 'Not required as lzma is pre-installed in python.'
-        except ImportError:
-            liblzma = pkg_config.get_version('liblzma')
-            if liblzma is None:
-                raise CheckFailed('Needs to be installed manually.')
-            else:
-                return 'Found with pkg-config.'
-
-
-class LZMA(SetupPackage):
-    name = 'lzma'
-
-    def check(self):
-        try:
-            import lzma  # noqa (unused import)
-            return 'Already installed in python.'
-        except ImportError:
-            return 'Will install backports.lzma with pip.'
-
-    def get_install_requires(self):
-        try:
-            import lzma  # noqa (unused import)
-            return []
-        except ImportError:
-            return ['backports.lzma']
-
-
 class LibMagic(SetupPackage):
     name = 'libmagic'
     pkg_names = {
