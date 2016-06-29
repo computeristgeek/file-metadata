@@ -275,16 +275,17 @@ class ImageFile(GenericFile):
         :param image:     Image to use when detecting with the haarcascade.
         :param filename:  The file to create the CascadeClassifier with.
         :param directory: The directory of the haarcascade file.
-        :param kwagrs:    Keyword args to pass to cascade's detectMultiScale().
+        :param kwargs:    Keyword args to pass to cascade's detectMultiScale().
         :return:          List of rectangles of the detected objects. A rect
                           is defined by an array with 4 values i the order:
                           left, top, width, height.
         """
         try:
             import cv2
+            from cv2 import cv  # noqa (unused import)
         except ImportError:
             logging.warn('HAAR Cascade analysis requires the optional '
-                         'dependency OpenCV to be installed.')
+                         'dependency OpenCV 2.x to be installed.')
             return []
 
         directory = (
@@ -295,6 +296,71 @@ class ImageFile(GenericFile):
         cascade = cv2.CascadeClassifier(os.path.join(directory, filename),)
         features = cascade.detectMultiScale(image, **kwargs)
         return features
+
+    def _haarcascade_feature(self, filename, directory=None):
+        """
+        Use opencv's haar cascade filters to identify features using the
+        given xml file.
+
+        :param filename:  The file to create the CascadeClassifier with.
+        :param directory: The directory of the haarcascade file.
+        :return:          List of rectangles of the detected objects. A rect
+                          is defined by an array with 4 values i the order:
+                          left, top, width, height.
+        """
+        try:
+            import cv2  # noqa (unused import)
+            from cv2 import cv
+        except ImportError:
+            logging.warn('HAAR Cascade analysis requires the optional '
+                         'dependency OpenCV 2.x to be installed.')
+            return []
+
+        image_array = self.fetch('ndarray_grey')
+        if image_array.ndim == 3:
+            logging.warn('Cars cannot be detected in animated images '
+                         'using haarcascades yet.')
+            return []
+
+        # The "scale" given here is relevant for the detection rate.
+        scale = max(1.0, numpy.average(image_array.shape) / 500.0)
+
+        # Equalize the histogram and make the size smaller
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            img_shape = map(lambda x: int(x / scale), image_array.shape)
+            img = skimage.img_as_ubyte(
+                skimage.exposure.equalize_hist(
+                    skimage.transform.resize(image_array,
+                                             output_shape=img_shape,
+                                             preserve_range=True)))
+
+        detected_feats = self._haarcascade(
+            img, filename, directory=directory, scaleFactor=1.1,
+            minNeighbors=2, minSize=(30, 30), flags=cv.CV_HAAR_SCALE_IMAGE)
+
+        if len(detected_feats) == 0:
+            return []
+
+        data = []
+        for ifeat, feat in enumerate(detected_feats):
+            scaled_feat = list(map(lambda x: int(x * scale), feat))
+            feat_data = {
+                'position': {
+                    'left': scaled_feat[0], 'top': scaled_feat[1],
+                    'width': scaled_feat[2], 'height': scaled_feat[3]},
+                'coverage': feat[2] * feat[3] / img.size}
+            data.append(feat_data)
+        return data
+
+    def analyze_car_haarcascades(self):
+        """
+        Use opencv's haar cascade filters to identify cars.
+        """
+        data = self._haarcascade_feature('/home/ajk/Downloads/cars.xml')
+        if len(data) == 0:
+            return 
+        return {'OpenCV:Cars': data}
 
     def analyze_face_haarcascades(self):
         """

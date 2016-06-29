@@ -208,6 +208,19 @@ class ImageFileColorInfoTest(unittest.TestCase):
         self.assertEqual(round(data['Color:EdgeRatio'], 3), 0.093)
 
 
+class ImageFileCarHAARCascadesTest(unittest.TestCase):
+
+    def test_car_haarcascade_(self):
+        with ImageFile(fetch_file('.jpg')) as uut:
+            data = uut.analyze_face_haarcascades()
+            self.assertIn('OpenCV:Cars', data)
+            self.assertEqual(len(data['OpenCV:Cars']), 1)
+
+            car = data['OpenCV:Cars'][0]
+            self.assertEqual(car['position'], {"height": None})
+            self.assertEqual(car['coverage'], -1)
+
+
 class ImageFileFaceHAARCascadesTest(unittest.TestCase):
 
     def test_face_haarcascade_charlie_chaplin(self):
