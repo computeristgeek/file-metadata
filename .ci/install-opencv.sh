@@ -2,8 +2,8 @@ set -x
 set -e
 
 name="OpenCV"
-folder_name="opencv-2.4.9"
-link="https://github.com/Itseez/opencv/archive/2.4.9.zip"
+folder_name="opencv-2.4.13"
+link="https://github.com/Itseez/opencv/archive/2.4.13.zip"
 
 if python -c "import cv2" ; then
   opencv_ver = $(python -c "import cv2; print(cv2.__version__.split('.',1)[0])")
