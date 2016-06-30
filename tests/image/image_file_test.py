@@ -121,10 +121,10 @@ class ImageFileColorInfoTest(unittest.TestCase):
     def test_color_info_rgba_image(self):
         data = ImageFile(fetch_file('ball.png')).analyze_color_info()
         self.assertIn('Color:AverageRGB', data)
-        self.assertEqual(data['Color:AverageRGB'], (113.705, 113.705, 113.705))
+        self.assertEqual(data['Color:AverageRGB'], (168.704, 168.704, 168.704))
         self.assertEqual(data['Color:ClosestLabeledColor'],
-                         'PMS 18-5102 TPX (Brushed Nickel)')
-        self.assertEqual(data['Color:ClosestLabeledColorRGB'], (122, 118, 117))
+                         'PMS 15-4306 TPX (Belgian Block)')
+        self.assertEqual(data['Color:ClosestLabeledColorRGB'], (167, 173, 170))
         self.assertEqual(data['Color:NumberOfGreyShades'], 2)
         self.assertEqual(round(data['Color:PercentFrequentColors'], 3), 0.008)
         self.assertEqual(round(data['Color:EdgeRatio'], 3), 0.016)

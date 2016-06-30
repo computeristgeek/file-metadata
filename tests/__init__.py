@@ -113,6 +113,12 @@ file_download_links = {
     'detailed_line_drawing.jpg': 'https://upload.wikimedia.org/wikipedia/commons/d/db/Compound_Microscope_1876.JPG',
     'very_detailed_line_drawing.jpg': 'https://upload.wikimedia.org/wikipedia/commons/c/cb/Hospital_ward_on_Red_Rover.jpg',
     'dark_line_drawing.jpg': 'https://upload.wikimedia.org/wikipedia/commons/3/3e/Bird_in_flight_line_drawing_art.jpg',
+
+    # Logos
+    'wikimedia_logo.png': 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/81/Wikimedia-logo.svg/768px-Wikimedia-logo.svg.png',
+    'wikidata_logo.png': 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/ff/Wikidata-logo.svg/1024px-Wikidata-logo.svg.png',
+    'wikipedia_logo.png': 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/de/Wikipedia_Logo_1.0.png/768px-Wikipedia_Logo_1.0.png',
+    'commons_logo.png': 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Commons-logo.svg/571px-Commons-logo.svg.png'
 }
 
 

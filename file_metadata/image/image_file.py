@@ -62,6 +62,11 @@ class ImageFile(GenericFile):
             return SVGFile.create(*args, **kwargs)
         return cls(*args, **kwargs)
 
+    def is_type(self, key):
+        if key == 'alpha':
+            return self.fetch('pillow').mode in ('LA', 'RGBA')
+        return super(ImageFile, self).is_type(key)
+
     @memoized
     def fetch(self, key=''):
         if key == 'filename_raster':
@@ -91,11 +96,35 @@ class ImageFile(GenericFile):
                 warnings.simplefilter("ignore")
                 return skimage.img_as_ubyte(
                     skimage.color.rgb2grey(self.fetch('ndarray')))
+        elif key == 'ndarray_noalpha':
+            if self.is_type('alpha'):
+                return self.alpha_blend(self.fetch('ndarray'))
+            return self.fetch('ndarray')
         elif key == 'pillow':
-            pillow_img = Image.open(self.fetch('filename'))
+            pillow_img = Image.open(self.fetch('filename_raster'))
             self.closables.append(pillow_img)
             return pillow_img
         return super(ImageFile, self).fetch(key)
+
+    @staticmethod
+    def alpha_blend(img, background=255):
+        """
+        Take an image, assume the last channel is a alpha channel and remove it
+        by using the appropriate background.
+
+        :param img:        The image to alpha blend into given background.
+        :param background: The background color to use when alpha blending.
+                           A scalar is expected, which is used for all
+                           the channels.
+        """
+        alpha = img[..., -1] / 255.0
+        channels = img[..., :-1]
+        new_img = numpy.zeros_like(channels)
+        for ichan in range(channels.shape[-1]):
+            new_img[..., ichan] = numpy.clip(
+                (1 - alpha) * background + alpha * channels[..., ichan],
+                a_min=0, a_max=255)
+        return new_img
 
     def analyze_softwares(self):
         """
@@ -193,7 +222,7 @@ class ImageFile(GenericFile):
              - Color:EdgeRatio - The percentage of pixels in the picture where
                 edges are found.
         """
-        image_array = self.fetch('ndarray')
+        image_array = self.fetch('ndarray_noalpha')
         if image_array.ndim == 4:  # Animated images
             mean_color = image_array.mean(axis=(0, 1, 2))
         elif image_array.ndim == 3:  # Static images
@@ -210,7 +239,6 @@ class ImageFile(GenericFile):
             return {}
 
         # Find the mean color and the closest color in the known palette
-        mean_color = mean_color[:3]  # Remove alpha channel if existent
         closest_label, closest_color = PantonePaint().find_closest(mean_color)
 
         grey_array = self.fetch('ndarray_grey')
@@ -467,17 +495,11 @@ class ImageFile(GenericFile):
                 - right eye - Location of the center of the right eye.
                 - mouth - Location of the center of the mouth.
         """
-        image_array = self.fetch('ndarray')
+        image_array = self.fetch('ndarray_noalpha')
         if len(image_array.shape) == 4:
             logging.warn('Facial landmarks of animated images cannot be '
                          'detected yet.')
             return {}
-
-        if len(image_array.shape) == 3 and image_array.shape[2] == 4:
-            # RGBA is not supported, Hence convert it to RGB
-            image_array = image_array[:, :, :3].copy()
-            # The .copy() is needed because of the dlib `shape` finding issue:
-            # https://github.com/davisking/dlib/issues/128
 
         predictor_dat = 'shape_predictor_68_face_landmarks.dat'
         predictor_arch = predictor_dat + '.bz2'
