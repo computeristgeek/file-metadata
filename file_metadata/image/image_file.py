@@ -91,6 +91,10 @@ class ImageFile(GenericFile):
                 warnings.simplefilter("ignore")
                 return skimage.img_as_ubyte(
                     skimage.color.rgb2grey(self.fetch('ndarray')))
+        elif key == 'pillow':
+            pillow_img = Image.open(self.fetch('filename'))
+            self.closables.append(pillow_img)
+            return pillow_img
         return super(ImageFile, self).fetch(key)
 
     def analyze_softwares(self):

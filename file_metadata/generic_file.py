@@ -36,11 +36,16 @@ class GenericFile(object):
         self.filename = fname
         self.options = kwargs
         self.temp_filenames = set()  # Temporary files created for analysis
+        self.closables = []  # List of items that need .close() at end
 
     def close(self):
         while self.temp_filenames:
             path = self.temp_filenames.pop()
             os.remove(path)
+
+        while self.closables:
+            closable = self.closables.pop()
+            closable.close()
 
     def __enter__(self):
         return self
