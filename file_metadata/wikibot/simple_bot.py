@@ -7,7 +7,14 @@ from __future__ import (division, absolute_import, unicode_literals,
 import datetime
 import os
 
-import pywikibot
+try:
+    import pywikibot
+except RuntimeError as err:
+    if (len(err.args) > 1 and
+            "No user-config.py found in director" in err.args[0]):
+        print("A user-config.py is require to run the pywikibot script. To"
+              "create the user-config.py run the command "
+              "`wikibot-create-config`.")
 from pywikibot import pagegenerators
 
 from file_metadata.utilities import download

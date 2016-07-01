@@ -249,8 +249,8 @@ def create_user_config(args=None, force=False):
     try:
         # config2.py will be in the pywikibot/ directory relative to this
         # script (generate_user_files)
-        install = os.path.dirname(os.path.abspath(__file__))
-        with codecs.open(os.path.join(install, "pywikibot", "config2.py"),
+        install = os.path.dirname(pywikibot.__file__)
+        with codecs.open(os.path.join(install, "config2.py"),
                          "r", "utf-8") as config_f:
             config_file = config_f.read()
 
