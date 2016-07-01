@@ -129,6 +129,12 @@ if __name__ == '__main__':
           # of basestring. Because of this we convert it to str for Py2.
           package_data={str('file_metadata'): [str("VERSION"),
                                                str("datafiles/*")]},
+          entry_points={
+              "console_scripts": [
+                  "wikibot-filemeta-simple = "
+                  "file_metadata.wikibot.simple_bot:main",
+                  "wikibot-create-config = "
+                  "file_metadata.wikibot.generate_user_files:main"]},
           # from http://pypi.python.org/pypi?%3Aaction=list_classifiers
           classifiers=[
               'Development Status :: 4 - Beta',
