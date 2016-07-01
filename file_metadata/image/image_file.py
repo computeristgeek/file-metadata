@@ -145,12 +145,12 @@ class ImageFile(GenericFile):
         exif = self.exiftool()
         softwares = []
 
-        if (exif.get('SVG:Output_extension', '') ==
+        if (str(exif.get('SVG:Output_extension', '')) ==
                 'org.inkscape.output.svg.inkscape'):
             softwares.append('Inkscape')
 
         for sw_key in ('PNG:Software', 'EXIF:Software'):
-            sw = exif.get(sw_key, '').lower()
+            sw = str(exif.get(sw_key, '')).lower()
             if sw.startswith('matlab'):
                 softwares.append('MATLAB')
             elif sw.startswith('imagemagick'):
@@ -171,7 +171,7 @@ class ImageFile(GenericFile):
             elif sw.startswith('microsoft ice '):
                 softwares.append('Microsoft ICE')
 
-        desc = exif.get('SVG:Desc', '').lower()
+        desc = str(exif.get('SVG:Desc', '')).lower()
         if ' gnuplot ' in desc:
             softwares.append('GNU Plot')
         elif ' chemtool ' in desc:
@@ -179,7 +179,7 @@ class ImageFile(GenericFile):
         elif ' vectorfieldplot ' in desc:
             softwares.append('VectorFieldPlot')
 
-        comment = exif.get('PNG:Comment', '').lower()
+        comment = str(exif.get('PNG:Comment', '')).lower()
         if ' stella4d ' in comment:
             softwares.append('Stella')
 
