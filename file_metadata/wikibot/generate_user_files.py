@@ -332,7 +332,7 @@ def main(*args):
     else:
         force = False
         # Force default site of en.wikipedia
-        (config.family, config.mylang) = ('wikipedia', 'en')
+        (config.family, config.mylang) = ('commons', 'commons')
 
     username = config.usernames[config.family].get(config.mylang)
     args = (config.family, config.mylang, username)
