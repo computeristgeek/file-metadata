@@ -1,11 +1,29 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+"""
+Script to show the capabilities of file-metadata. Files are downloaded from the
+wiki site and analyzed using file-metadata's analysis routines. Then, the
+
+
+Syntax:
+
+    wikibot-filemeta-simple [-arguments ...]
+
+Arguments can be:
+
+-showcats      Show only the categories that the file should belong to and not
+               the detailed analysis results.
+"""
 
 from __future__ import (division, absolute_import, unicode_literals,
                         print_function)
 
 import datetime
 import os
+import ssl
+from itertools import chain
+
+from six.moves.urllib.error import URLError
 
 try:
     import pywikibot
@@ -17,40 +35,123 @@ except RuntimeError as err:
               "`wikibot-create-config`.")
 from pywikibot import pagegenerators
 
-from file_metadata.utilities import download
+from file_metadata.utilities import download, retry
 from file_metadata.generic_file import GenericFile
-from file_metadata.image.image_file import ImageFile
 
 
-def mimetype(_file):
-    """
-    Use file-metadata's analyze_mimetype() method to fetch the mimetype.
-    """
-    mime = _file.analyze_mimetype()['File:MIMEType']
-    return ["* '''Mimetype:''' " + mime]
+def str_bbox(bbox):
+    return ("Left: {left}, Top: {top}, Width: {width}, Height: {height}"
+            .format(**bbox))
 
 
-def barcode(_file):
-    """
-    Use file-metadata's analyze_barcode() method to detect whether barcodes
-    exist.
-    """
+def handle_meta(meta):
     txt = []
-    if isinstance(_file, ImageFile):
-        # Barcode detection is only for ImageFiles
-        barcodes = _file.analyze_barcode()
+    if options.get('showcats'):
+        #################################################################
+        # Mime analysis
+        mime = meta['File:MIMEType']
+        mime_cats = {
+            "JPEG files": ('image/jpeg',),
+            "GIF files": ('image/gif',),
+            "PNG files": ('image/png',),
+            "TIFF files": ('image/tiff',),
+            "XCF files": ('image/x-xcf', 'application/x-xcf'),
+            "FLAC files": ('audio/x-flac',),
+            "WAV files": ('audio/x-wav',),
+            "MIDI files": ('audio/midi',),
+            "DjVu files": ('image/vnd-djvu',),
+            "PDF files": ('application/pdf',),
+        }
+        for cat, mimelist in mime_cats.items():
+            if mime in mimelist:
+                txt.append('* Category:' + cat)
+
+        #################################################################
+        # Software analysis
+        softwares = meta.get('Composite:Softwares', [])
+        software_cats = {
+            'Microsoft ICE': 'Microsoft Image Composite Editor',
+            'GNU Plot': 'Gnuplot'
+        }
+        if len(softwares) > 0:
+            for sw in softwares:
+                txt.append('* Category:Created with ' +
+                           software_cats.get(sw, sw))
+
+        #################################################################
+        # Screenshot analysis
+        screenshot_softwares = meta.get('Composite:ScreenshotSoftwares', [])
+        if len(screenshot_softwares) > 0:
+            txt.append('* Category:Screenshots')
+
+        #################################################################
+        # Barcode analysis
+        barcodes = tuple(chain(meta.get('zxing:Barcodes', []),
+                               meta.get('zbar:Barcodes', [])))
         if len(barcodes) > 0:
-            txt.append("* '''Barcodes found:'''")
-        for i, bar in enumerate(barcodes):
-            txt.append("** Barcode " + str(i))
+            txt.append('* Category:Barcode')
+            bar_cats = {
+                "Code 39": ('code_39', 'code39'),
+                "Code 93": ('code_93', 'code93'),
+                "Code 128": ('code_128', 'code128'),
+                "Data Matrix": ('data_matrix',),
+                "Quick Response Codes": ('qr_code', 'qrcode'),
+            }
+            for cat, formats in bar_cats.items():
+                if any(bar['format'].lower() in formats for bar in barcodes):
+                    txt.append('* Category:' + cat)
+    else:
+        #################################################################
+        # Mime analysis
+        txt.append("* Mimetype: " + meta['File:MIMEType'])
+
+        #################################################################
+        # Software analysis
+        softwares = meta.get('Composite:Softwares', [])
+        if len(softwares) > 0:
+            txt.append("* Softwares: " + ", ".join(softwares))
+
+        #################################################################
+        # Screenshot analysis
+        screenshot_softwares = meta.get('Composite:ScreenshotSoftwares', [])
+        if len(screenshot_softwares) > 0:
+            txt.append("* Screenshot Softwares: " +
+                       ", ".join(screenshot_softwares))
+
+        #################################################################
+        # Barcode analysis
+        def print_barcode_data(bar):
             txt.append("*** Data: " + bar['data'])
             txt.append("*** Format: " + str(bar['format']))
-            bbox = bar['bounding box']
-            txt.append("*** Position (left, top, width, height): "
-                       "{left}, {top}, {width}, {height}".format(**bbox))
+            txt.append("*** Position : " + str_bbox(bar['bounding box']))
+
+        # Barcodes from zxing:
+        for i, bar in enumerate(meta.get('zxing:Barcodes', [])):
+            txt.append("** Barcode (zxing) #" + str(i))
+            print_barcode_data(bar)
+
+        # Barcodes from zbar:
+        for i, bar in enumerate(meta.get('zbar:Barcodes', [])):
+            txt.append("** Barcode (zbar) #" + str(i))
+            print_barcode_data(bar)
+
+        #################################################################
+        # Face analysis
+        # Faces with dlib:
+        for iface, face in enumerate(meta.get('dlib:Faces', [])):
+            txt.append("* Face (dlib) #" + str(iface + 1))
+            txt.append("** Score: " + str(round(face['score'], 2)))
+            txt.append("** Bounding Box: " + str_bbox(face['position']))
+
+        # Faces with opencv's haarcascades:
+        for iface, face in enumerate(meta.get('OpenCV:Faces', [])):
+            txt.append("* Face (haarcascade) #" + str(iface + 1))
+            txt.append("** Bounding Box: " + str_bbox(face['position']))
+
     return txt
 
 
+@retry((ssl.SSLError, URLError), tries=3)
 def download_page(page, directory=None, fname=None, timeout=None):
     # Code the filename so that the filesystem definitely supports the name
     fname = fname or page.title(as_filename=True).encode('ascii', 'replace')
@@ -76,13 +177,15 @@ def handle_page(page):
 
         txt.append('==== {0} ===='.format(page.title(asLink=True,
                                                      textlink=True)))
-        txt += mimetype(_file)
-        txt += barcode(_file)
-
+        meta = _file.analyze()
+        handle_meta(meta)
         end_time = datetime.datetime.now()
         txt.append('Time taken to analyze: ' +
                    str((end_time - start_time).total_seconds()) + "sec")
     return txt
+
+
+options = {}
 
 
 def main(*args):
@@ -92,9 +195,16 @@ def main(*args):
     if str(site) != "commons:commons":
         pywikibot.warning("The script has not been tested on sites other that "
                           "commons:commons.")
+
     gen_factory = pagegenerators.GeneratorFactory(site)
-    for arg in local_args:
-        gen_factory.handleArg(arg)
+    for local_arg in local_args:
+        if gen_factory.handleArg(local_arg):
+            continue
+        arg, sep, value = local_arg.partition(':')
+        if arg in ('-showcats',):
+            options[arg[1:]] = True
+        else:
+            raise ValueError('Unknown argument: ' + local_arg)
 
     generator = gen_factory.getCombinedGenerator(gen=generator)
     if not generator:
