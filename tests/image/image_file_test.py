@@ -63,6 +63,12 @@ class ImageFileSoftwaresTest(unittest.TestCase):
         data = _file.analyze_softwares().get('Composite:Softwares', None)
         self.assertEqual(data, 'Adobe Photoshop Elements')
 
+    def test_created_with_photoshop_photomerge(self):
+        _file = ImageFile(fetch_file(
+            'created_with_photoshop_photomerge.jpg'))
+        data = _file.analyze_softwares().get('Composite:Softwares', None)
+        self.assertEqual(data, 'Photoshop Photomerge')
+
     def test_created_with_picasa(self):
         _file = ImageFile(fetch_file('created_with_picasa.jpg'))
         data = _file.analyze_softwares().get('Composite:Softwares', None)
@@ -70,6 +76,11 @@ class ImageFileSoftwaresTest(unittest.TestCase):
 
     def test_created_with_gimp(self):
         _file = ImageFile(fetch_file('created_with_gimp.jpg'))
+        data = _file.analyze_softwares().get('Composite:Softwares', None)
+        self.assertEqual(data, 'GIMP')
+
+    def test_created_with_gimp_comment(self):
+        _file = ImageFile(fetch_file('created_with_gimp_comment.jpg'))
         data = _file.analyze_softwares().get('Composite:Softwares', None)
         self.assertEqual(data, 'GIMP')
 
@@ -103,6 +114,25 @@ class ImageFileSoftwaresTest(unittest.TestCase):
             'created_with_microsoft_image_composite_editor.jpg'))
         data = _file.analyze_softwares().get('Composite:Softwares', None)
         self.assertEqual(data, 'Microsoft ICE')
+
+    def test_created_with_paint_net(self):
+        _file = ImageFile(fetch_file(
+            'created_with_paint_net.jpg'))
+        data = _file.analyze_softwares().get('Composite:Softwares', None)
+        self.assertEqual(data, 'Paint.NET')
+
+
+class ImageFileScreenshotSoftwaresTest(unittest.TestCase):
+
+    def test_screenshot_with_unknown(self):
+        _file = ImageFile(fetch_file('red.svg'))
+        self.assertEqual(_file.analyze_screenshot_softwares(), {})
+
+    def test_screenshot_with_gnome_screenshot(self):
+        _file = ImageFile(fetch_file('screenshot_with_gnome_screenshot.png'))
+        data = _file.analyze_screenshot_softwares()
+        self.assertEqual(data.get('Composite:ScreenshotSoftwares', None),
+                         'GNOME Screenshot')
 
 
 class ImageFileColorInfoTest(unittest.TestCase):

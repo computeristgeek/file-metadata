@@ -139,54 +139,95 @@ class ImageFile(GenericFile):
                 The possible softwares that can be found are:
                     Inkscape, MATLAB, ImageMagick, Adobe ImageReady,
                     Adobe Photoshop Elements, Adobe Photoshop Express,
-                    Adobe Photoshop, Picasa, GIMP, Microsoft ICE, GNU Plot,
+                    Adobe Photoshop, Photoshop Photomerge, Picasa, GIMP,
+                    Microsoft ICE, Paint.NET, GNU Plot,
                     Chemtool, VectorFieldPlot, and Stella.
         """
+        # Find more files at https://commons.wikimedia.org/wiki/
+        # Category:Created_with_..._templates
         exif = self.exiftool()
-        softwares = []
+        softwares = set()
 
         if (str(exif.get('SVG:Output_extension', '')) ==
                 'org.inkscape.output.svg.inkscape'):
-            softwares.append('Inkscape')
+            softwares.add('Inkscape')
 
         for sw_key in ('PNG:Software', 'EXIF:Software'):
             sw = str(exif.get(sw_key, '')).lower()
             if sw.startswith('matlab'):
-                softwares.append('MATLAB')
+                softwares.add('MATLAB')
             elif sw.startswith('imagemagick'):
-                softwares.append('ImageMagick')
+                softwares.add('ImageMagick')
             elif sw.startswith('adobe imageready'):
-                softwares.append('Adobe ImageReady')
+                softwares.add('Adobe ImageReady')
             elif sw.startswith('adobe photoshop'):
                 if sw.startswith('adobe photoshop elements'):
-                    softwares.append('Adobe Photoshop Elements')
+                    softwares.add('Adobe Photoshop Elements')
                 elif sw.startswith('adobe photoshop express'):
-                    softwares.append('Adobe Photoshop Express')
+                    softwares.add('Adobe Photoshop Express')
                 else:
-                    softwares.append('Adobe Photoshop')
+                    softwares.add('Adobe Photoshop')
+                # Check if photomerge was used
+                if (str(exif.get('Photoshop:HasRealMergedData', ''))
+                        in ('1', 'yes')):
+                    softwares.add('Photoshop Photomerge')
             elif sw.startswith('picasa'):
-                softwares.append('Picasa')
+                softwares.add('Picasa')
             elif sw.startswith('gimp'):
-                softwares.append('GIMP')
+                softwares.add('GIMP')
             elif sw.startswith('microsoft ice '):
-                softwares.append('Microsoft ICE')
+                softwares.add('Microsoft ICE')
+            elif sw.startswith('paint.net'):
+                softwares.add('Paint.NET')
 
         desc = str(exif.get('SVG:Desc', '')).lower()
         if ' gnuplot ' in desc:
-            softwares.append('GNU Plot')
+            softwares.add('GNU Plot')
         elif ' chemtool ' in desc:
-            softwares.append('Chemtool')
+            softwares.add('Chemtool')
         elif ' vectorfieldplot ' in desc:
-            softwares.append('VectorFieldPlot')
+            softwares.add('VectorFieldPlot')
 
-        comment = str(exif.get('PNG:Comment', '')).lower()
-        if ' stella4d ' in comment:
-            softwares.append('Stella')
+        for comment_key in ('PNG:Comment', 'File:Comment'):
+            comment = str(exif.get(comment_key, '')).lower()
+            if ' stella4d ' in comment:
+                softwares.add('Stella')
+            elif 'created with gimp' in comment:
+                softwares.add('GIMP')
 
         if len(softwares) == 0:
             return {}
 
+        softwares = tuple(softwares)
         return {'Composite:Softwares':
+                softwares if len(softwares) > 1 else softwares[0]}
+
+    def analyze_screenshot_softwares(self):
+        """
+        Find the software used to create the given file with. This is mainly
+        for screenshots.
+
+        :return: dict with the keys:
+
+             - Composite:ScreenshotSoftwares - Tuple with the names of the
+                softwares detected that was used.
+                The possible softwares that can be found are:
+                    GNOME Screenshot,
+        """
+        # Find more files at https://commons.wikimedia.org/wiki/
+        # Category:Created_with_..._templates
+        exif = self.exiftool()
+        softwares = []
+
+        for sw_key in ('PNG:Software', 'EXIF:Software'):
+            sw = str(exif.get(sw_key, '')).lower()
+            if sw.startswith('gnome-screenshot'):
+                softwares.append('GNOME Screenshot')
+
+        if len(softwares) == 0:
+            return {}
+
+        return {'Composite:ScreenshotSoftwares':
                 tuple(softwares) if len(softwares) > 1 else softwares[0]}
 
     def analyze_color_info(self,

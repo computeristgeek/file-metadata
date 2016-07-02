@@ -99,14 +99,18 @@ file_download_links = {
     'created_with_adobe_photoshop.jpg': 'https://upload.wikimedia.org/wikipedia/commons/6/64/Cervicomanubriotomie.jpg',
     'created_with_adobe_photoshop_express.jpg': 'https://upload.wikimedia.org/wikipedia/commons/b/b5/Politecnico_di_Milano_Bovisa_4.jpg',
     'created_with_adobe_photoshop_elements.jpg': 'https://upload.wikimedia.org/wikipedia/commons/4/49/1010_Bazylika_archikatedralna_%C5%9Bw_Jakuba_Szczecin_sygnaturka_0.jpg',
+    'created_with_photoshop_photomerge.jpg': 'https://upload.wikimedia.org/wikipedia/commons/9/90/01-118_Koenigstein_Panorama.jpg',
     'created_with_picasa.jpg': 'https://upload.wikimedia.org/wikipedia/commons/1/1f/08_Ny_Alesund_prn.JPG',
     'created_with_gimp.jpg': 'https://upload.wikimedia.org/wikipedia/commons/d/d5/2013-04-25_21-09-18-ecl-lune-mosaic.jpg',
+    'created_with_gimp_comment.jpg': 'https://upload.wikimedia.org/wikipedia/commons/c/c9/105_H_61-37.jpeg',
     'created_with_gnu_octave.svg': 'https://upload.wikimedia.org/wikipedia/commons/5/52/Beta_versus_rapidity.svg',
     'created_with_gnuplot.svg': 'https://upload.wikimedia.org/wikipedia/commons/a/a5/2005_H-1B_admissions_by_country_of_citizenship.svg',
     'created_with_chemtool.svg': 'https://upload.wikimedia.org/wikipedia/commons/0/00/Chitobiose_glucosamine.svg',
     'created_with_vectorfieldplot.svg': 'https://upload.wikimedia.org/wikipedia/commons/8/83/VFPt_minus.svg',
     'created_with_stella.png': 'https://upload.wikimedia.org/wikipedia/commons/e/e8/10-3_deltohedron.png',
     'created_with_microsoft_image_composite_editor.jpg': 'https://upload.wikimedia.org/wikipedia/commons/7/7c/Bochnia_kopalnia_kaplica_2.jpg',
+    'created_with_paint_net.jpg': 'https://upload.wikimedia.org/wikipedia/commons/1/10/Broadway_Tower_Oil_Painting.jpg',
+    'screenshot_with_gnome_screenshot.png': 'https://upload.wikimedia.org/wikipedia/commons/7/74/LibreOfficePresentationTeluguExample1.png',
 
     # Line drawings
     'simple_line_drawing.jpg': 'https://upload.wikimedia.org/wikipedia/commons/c/c6/Destilacija_rakije.jpg',
