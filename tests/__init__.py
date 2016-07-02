@@ -89,6 +89,7 @@ file_download_links = {
     'example.tiff': 'https://upload.wikimedia.org/wikipedia/commons/b/b0/Dabigatran_binding_pockets.tiff',
     'text.pdf': 'https://upload.wikimedia.org/wikipedia/commons/a/a7/Life_of_Future.pdf',
     'image.pdf': 'https://upload.wikimedia.org/wikipedia/commons/4/40/AugerTransition1.pdf',
+    'empty.djvu': 'https://upload.wikimedia.org/wikipedia/commons/4/42/Vuota.djvu',
 
     # Files created by some software
     'bitmap_from_inkscape.png': 'https://upload.wikimedia.org/wikipedia/commons/4/41/Joetsu_Shinkansen_icon.png',

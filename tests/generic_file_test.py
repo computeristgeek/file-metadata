@@ -183,7 +183,7 @@ class GenericFileCreateTest(unittest.TestCase):
                 'File "{0}" was not of type {1}'.format(fname, AudioFile))
 
     def test_create_generic_file(self):
-        for fname in ['image.pdf', 'text.pdf']:
+        for fname in ['image.pdf', 'text.pdf', 'empty.djvu']:
             self.assertTrue(isinstance(
                 GenericFile.create(fetch_file(fname)), GenericFile),
                 'File "{0}" was not of type {1}'.format(fname, GenericFile))

@@ -89,8 +89,8 @@ class GenericFile(object):
         mime = cls_file.mime()
         _type, subtype = mime.split('/', 1)
 
-        if (_type == 'image' or mime == 'application/x-xcf' or
-                cls_file.is_type('svg')):
+        if ((_type == 'image' or mime == 'application/x-xcf' or
+                cls_file.is_type('svg')) and subtype != 'vnd-djvu'):
             from file_metadata.image.image_file import ImageFile
             return ImageFile.create(*args, **kwargs)
         elif _type == 'audio':
