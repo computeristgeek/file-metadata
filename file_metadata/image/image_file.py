@@ -168,7 +168,7 @@ class ImageFile(GenericFile):
                 else:
                     softwares.add('Adobe Photoshop')
                 # Check if photomerge was used
-                if (str(exif.get('Photoshop:HasRealMergedData', ''))
+                if (str(exif.get('Photoshop:HasRealMergedData', '')).lower()
                         in ('1', 'yes')):
                     softwares.add('Photoshop Photomerge')
             elif sw.startswith('picasa'):
@@ -198,9 +198,7 @@ class ImageFile(GenericFile):
         if len(softwares) == 0:
             return {}
 
-        softwares = tuple(softwares)
-        return {'Composite:Softwares':
-                softwares if len(softwares) > 1 else softwares[0]}
+        return {'Composite:Softwares': tuple(softwares)}
 
     def analyze_screenshot_softwares(self):
         """

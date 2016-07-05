@@ -29,97 +29,97 @@ class ImageFileSoftwaresTest(unittest.TestCase):
     def test_created_with_inkscape(self):
         _file = ImageFile(fetch_file('created_with_inkscape.svg'))
         data = _file.analyze_softwares().get('Composite:Softwares', None)
-        self.assertEqual(data, 'Inkscape')
+        self.assertIn('Inkscape', data)
 
     def test_created_with_matlab(self):
         _file = ImageFile(fetch_file('created_with_matlab.png'))
         data = _file.analyze_softwares().get('Composite:Softwares', None)
-        self.assertEqual(data, 'MATLAB')
+        self.assertIn('MATLAB', data)
 
     def test_created_with_imagemagick(self):
         _file = ImageFile(fetch_file('created_with_imagemagick.png'))
         data = _file.analyze_softwares().get('Composite:Softwares', None)
-        self.assertEqual(data, 'ImageMagick')
+        self.assertIn('ImageMagick', data)
 
     def test_created_with_adobe_imageready(self):
         _file = ImageFile(fetch_file('created_with_adobe_imageready.png'))
         data = _file.analyze_softwares().get('Composite:Softwares', None)
-        self.assertEqual(data, 'Adobe ImageReady')
+        self.assertIn('Adobe ImageReady', data)
 
     def test_created_with_adobe_photoshop(self):
         _file = ImageFile(fetch_file('created_with_adobe_photoshop.jpg'))
         data = _file.analyze_softwares().get('Composite:Softwares', None)
-        self.assertEqual(data, 'Adobe Photoshop')
+        self.assertIn('Adobe Photoshop', data)
 
     def test_created_with_adobe_photoshop_express(self):
         _file = ImageFile(fetch_file(
             'created_with_adobe_photoshop_express.jpg'))
         data = _file.analyze_softwares().get('Composite:Softwares', None)
-        self.assertEqual(data, 'Adobe Photoshop Express')
+        self.assertIn('Adobe Photoshop Express', data)
 
     def test_created_with_adobe_photoshop_elements(self):
         _file = ImageFile(fetch_file(
             'created_with_adobe_photoshop_elements.jpg'))
         data = _file.analyze_softwares().get('Composite:Softwares', None)
-        self.assertEqual(data, 'Adobe Photoshop Elements')
+        self.assertIn('Adobe Photoshop Elements', data)
 
     def test_created_with_photoshop_photomerge(self):
         _file = ImageFile(fetch_file(
             'created_with_photoshop_photomerge.jpg'))
         data = _file.analyze_softwares().get('Composite:Softwares', None)
-        self.assertEqual(data, 'Photoshop Photomerge')
+        self.assertIn('Photoshop Photomerge', data)
 
     def test_created_with_picasa(self):
         _file = ImageFile(fetch_file('created_with_picasa.jpg'))
         data = _file.analyze_softwares().get('Composite:Softwares', None)
-        self.assertEqual(data, 'Picasa')
+        self.assertIn('Picasa', data)
 
     def test_created_with_gimp(self):
         _file = ImageFile(fetch_file('created_with_gimp.jpg'))
         data = _file.analyze_softwares().get('Composite:Softwares', None)
-        self.assertEqual(data, 'GIMP')
+        self.assertIn('GIMP', data)
 
     def test_created_with_gimp_comment(self):
         _file = ImageFile(fetch_file('created_with_gimp_comment.jpg'))
         data = _file.analyze_softwares().get('Composite:Softwares', None)
-        self.assertEqual(data, 'GIMP')
+        self.assertIn('GIMP', data)
 
     def test_created_with_gnu_octave(self):
         _file = ImageFile(fetch_file('created_with_gnu_octave.svg'))
         data = _file.analyze_softwares().get('Composite:Softwares', None)
-        self.assertEqual(data, 'GNU Plot')
+        self.assertIn('GNU Plot', data)
 
     def test_created_with_gnuplot(self):
         _file = ImageFile(fetch_file('created_with_gnuplot.svg'))
         data = _file.analyze_softwares().get('Composite:Softwares', None)
-        self.assertEqual(data, 'GNU Plot')
+        self.assertIn('GNU Plot', data)
 
     def test_created_with_chemtool(self):
         _file = ImageFile(fetch_file('created_with_chemtool.svg'))
         data = _file.analyze_softwares().get('Composite:Softwares', None)
-        self.assertEqual(data, 'Chemtool')
+        self.assertIn('Chemtool', data)
 
     def test_created_with_vectorfieldplot(self):
         _file = ImageFile(fetch_file('created_with_vectorfieldplot.svg'))
         data = _file.analyze_softwares().get('Composite:Softwares', None)
-        self.assertEqual(data, 'VectorFieldPlot')
+        self.assertIn('VectorFieldPlot', data)
 
     def test_created_with_stella(self):
         _file = ImageFile(fetch_file('created_with_stella.png'))
         data = _file.analyze_softwares().get('Composite:Softwares', None)
-        self.assertEqual(data, 'Stella')
+        self.assertIn('Stella', data)
 
     def test_created_with_microsoft_image_composite_editor(self):
         _file = ImageFile(fetch_file(
             'created_with_microsoft_image_composite_editor.jpg'))
         data = _file.analyze_softwares().get('Composite:Softwares', None)
-        self.assertEqual(data, 'Microsoft ICE')
+        self.assertIn('Microsoft ICE', data)
 
     def test_created_with_paint_net(self):
         _file = ImageFile(fetch_file(
             'created_with_paint_net.jpg'))
         data = _file.analyze_softwares().get('Composite:Softwares', None)
-        self.assertEqual(data, 'Paint.NET')
+        self.assertIn('Paint.NET', data)
 
 
 class ImageFileScreenshotSoftwaresTest(unittest.TestCase):
