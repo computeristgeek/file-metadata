@@ -544,6 +544,16 @@ class ZXing(SetupPackage):
         return 'Successfully downloaded zxing-javase, zxing-core, jcommander.'
 
 
+class GeoPy(SetupPackage):
+    name = 'geopy'
+
+    def check(self):
+        return 'Will be installed with pip.'
+
+    def get_install_requires(self):
+        return ['geopy']
+
+
 class FFProbe(SetupPackage):
     name = 'ffprobe'
     pkg_names = {

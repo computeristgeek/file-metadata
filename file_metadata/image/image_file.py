@@ -10,8 +10,10 @@ import subprocess
 import warnings
 
 import dlib
+import geopy
 import numpy
 import pathlib2
+import six
 import skimage
 import skimage.color
 import skimage.exposure
@@ -227,6 +229,83 @@ class ImageFile(GenericFile):
 
         return {'Composite:ScreenshotSoftwares':
                 tuple(softwares) if len(softwares) > 1 else softwares[0]}
+
+    def analyze_geolocation(self, use_google=False):
+        """
+        Find the location where the photo was taken initially. This is
+        information which is got using the latitude/longitude in EXIF data.
+
+        :return: dict with the keys:
+
+             - Composite:Country - The country the photo was taken.
+             - Composite:City - The city the photo was taken.
+        """
+        exif = self.exiftool()
+        data = {}
+
+        def dms2dec(dms_str, sign=None):
+            """
+            Return decimal representation of DMS string: DDD deg MM' SS.SS"
+            """
+            dms_regex = r'(?P<deg>-?\d+) deg (?P<min>\d+)\' (?P<sec>\d+\.\d+)"'
+            dms = re.match(dms_regex, dms_str.strip().lower()).groups()
+            _deg, _min, _sec = map(float, dms)
+            dec = _deg + _min / 60 + _sec / 3600
+
+            if '-' in dms_str:  # Use negative sign if given
+                return dec
+            elif re.search('[sw]', dms_str.lower()):  # Use S/W if given
+                return -dec
+            elif ((isinstance(sign, (int, float)) and sign > 0) or
+                    (isinstance(sign, six.string_types) and
+                     sign.strip().lower().startswith('n'))):
+                return dec
+            elif ((isinstance(sign, (int, float)) and sign < 0) or
+                    (isinstance(sign, six.string_types) and
+                     sign.strip().lower().startswith('s'))):
+                return -dec
+            return dec
+
+        lat, lon = None, None
+        for grp in ('EXIF', 'XMP'):
+            lat_ref = exif.get(grp + ':GPSLatitudeRef', '')
+            lon_ref = exif.get(grp + ':GPSLongitudeRef', '')
+            lat_dms = exif.get(grp + ':GPSLatitude', '')
+            lon_dms = exif.get(grp + ':GPSLongitude', '')
+            if not (lat_dms and lon_dms):
+                continue
+            lat, lon = dms2dec(lat_dms, lat_ref), dms2dec(lon_dms, lon_ref)
+
+        if lat is None or lon is None:
+            return {}
+
+        data = {'Composite:GPSLatitude': lat, 'Composite:GPSLongitude': lon}
+
+        if use_google:
+            geolocator = geopy.GoogleV3(scheme="http")
+            try:
+                location = geolocator.reverse(
+                    '{0:.6f}, {1:.6f}'.format(lat, lon))
+            except geopy.exc.GeocoderQuotaExceeded:
+                logging.warn('Unable to identify location right now. Quota '
+                             'for the geolocation service (GoogleV3) '
+                             'exceeded. The quota is 2500 requests per '
+                             'day, try again tomorrow.')
+            except geopy.exc.GeocoderServiceError as err:
+                logging.error('There was an error while querying the '
+                              'location of the GPS co-ordinates.')
+                logging.exception(err)
+            if isinstance(location, list) and len(location) == 0:
+                return {}  # No location found
+
+            location = location[0] if isinstance(location, list) else location
+            for addr in location.raw.get('address_components', []):
+                if 'locality' in addr.get('types', []):
+                    data['Composite:GPSGoogleLocality'] = addr.get('long_name')
+                elif 'country' in addr.get('types', []):
+                    data['Composite:GPSGoogleCountry'] = addr.get('long_name')
+
+        return data
 
     def analyze_color_info(self,
                            grey_shade_threshold=0.05,

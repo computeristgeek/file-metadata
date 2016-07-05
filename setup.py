@@ -37,6 +37,7 @@ install_deps = [
     setupdeps.ZBar(),
     setupdeps.JavaJRE(),
     setupdeps.ZXing(),
+    setupdeps.GeoPy(),
     setupdeps.PyColorName(),
     # Audio video deps
     setupdeps.FFProbe(),

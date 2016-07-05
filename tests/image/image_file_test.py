@@ -135,6 +135,18 @@ class ImageFileScreenshotSoftwaresTest(unittest.TestCase):
                          'GNOME Screenshot')
 
 
+class ImageFileGeoLocation(unittest.TestCase):
+
+    def test_geolocation_osaka(self):
+        _file = ImageFile(fetch_file('geotag_osaka.jpg'))
+        data = _file.analyze_geolocation()
+        self.assertIn('Composite:GPSLatitude', data)
+        self.assertEqual(int(data.get('Composite:GPSLatitude', 0) * 1e6),
+                         34748261)
+        self.assertEqual(int(data.get('Composite:GPSLongitude', 0) * 1e6),
+                         135576661)
+
+
 class ImageFileColorInfoTest(unittest.TestCase):
 
     def test_color_info_rgb_image(self):

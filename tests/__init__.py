@@ -123,7 +123,10 @@ file_download_links = {
     'wikimedia_logo.png': 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/81/Wikimedia-logo.svg/768px-Wikimedia-logo.svg.png',
     'wikidata_logo.png': 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/ff/Wikidata-logo.svg/1024px-Wikidata-logo.svg.png',
     'wikipedia_logo.png': 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/de/Wikipedia_Logo_1.0.png/768px-Wikipedia_Logo_1.0.png',
-    'commons_logo.png': 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Commons-logo.svg/571px-Commons-logo.svg.png'
+    'commons_logo.png': 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Commons-logo.svg/571px-Commons-logo.svg.png',
+
+    # Geocoded images
+    'geotag_osaka.jpg': 'https://upload.wikimedia.org/wikipedia/commons/5/50/Honda_STEPWGN_SPADA%E3%83%BBCool_Spirit_%28RP3%29_rear.JPG',
 }
 
 
