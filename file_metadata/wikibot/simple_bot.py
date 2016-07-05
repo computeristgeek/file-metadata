@@ -68,6 +68,7 @@ def handle_meta(meta):
 
         #################################################################
         # Software analysis
+        # Softwares used:
         softwares = meta.get('Composite:Softwares', [])
         software_cats = {
             'Microsoft ICE': 'Microsoft Image Composite Editor',
@@ -78,11 +79,16 @@ def handle_meta(meta):
                 txt.append('* Category:Created with ' +
                            software_cats.get(sw, sw))
 
-        #################################################################
-        # Screenshot analysis
+        # Screenshot:
         screenshot_softwares = meta.get('Composite:ScreenshotSoftwares', [])
         if len(screenshot_softwares) > 0:
             txt.append('* Category:Screenshots')
+
+        #################################################################
+        # Camera analysis
+        model = meta.get('EXIF:Model', '')
+        if model:
+            txt.append("* Category:Taken with " + model)
 
         #################################################################
         # Barcode analysis
@@ -107,12 +113,24 @@ def handle_meta(meta):
 
         #################################################################
         # Software analysis
+        # Softwares used:
         softwares = meta.get('Composite:Softwares', [])
         if len(softwares) > 0:
             txt.append("* Softwares: " + ", ".join(softwares))
 
+        # Screenshot:
+        screenshot_softwares = meta.get('Composite:ScreenshotSoftwares', [])
+        if len(screenshot_softwares) > 0:
+            txt.append("* Screenshot Softwares: " +
+                       ", ".join(screenshot_softwares))
+
         #################################################################
-        # Screenshot analysis
+        # Camera analysis
+        model = meta.get('EXIF:Model', '')
+        if model:
+            txt.append("* Camera Model: " + model)
+
+        # Screenshot:
         screenshot_softwares = meta.get('Composite:ScreenshotSoftwares', [])
         if len(screenshot_softwares) > 0:
             txt.append("* Screenshot Softwares: " +
