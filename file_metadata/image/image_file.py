@@ -144,11 +144,18 @@ class ImageFile(GenericFile):
                     Adobe Photoshop, Photoshop Photomerge, Picasa, GIMP,
                     Microsoft ICE, Paint.NET, GNU Plot,
                     Chemtool, VectorFieldPlot, and Stella.
+             - Composite:ScreenshotSoftwares - Tuple with the names of the
+                softwares detected that was used.
+                The possible softwares that can be found are:
+                    GNOME Screenshot
         """
         # Find more files at https://commons.wikimedia.org/wiki/
         # Category:Created_with_..._templates
         exif = self.exiftool()
+        data = {}
+
         softwares = set()
+        screenshots = set()
 
         if (str(exif.get('SVG:Output_extension', '')) ==
                 'org.inkscape.output.svg.inkscape'):
@@ -181,6 +188,8 @@ class ImageFile(GenericFile):
                 softwares.add('Microsoft ICE')
             elif sw.startswith('paint.net'):
                 softwares.add('Paint.NET')
+            elif sw.startswith('gnome-screenshot'):
+                screenshots.add('GNOME Screenshot')
 
         desc = str(exif.get('SVG:Desc', '')).lower()
         if ' gnuplot ' in desc:
@@ -197,38 +206,12 @@ class ImageFile(GenericFile):
             elif 'created with gimp' in comment:
                 softwares.add('GIMP')
 
-        if len(softwares) == 0:
-            return {}
+        if len(softwares) > 0:
+            data['Composite:Softwares'] = tuple(softwares)
+        if len(screenshots) > 0:
+            data['Composite:ScreenshotSoftwares'] = tuple(screenshots)
 
-        return {'Composite:Softwares': tuple(softwares)}
-
-    def analyze_screenshot_softwares(self):
-        """
-        Find the software used to create the given file with. This is mainly
-        for screenshots.
-
-        :return: dict with the keys:
-
-             - Composite:ScreenshotSoftwares - Tuple with the names of the
-                softwares detected that was used.
-                The possible softwares that can be found are:
-                    GNOME Screenshot,
-        """
-        # Find more files at https://commons.wikimedia.org/wiki/
-        # Category:Created_with_..._templates
-        exif = self.exiftool()
-        softwares = []
-
-        for sw_key in ('PNG:Software', 'EXIF:Software'):
-            sw = str(exif.get(sw_key, '')).lower()
-            if sw.startswith('gnome-screenshot'):
-                softwares.append('GNOME Screenshot')
-
-        if len(softwares) == 0:
-            return {}
-
-        return {'Composite:ScreenshotSoftwares':
-                tuple(softwares) if len(softwares) > 1 else softwares[0]}
+        return data
 
     def analyze_geolocation(self, use_google=False):
         """
