@@ -67,7 +67,10 @@ class ImageFileSoftwaresTest(unittest.TestCase):
         _file = ImageFile(fetch_file(
             'created_with_photoshop_photomerge.jpg'))
         data = _file.analyze_softwares().get('Composite:Softwares', None)
-        self.assertIn('Photoshop Photomerge', data)
+        if float(_file.exiftool()['ExifTool:ExifToolVersion']) >= 10:
+            # Older versions of exiftool do not detect this correctly. Hence
+            # we only do the test in newer versions.
+            self.assertIn('Photoshop Photomerge', data)
 
     def test_created_with_picasa(self):
         _file = ImageFile(fetch_file('created_with_picasa.jpg'))
