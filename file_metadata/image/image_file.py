@@ -98,6 +98,11 @@ class ImageFile(GenericFile):
                 warnings.simplefilter("ignore")
                 return skimage.img_as_ubyte(
                     skimage.color.rgb2grey(self.fetch('ndarray')))
+        elif key == 'ndarray_hsv':
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                return skimage.img_as_ubyte(
+                    skimage.color.rgb2hsv(self.fetch('ndarray_noalpha')))
         elif key == 'ndarray_noalpha':
             if self.is_type('alpha'):
                 return self.alpha_blend(self.fetch('ndarray'))
@@ -322,6 +327,9 @@ class ImageFile(GenericFile):
                 palette.
              - Color:EdgeRatio - The percentage of pixels in the picture where
                 edges are found.
+             - Color:Monochrome - This value is present if the image is found
+                to be monochrome. It's value is the color of the monochrome
+                image - Sepia, BlackWhite.
         """
         image_array = self.fetch('ndarray_noalpha')
         if image_array.ndim == 4:  # Animated images
@@ -392,13 +400,20 @@ class ImageFile(GenericFile):
         peaks_hist_max = freq_colors_threshold * hist_concat.max()
         peaks_percent = (hist_concat > peaks_hist_max).mean()
 
+        # Convert to HSV and threshold the H and V values to find the
+        # monochromatic color.
+        monochrome = None
+        if image_array.ndim == 2:  # Greyscale images
+            monochrome = 'BlackWhite'
+
         return DictNoNone({
             'Color:ClosestLabeledColorRGB': closest_color,
             'Color:ClosestLabeledColor': closest_label,
             'Color:AverageRGB': tuple(round(i, 3) for i in mean_color),
             'Color:NumberOfGreyShades': num_grey_shades,
             'Color:PercentFrequentColors': peaks_percent,
-            'Color:EdgeRatio': edge_ratio})
+            'Color:EdgeRatio': edge_ratio,
+            'Color:Monochrome': monochrome})
 
     @staticmethod
     def _haarcascade(image, filename, directory=None, **kwargs):

@@ -177,6 +177,7 @@ class ImageFileColorInfoTest(unittest.TestCase):
         self.assertEqual(data['Color:NumberOfGreyShades'], 2)
         self.assertEqual(round(data['Color:PercentFrequentColors'], 3), 0.008)
         self.assertEqual(round(data['Color:EdgeRatio'], 3), 0.268)
+        self.assertEqual(data['Color:Monochrome'], 'BlackWhite')
 
     def test_color_info_animated_image(self):
         data = ImageFile(fetch_file('animated.gif')).analyze_color_info()
@@ -244,6 +245,14 @@ class ImageFileColorInfoTest(unittest.TestCase):
         self.assertEqual(data['Color:NumberOfGreyShades'], 2)
         self.assertEqual(round(data['Color:PercentFrequentColors'], 3), 0.008)
         self.assertEqual(round(data['Color:EdgeRatio'], 3), 0.093)
+
+    def test_color_info_monochrome_blackwhite(self):
+        with ImageFile(fetch_file('blackwhite_monochrome.jpg')) as _file:
+            data = _file.analyze_color_info()
+            self.assertIn('Color:AverageRGB', data)
+            self.assertEqual(data['Color:AverageRGB'],
+                             (179.717, 181.715, 172.087))
+            self.assertEqual(data['Color:NumberOfGreyShades'], 164)
 
 
 class ImageFileFaceHAARCascadesTest(unittest.TestCase):

@@ -127,6 +127,12 @@ file_download_links = {
 
     # Geocoded images
     'geotag_osaka.jpg': 'https://upload.wikimedia.org/wikipedia/commons/5/50/Honda_STEPWGN_SPADA%E3%83%BBCool_Spirit_%28RP3%29_rear.JPG',
+
+    # Monochrome colors
+    'blackwhite_monochrome.jpg': 'https://upload.wikimedia.org/wikipedia/commons/7/76/%22Seattle_is_a_Wonder%22_-_2nd_and_Yesler%2C_c1904_%288308568968%29.jpg',
+    'blue_monochrome.jpg': 'https://upload.wikimedia.org/wikipedia/commons/9/9f/Paolo_Monti_-_Serie_fotografica_-_BEIC_6358396.jpg',
+    'green_monochrome.jpg': 'https://upload.wikimedia.org/wikipedia/commons/e/ea/Edvard-dawkins.jpg',
+    
 }
 
 
