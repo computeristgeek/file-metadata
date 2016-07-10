@@ -326,7 +326,7 @@ class ImageFile(GenericFile):
         image_array = self.fetch('ndarray_noalpha')
         if image_array.ndim == 4:  # Animated images
             mean_color = image_array.mean(axis=(0, 1, 2))
-        elif image_array.ndim == 3:  # Static images
+        elif image_array.ndim == 3 and image_array.shape[2] == 3:  # Static
             mean_color = image_array.mean(axis=(0, 1))
         elif image_array.ndim == 2:  # Greyscale images
             avg = image_array.mean()
@@ -376,7 +376,7 @@ class ImageFile(GenericFile):
                 "green": _full_histogram(image_array[:, :, :, 1]),
                 "blue": _full_histogram(image_array[:, :, :, 2])
             }
-        elif image_array.ndim == 3:  # Static images
+        elif image_array.ndim == 3 and image_array.shape[2] == 3:  # Static
             hist = {
                 "red": _full_histogram(image_array[:, :, 0]),
                 "green": _full_histogram(image_array[:, :, 1]),
@@ -597,7 +597,8 @@ class ImageFile(GenericFile):
                 - mouth - Location of the center of the mouth.
         """
         image_array = self.fetch('ndarray_noalpha')
-        if len(image_array.shape) == 4:
+        if (image_array.ndim == 4 or
+                (image_array.ndim == 3 and image_array.shape[2] != 3)):
             logging.warn('Facial landmarks of animated images cannot be '
                          'detected yet.')
             return {}
