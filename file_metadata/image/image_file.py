@@ -677,15 +677,33 @@ class ImageFile(GenericFile):
                 - points - The detection points of the barcode (4 points for
                     QR codes and Data matrices and 2 points for barcodes).
         """
-        if all(map(lambda x: x < 4, self.fetch('ndarray').shape)):
+        image_array = self.fetch('ndarray')
+        if all(map(lambda x: x < 4, image_array.shape)):
             # If the file is less than 4 pixels, it won't contain a barcode.
             # Small files cause zxing to crash so, we just return empty.
             return {}
+        if (image_array.ndim == 4 or
+                (image_array.ndim == 3 and
+                 image_array.shape[2] not in (3, 4))):
+            logging.warn('Barcode analysis with zxing of animated images '
+                         'or multi page images is not supported yet.')
+            return {}
 
-        output = subprocess.check_output([
-            'java', '-cp', os.path.join(DATA_PATH, '*'),
-            'com.google.zxing.client.j2se.CommandLineRunner', '--multi',
-            self.fetch('filename_zxing')])
+        try:
+            output = subprocess.check_output([
+                'java', '-cp', os.path.join(DATA_PATH, '*'),
+                'com.google.zxing.client.j2se.CommandLineRunner', '--multi',
+                self.fetch('filename_zxing')],
+                stderr=subprocess.STDOUT)
+        except subprocess.CalledProcessError as err:
+            if 'java.io.IOException: Could not load file' in err.output:
+                logging.error(
+                    "`java.io` is unable to read this file. Possibly the file "
+                    "has invalid exifdata or is corrupt. This is required for "
+                    "zxing's barcode analysis.")
+            else:
+                logging.error(err.output)
+            return {}
 
         if 'No barcode found' in output:
             return {}
