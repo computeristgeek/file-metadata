@@ -704,11 +704,15 @@ class ImageFile(GenericFile):
                          'or multi page images is not supported yet.')
             return {}
 
+        filename = self.fetch('filename_zxing')
+        if filename is None:
+            return {}
+
         try:
             output = subprocess.check_output([
                 'java', '-cp', os.path.join(DATA_PATH, '*'),
                 'com.google.zxing.client.j2se.CommandLineRunner', '--multi',
-                self.fetch('filename_zxing')],
+                filename],
                 stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as err:
             if 'java.io.IOException: Could not load file' in err.output:

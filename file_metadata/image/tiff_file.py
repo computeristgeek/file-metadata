@@ -22,6 +22,9 @@ class TIFFFile(ImageFile):
     @memoized
     def fetch(self, key=''):
         if key == 'filename_zxing':
+            pill = self.fetch('pillow')
+            if hasattr(pill, 'n_frames') and pill.n_frames != 1:
+                return None
             # ZXing cannot handle most TIFF images, convert to PNG.
             with wand.image.Image(filename=self.fetch('filename')) \
                     as tiff_image:
