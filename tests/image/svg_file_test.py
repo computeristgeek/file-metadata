@@ -36,3 +36,9 @@ class SVGFileTest(unittest.TestCase):
     def test_fetch_svg_ndarray_text_plain(self):
         with SVGFile(fetch_file('text_plain.svg')) as uut:
             self.assertEqual(uut.fetch('ndarray').shape, (300, 300, 3))
+
+    def test_file_format(self):
+        with SVGFile(fetch_file('text_plain.svg')) as uut:
+            data = uut.analyze_file_format()
+            self.assertIn('Composite:FileFormat', data)
+            self.assertEqual(data['Composite:FileFormat'], 'svg')

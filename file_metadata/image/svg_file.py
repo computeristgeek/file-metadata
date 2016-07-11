@@ -35,3 +35,15 @@ class SVGFile(ImageFile):
                 return name
 
         return super(SVGFile, self).fetch(key)
+
+    def analyze_file_format(self):
+        """
+        Simply add a metadata mentioning this is a valid SVG file. This is
+        useful because SVG cannot be simply detected by MimeType as it's not
+        standardized yet.
+
+        :return: dict with the keys:
+
+             - Composite:FileFormat - 'svg'
+        """
+        return {'Composite:FileFormat': 'svg'}
