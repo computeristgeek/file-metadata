@@ -627,7 +627,7 @@ class ImageFile(GenericFile):
         arch_path = app_dir('user_data_dir', predictor_arch)
 
         if with_landmarks and not os.path.exists(dat_path):
-            logging.info('Downloading the landmark data file for facial '
+            logging.warn('Downloading the landmark data file for facial '
                          'landmark detection. Hence, the '
                          'first run may take longer than normal.')
             url = 'http://sourceforge.net/projects/dclib/files/dlib/v18.10/{0}'
