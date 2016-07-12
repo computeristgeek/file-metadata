@@ -3,6 +3,7 @@
 from __future__ import (division, absolute_import, unicode_literals,
                         print_function)
 
+import json
 import logging
 import os
 import re
@@ -10,7 +11,6 @@ import subprocess
 import warnings
 
 import dlib
-import geopy
 import numpy
 import pathlib2
 import six
@@ -23,6 +23,8 @@ import skimage.transform
 import zbar
 from PIL import Image
 from pycolorname.pantone.pantonepaint import PantonePaint
+from six.moves.urllib.request import urlopen
+from six.moves.urllib.error import URLError
 
 from file_metadata.generic_file import GenericFile
 from file_metadata.utilities import (DictNoNone, app_dir, bz2_decompress,
@@ -218,11 +220,13 @@ class ImageFile(GenericFile):
 
         return data
 
-    def analyze_geolocation(self, use_google=False):
+    def analyze_geolocation(self, use_nominatim=False):
         """
         Find the location where the photo was taken initially. This is
         information which is got using the latitude/longitude in EXIF data.
 
+        :param use_nominatim: Whether to use reverse geocoding from nominatim
+                              or not.
         :return: dict with the keys:
 
              - Composite:Country - The country the photo was taken.
@@ -267,31 +271,30 @@ class ImageFile(GenericFile):
         if lat is None or lon is None:
             return {}
 
-        data = {'Composite:GPSLatitude': lat, 'Composite:GPSLongitude': lon}
+        data = DictNoNone({'Composite:GPSLatitude': lat,
+                           'Composite:GPSLongitude': lon})
 
-        if use_google:
-            geolocator = geopy.GoogleV3(scheme="http")
+        if use_nominatim:
+            # Zoom levels: country = 0, megacity = 10, district = 10,
+            # city = 13, village = 15, street = 16, house = 18
+            url = ('http://nominatim.openstreetmap.org/reverse?format=json'
+                   '&lat={lat}&lon={lon}&zoom={zoom}'
+                   .format(lat=lat, lon=lon, zoom=13))
             try:
-                location = geolocator.reverse(
-                    '{0:.6f}, {1:.6f}'.format(lat, lon))
-            except geopy.exc.GeocoderQuotaExceeded:
-                logging.warn('Unable to identify location right now. Quota '
-                             'for the geolocation service (GoogleV3) '
-                             'exceeded. The quota is 2500 requests per '
-                             'day, try again tomorrow.')
-            except geopy.exc.GeocoderServiceError as err:
-                logging.error('There was an error while querying the '
-                              'location of the GPS co-ordinates.')
-                logging.exception(err)
+                response = urlopen(url)
+                location = json.loads(response.read().decode('utf-8'))
+            except URLError:
+                logging.warn('An issue occured while querying nominatim '
+                             'with: ' + url)
+                return data
+
             if isinstance(location, list) and len(location) == 0:
                 return {}  # No location found
 
-            location = location[0] if isinstance(location, list) else location
-            for addr in location.raw.get('address_components', []):
-                if 'locality' in addr.get('types', []):
-                    data['Composite:GPSGoogleLocality'] = addr.get('long_name')
-                elif 'country' in addr.get('types', []):
-                    data['Composite:GPSGoogleCountry'] = addr.get('long_name')
+            addr = location.get('address', {})
+            data['Composite:GPSCountry'] = addr.get('country')
+            data['Composite:GPSState'] = addr.get('state')
+            data['Composite:GPSCity'] = addr.get('city')
 
         return data
 
