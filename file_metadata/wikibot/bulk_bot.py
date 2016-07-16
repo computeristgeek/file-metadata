@@ -27,6 +27,7 @@ from __future__ import (division, absolute_import, unicode_literals,
 
 import logging
 import os
+import re
 import sys
 import tempfile
 from collections import Counter
@@ -149,6 +150,13 @@ def handle_bulk_pages(gen):
                 info.append("* '''Softwares''': " + ", ".join(softwares))
                 cats.add('Category:Created with ' + software_cats.get(sw, sw))
 
+        if 'Chemtool' in softwares:
+            cats.add('Category:Chemical compounds')
+            cats.add('Category:Graphics')
+        if 'VectorFieldPlot' in softwares:
+            cats.add('Category:Field diagrams')
+            cats.add('Category:Graphics')
+
         # Screenshot:
         screenshot_softwares = meta.get('Composite:ScreenshotSoftwares', [])
         if len(screenshot_softwares) > 0:
@@ -169,26 +177,51 @@ def handle_bulk_pages(gen):
             elif make == 'i2S DigiBook Scanner':
                 model = 'i2s Digibook ' + model
             # Simple replacements
-            model.replace('NIKON', 'Nikon')
-            model.replace('FUJIFILM', 'Nikon')
+            model = model.replace('NIKON', 'Nikon')
+            model = model.replace('FUJIFILM', 'Nikon')
             if make.lower() == 'xiaomi':
-                model.replace('Note3', 'Note 3')  # Some pics have "Note3"
+                # Some pics have "Note3"
+                model = model.replace('Note3', 'Note 3')
+            if make.lower().startswith('samsung'):
+                # In samsung, the cameras have multiple names like:
+                # "<Digimax S600 / Kenox S600 / Digimax Cyber 630>" or
+                # "Digimax A4/Kenox D4". THe categories are only named as
+                # "Taken with Samsung S600", "Taken with Samsung A4" though.
+                samsung_model = ''
+                possible_models = re.sub('[<>]', '', model).split('/')
+                for imod in possible_models:
+                    imod = imod.strip()
+                    if (imod.lower().startswith('digimax') and
+                            not imod.lower().startswith('digimax cyber')):
+                        samsung_model = imod
+                        break
+                if not samsung_model and len(possible_models) > 0:
+                    samsung_model = possible_models[0].strip()
+                # Remove digimax if present
+                samsung_model = re.sub('Digimax', '', samsung_model, count=1,
+                                       flags=re.IGNORECASE).strip()
+
+                model = 'Samsung ' + samsung_model
 
             possible_prefixes = ['Sanned with ', 'Taken with ',
                                  'Taken or Scanned with ']
             for prefix in possible_prefixes:
                 possible_cat = pywikibot.Page(pywikibot.Site(),
                                               "Category:" + prefix + model)
-                if possible_cat.exists():
+                if (possible_cat.exists() or
+                        prefix == len(possible_prefixes) - 1):
                     info.append("* '''Model''': " +
                                 possible_cat.title(underscore=False,
                                                    textlink=True, asLink=True))
                     cats.add(possible_cat.title(underscore=False))
+                    break
 
         #################################################################
         # Color analysis
         for key in ['AverageRGB', 'ClosestLabeledColor', 'EdgeRatio',
-                    'NumberOfGreyShades', 'PercentFrequentColors']:
+                    'NumberOfGreyShades', 'PercentFrequentColors',
+                    'MeanSquareErrorFromGrey', 'Monochrome', 'UsesAlpha',
+                    'CalibrationTopBar', 'CalibrationBottomBar']:
             if 'Color:' + key in meta:
                 if isinstance(meta['Color:' + key], (list, tuple)):
                     val = ', '.join(map(str, meta['Color:' + key]))
@@ -200,8 +233,48 @@ def handle_bulk_pages(gen):
         greys = meta.get('Color:NumberOfGreyShades')
         edges = meta.get('Color:EdgeRatio')
         if ((greys is not None and greys < 2) or
-                (edges is not None and edges < 0.13)):
+                (edges is not None and edges < 0.13) or
+                meta.get('Composite:FileFormat') == 'svg'):
             cats.add('Category:Graphics')
+        if (meta.get('Color:MeanSquareErrorFromGrey', 999) < 22 and
+                meta.get('EXIF:Make') is not None):
+            # If it's scanned or from a camera and black-white
+            cats.add('Category:Black and white photographs')
+        if meta.get('Color:UsesAlpha') is True:
+            cats.add('Category:Transparent background')
+
+        if 17 <= meta.get('CalibrationTopBar', -1) <= 23:
+            cats.add('Category:Scans with IT8 target')
+        elif 17 <= meta.get('CalibrationBottomBar', -1) <= 23:
+            cats.add('Category:Scans with IT8 target')
+
+        #################################################################
+        # Location analysis
+        found_location_category = False
+        for key in ['GPSCity', 'GPSState', 'GPSCountry']:
+            val = meta.get('Composite:' + key)
+            if val is not None:
+                info.append("* '''" + key + "''': " + val)
+                if pywikibot.Page(
+                        pywikibot.Site(), "Category:" + val).exists():
+                    found_location_category = val
+                    cats.add('Category:' + val)
+                    break
+
+        if (meta.get('Composite:GPSLatitude') and
+                meta.get('Composite:GPSLongitude')):
+            cats.add('Category:Media with locations')
+            info.append("* '''GPS Coordinates''': {0}, {1}"
+                        .format(meta.get('Composite:GPSLatitude'),
+                                meta.get('Composite:GPSLongitude')))
+            if not found_location_category:
+                cats.add('Category:Media with geo-coordinates '
+                         'needing categories')
+
+        #################################################################
+        # Author analysis
+        if meta.get('EXIF:Artist') == "New York Public Library":
+            cats.add('Category:Images from the New York Public Library')
 
         #################################################################
         # Image analysis
@@ -228,10 +301,25 @@ def handle_bulk_pages(gen):
                         ", Width:" + str(bbox['width']) +
                         ", Height:" + str(bbox['height']))
 
+            def _mean_bbox(bbox):
+                return (bbox['left'] + bbox['width'] / 2,
+                        bbox['top'] + bbox['height'] / 2)
+
+            def _area_bbox(bbox):
+                return bbox['width'] * bbox['height']
+
             #################################################################
-            # Icon analysis
+            # Analysis for very specific images: Icons, Football kits, etc
             if height == width and height in (16, 32, 48, 96):
                 cats.add('Category:Icons')
+            elif width == 36 and height == 100:
+                cats.add('Category:Football kit shorts')
+            elif width == 25 and height == 100:
+                cats.add('Category:Football kit socks')
+            elif width == 38 and height == 59:
+                cats.add('Category:Football kit body')
+            elif width == 31 and height == 59:
+                cats.add('Category:Football kit sleeves')
 
             #################################################################
             # Barcode analysis
@@ -271,23 +359,30 @@ def handle_bulk_pages(gen):
 
             #################################################################
             # Face analysis
-            def print_face_data(face):
+            def print_face_data(face, _type):
                 _cats = set()  # These may or may not be added ...
                 feats = set()
                 _cats.add('Category:Human faces')
-                if len(face.get('eyes', ())) > 0:
-                    # _cats.add('Category:Human eyes')
-                    feats.add('Eyes (' + str(len(face['eyes'])) + ')')
-                if face.get('ears') is not None:
-                    # _cats.add('Category:Human ears')
-                    feats.add('Ears')
-                if face.get('nose') is not None:
-                    # _cats.add('Category:Human noses')
-                    feats.add('Nose')
-                if face.get('mouth') is not None:
-                    # _cats.add('Category:Human mouths')
-                    feats.add('Mouth')
+                _cats.add('Category:Unidentified people')
+                if _type == 'opencv':  # Dlib always finds all features
+                    if len(face.get('eyes', ())) > 0:
+                        # _cats.add('Category:Human eyes')
+                        feats.add('Eyes (' + str(len(face['eyes'])) + ')')
+                    if face.get('ears') is not None:
+                        # _cats.add('Category:Human ears')
+                        feats.add('Ears')
+                    if face.get('nose') is not None:
+                        # _cats.add('Category:Human noses')
+                        feats.add('Nose')
+                    if face.get('mouth') is not None:
+                        # _cats.add('Category:Human mouths')
+                        feats.add('Mouth')
+                    if face.get('glasses') is not None:
+                        _cats.add('Category:People with glasses')
+                        feats.add('Glasses')
 
+                if _type == 'dlib':
+                    info.append("** Score: " + str(round(face['score'], 3)))
                 info.append("** Bounding Box: " + _str_bbox(face['position']))
                 if len(feats) > 0:
                     info.append("** Other features: " + ", ".join(feats))
@@ -296,24 +391,51 @@ def handle_bulk_pages(gen):
                 box_kwargs["color"] = "ff0000"
                 box_kwargs["css_class"] = "barcode"
                 img.append(img_bbox.format(**box_kwargs))
-                if len(feats) > 2:
-                    # Atleast 1 feature is needed to reliably detect it as
-                    # a face
+                if ((_type == 'opencv' and len(feats) > 2) or
+                        (_type == 'dlib' and face['score'] > 0.045)):
                     return _cats
                 return set()
+
+            # Save all face categories in this set, ad add it later if it
+            # seems appropirate. This is because we need to delay the writing
+            # of these categories based on some logic.
+            valid_faces = []
+            face_cats = set()
 
             # Faces with dlib:
             for iface, face in enumerate(meta.get('dlib:Faces', [])):
                 info.append("* '''Face''' (dlib) #" + str(iface + 1))
-                info.append("** Score: " + str(round(face['score'], 3)))
-                cats = cats.union(print_face_data(face))
+                icats = print_face_data(face, 'dlib')
+                face_cats = face_cats.union(icats)
+                if 'Category:Human faces' in icats:
+                    valid_faces.append(face)
 
             # Faces with opencv's haarcascades:
             for iface, face in enumerate(meta.get('OpenCV:Faces', [])):
                 info.append("* '''Face''' (haarcascade) #" + str(iface + 1))
-                cats = cats.union(print_face_data(face))
+                icats = print_face_data(face, 'opencv')
+                face_cats = face_cats.union(icats)
+                if 'Category:Human faces' in icats:
+                    valid_faces.append(face)
 
+            if len(valid_faces) >= 3:
+                face_cats.add('Category:Groups of people')
+
+            cats = cats.union(face_cats)
             img.append('</div>')  # Close the image's div
+
+        #################################################################
+        # Unidentified people by Location analysis
+        if 'Category:Unidentified People' in cats:
+            for key in ['GPSState']:
+                val = meta.get('Composite:' + key)
+                if val is None:
+                    continue
+                cat_val = "Category:Unidentified people in " + val
+                if pywikibot.Page(pywikibot.Site(), cat_val).exists():
+                    cats.add(cat_val)
+                    cats.remove('Category:Unidentified People')
+                    break
 
         categories.append(cats)
 
@@ -351,18 +473,17 @@ def handle_bulk_pages(gen):
               "{0} ({1:0.4f} %)".format(
                   exception_count,
                   100 * exception_count / (count + exception_count))]
-    distinct_cats = set(cat for fcats in categories for cat in fcats)
+    cat_counter = Counter(cat for fcats in categories for cat in fcats)
     stats += ["* '''Number of distinct categories used''': {0}"
-              .format(len(distinct_cats))]
+              .format(len(cat_counter))]
 
     stats += ['{{Bar chart',
               '| title = Histogram of files categorized by category name',
               '| label_type = Category (% files analyzed in this category)',
               '| data_type = Number of files in the category',
               '| data_max = ' + str(count)]
-    for icat, (catname, numfiles) in \
-            enumerate(Counter(cat for fcats in categories
-                              for cat in fcats).items()):
+    for icat, (catname, numfiles) in enumerate(
+            sorted(cat_counter.items(), key=lambda x: x[1], reverse=True)):
         stats += ['| label{0} = {1} ({2:.4f} %)'.format(
                   icat + 1, "[[:" + catname + "]]", 100 * numfiles / count),
                   '| data{0} = {1}'.format(icat + 1, numfiles)]
