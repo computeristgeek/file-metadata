@@ -422,6 +422,11 @@ class ImageFile(GenericFile):
             if blackwhite_mean_square_err < blackwhite_mean_square_err_cutoff:
                 monochrome = 'BlackWhite'
 
+        uses_alpha = None
+        nd_array = self.fetch('ndarray')
+        if self.is_type('alpha') and nd_array.ndim == 3:
+            uses_alpha = (nd_array[:, :, 3] < 255).any()
+
         return DictNoNone({
             'Color:ClosestLabeledColorRGB': closest_color,
             'Color:ClosestLabeledColor': closest_label,
@@ -430,7 +435,8 @@ class ImageFile(GenericFile):
             'Color:PercentFrequentColors': peaks_percent,
             'Color:EdgeRatio': edge_ratio,
             'Color:MeanSquareErrorFromGrey': blackwhite_mean_square_err,
-            'Color:Monochrome': monochrome})
+            'Color:Monochrome': monochrome,
+            'Color:UsesAlpha': uses_alpha})
 
     @staticmethod
     def _haarcascade(image, filename, directory=None, **kwargs):

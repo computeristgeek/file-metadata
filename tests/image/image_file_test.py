@@ -155,6 +155,7 @@ class ImageFileColorInfoTest(unittest.TestCase):
         self.assertEqual(data['Color:NumberOfGreyShades'], 1)
         self.assertEqual(round(data['Color:PercentFrequentColors'], 3), 0.004)
         self.assertEqual(round(data['Color:EdgeRatio'], 3), 0)
+        self.assertNotIn('Color:UsesAlpha', data)
 
     def test_color_info_rgba_image(self):
         data = ImageFile(fetch_file('ball.png')).analyze_color_info()
@@ -166,6 +167,7 @@ class ImageFileColorInfoTest(unittest.TestCase):
         self.assertEqual(data['Color:NumberOfGreyShades'], 2)
         self.assertEqual(round(data['Color:PercentFrequentColors'], 3), 0.008)
         self.assertEqual(round(data['Color:EdgeRatio'], 3), 0.016)
+        self.assertEqual(data['Color:UsesAlpha'], True)
 
     def test_color_info_greyscale_image(self):
         data = ImageFile(fetch_file('barcode.png')).analyze_color_info()
