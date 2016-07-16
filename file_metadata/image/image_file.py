@@ -301,7 +301,8 @@ class ImageFile(GenericFile):
     def analyze_color_info(self,
                            grey_shade_threshold=0.05,
                            freq_colors_threshold=0.1,
-                           edge_ratio_gaussian_sigma=1):
+                           edge_ratio_gaussian_sigma=1,
+                           blackwhite_mean_square_err_cutoff=32):
         """
         Find the average RGB color of the image and compare with the existing
         Pantone color system to identify the color name.
@@ -315,6 +316,9 @@ class ImageFile(GenericFile):
         :param edge_ratio_gaussian_sigma:
             The sigma to use in gaussian blurring in Canny edge detection
             for EdgeRatio.
+        :param blackwhite_mean_square_err_cutoff:
+            The mean square error below which an image is considered as
+            black and white.
         :return: dict with the keys:
 
              - Color:ClosestLabeledColorRGB - The closest RGB value of the
@@ -406,8 +410,17 @@ class ImageFile(GenericFile):
         # Convert to HSV and threshold the H and V values to find the
         # monochromatic color.
         monochrome = None
+        blackwhite_mean_square_err = None
         if image_array.ndim == 2:  # Greyscale images
             monochrome = 'BlackWhite'
+        elif image_array.ndim == 3:
+            blackwhite_mean_square_err = 0
+            for chan in range(image_array.shape[2]):
+                blackwhite_mean_square_err += (
+                    (image_array[:, :, chan] - grey_array) ** 2).mean()
+            blackwhite_mean_square_err /= image_array.shape[2]
+            if blackwhite_mean_square_err < blackwhite_mean_square_err_cutoff:
+                monochrome = 'BlackWhite'
 
         return DictNoNone({
             'Color:ClosestLabeledColorRGB': closest_color,
@@ -416,6 +429,7 @@ class ImageFile(GenericFile):
             'Color:NumberOfGreyShades': num_grey_shades,
             'Color:PercentFrequentColors': peaks_percent,
             'Color:EdgeRatio': edge_ratio,
+            'Color:MeanSquareErrorFromGrey': blackwhite_mean_square_err,
             'Color:Monochrome': monochrome})
 
     @staticmethod

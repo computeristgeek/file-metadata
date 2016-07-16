@@ -250,9 +250,20 @@ class ImageFileColorInfoTest(unittest.TestCase):
         with ImageFile(fetch_file('blackwhite_monochrome.jpg')) as _file:
             data = _file.analyze_color_info()
             self.assertIn('Color:AverageRGB', data)
-            self.assertEqual(data['Color:AverageRGB'],
-                             (179.717, 181.715, 172.087))
-            self.assertEqual(data['Color:NumberOfGreyShades'], 164)
+            self.assertLess(int(data['Color:MeanSquareErrorFromGrey']), 32)
+            self.assertEqual(data['Color:Monochrome'], 'BlackWhite')
+
+    def test_color_info_monochrome_sepia(self):
+        with ImageFile(fetch_file('sepia_monochrome.jpg')) as _file:
+            data = _file.analyze_color_info()
+            self.assertEqual(int(data['Color:MeanSquareErrorFromGrey']), 34)
+            self.assertNotIn('Color:Monochrome', data)
+
+    def test_color_info_monochrome_blue(self):
+        with ImageFile(fetch_file('blue_monochrome.jpg')) as _file:
+            data = _file.analyze_color_info()
+            self.assertEqual(int(data['Color:MeanSquareErrorFromGrey']), 83)
+            self.assertNotIn('Color:Monochrome', data)
 
 
 class ImageFileFaceHAARCascadesTest(unittest.TestCase):
