@@ -301,8 +301,7 @@ class ImageFile(GenericFile):
     def analyze_color_info(self,
                            grey_shade_threshold=0.05,
                            freq_colors_threshold=0.1,
-                           edge_ratio_gaussian_sigma=1,
-                           blackwhite_mean_square_err_cutoff=32):
+                           edge_ratio_gaussian_sigma=1):
         """
         Find the average RGB color of the image and compare with the existing
         Pantone color system to identify the color name.
@@ -316,9 +315,6 @@ class ImageFile(GenericFile):
         :param edge_ratio_gaussian_sigma:
             The sigma to use in gaussian blurring in Canny edge detection
             for EdgeRatio.
-        :param blackwhite_mean_square_err_cutoff:
-            The mean square error below which an image is considered as
-            black and white.
         :return: dict with the keys:
 
              - Color:ClosestLabeledColorRGB - The closest RGB value of the
@@ -334,9 +330,10 @@ class ImageFile(GenericFile):
                 palette.
              - Color:EdgeRatio - The percentage of pixels in the picture where
                 edges are found.
-             - Color:Monochrome - This value is present if the image is found
-                to be monochrome. It's value is the color of the monochrome
-                image - Sepia, BlackWhite.
+             - Color:MeanSquareErrorFromGrey - The mean square error fo each
+                pixel with respect to the greyscale equivalent image.
+             - Color:UsesAlpha - True if the alpha channel is present and being
+                used.
         """
         image_array = self.fetch('ndarray_noalpha')
         if image_array.ndim == 4:  # Animated images
@@ -407,20 +404,15 @@ class ImageFile(GenericFile):
         peaks_hist_max = freq_colors_threshold * hist_concat.max()
         peaks_percent = (hist_concat > peaks_hist_max).mean()
 
-        # Convert to HSV and threshold the H and V values to find the
-        # monochromatic color.
-        monochrome = None
         blackwhite_mean_square_err = None
         if image_array.ndim == 2:  # Greyscale images
-            monochrome = 'BlackWhite'
+            blackwhite_mean_square_err = 0
         elif image_array.ndim == 3:
             blackwhite_mean_square_err = 0
             for chan in range(image_array.shape[2]):
                 blackwhite_mean_square_err += (
                     (image_array[:, :, chan] - grey_array) ** 2).mean()
             blackwhite_mean_square_err /= image_array.shape[2]
-            if blackwhite_mean_square_err < blackwhite_mean_square_err_cutoff:
-                monochrome = 'BlackWhite'
 
         uses_alpha = None
         nd_array = self.fetch('ndarray')
@@ -435,7 +427,6 @@ class ImageFile(GenericFile):
             'Color:PercentFrequentColors': peaks_percent,
             'Color:EdgeRatio': edge_ratio,
             'Color:MeanSquareErrorFromGrey': blackwhite_mean_square_err,
-            'Color:Monochrome': monochrome,
             'Color:UsesAlpha': uses_alpha})
 
     @staticmethod

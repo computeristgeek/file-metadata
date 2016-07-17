@@ -179,7 +179,7 @@ class ImageFileColorInfoTest(unittest.TestCase):
         self.assertEqual(data['Color:NumberOfGreyShades'], 2)
         self.assertEqual(round(data['Color:PercentFrequentColors'], 3), 0.008)
         self.assertEqual(round(data['Color:EdgeRatio'], 3), 0.268)
-        self.assertEqual(data['Color:Monochrome'], 'BlackWhite')
+        self.assertEqual(data['Color:MeanSquareErrorFromGrey'], 0)
 
     def test_color_info_animated_image(self):
         data = ImageFile(fetch_file('animated.gif')).analyze_color_info()
@@ -253,19 +253,16 @@ class ImageFileColorInfoTest(unittest.TestCase):
             data = _file.analyze_color_info()
             self.assertIn('Color:AverageRGB', data)
             self.assertLess(int(data['Color:MeanSquareErrorFromGrey']), 32)
-            self.assertEqual(data['Color:Monochrome'], 'BlackWhite')
 
     def test_color_info_monochrome_sepia(self):
         with ImageFile(fetch_file('sepia_monochrome.jpg')) as _file:
             data = _file.analyze_color_info()
             self.assertEqual(int(data['Color:MeanSquareErrorFromGrey']), 34)
-            self.assertNotIn('Color:Monochrome', data)
 
     def test_color_info_monochrome_blue(self):
         with ImageFile(fetch_file('blue_monochrome.jpg')) as _file:
             data = _file.analyze_color_info()
             self.assertEqual(int(data['Color:MeanSquareErrorFromGrey']), 83)
-            self.assertNotIn('Color:Monochrome', data)
 
 
 class ImageFileFaceHAARCascadesTest(unittest.TestCase):
