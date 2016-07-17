@@ -142,6 +142,14 @@ class ImageFileGeoLocation(unittest.TestCase):
         self.assertEqual(int(data.get('Composite:GPSLongitude', 0) * 1e6),
                          135576661)
 
+    def test_geolocation_nominatim_osaka(self):
+        _file = ImageFile(fetch_file('geotag_osaka.jpg'))
+        data = _file.analyze_geolocation(use_nominatim=True)
+        self.assertIn('Composite:GPSCountry', data)
+        self.assertEqual(data.get('Composite:GPSCountry'), 'Japan')
+        self.assertEqual(data.get('Composite:GPSState'), None)
+        self.assertEqual(data.get('Composite:GPSCity'), 'Moriguchi')
+
 
 class ImageFileColorInfoTest(unittest.TestCase):
 

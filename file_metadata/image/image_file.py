@@ -278,7 +278,7 @@ class ImageFile(GenericFile):
             # Zoom levels: country = 0, megacity = 10, district = 10,
             # city = 13, village = 15, street = 16, house = 18
             url = ('http://nominatim.openstreetmap.org/reverse?format=json'
-                   '&lat={lat}&lon={lon}&zoom={zoom}'
+                   '&accept-language=en&lat={lat}&lon={lon}&zoom={zoom}'
                    .format(lat=lat, lon=lon, zoom=13))
             try:
                 response = urlopen(url)
