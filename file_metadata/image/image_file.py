@@ -562,6 +562,7 @@ class ImageFile(GenericFile):
                 nested = sorted(nested, key=lambda x: x[0])
                 fdata['eyes'] = (feat_mid(nested[0], 0, 0),
                                  feat_mid(nested[1], 0, 0))
+                fdata['glasses'] = True
             else:
                 eyes_found = []
                 for eye in ['left_eye', 'right_eye']:
