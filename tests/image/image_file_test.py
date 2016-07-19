@@ -20,122 +20,11 @@ class ImageFileTest(unittest.TestCase):
         self.assertEqual(_file.fetch('ndarray').shape, (0,))
 
 
-class ImageFileSoftwaresTest(unittest.TestCase):
-
-    def test_created_with_unknown(self):
-        _file = ImageFile(fetch_file('red.svg'))
-        self.assertEqual(_file.analyze_softwares(), {})
-
-    def test_created_with_inkscape(self):
-        _file = ImageFile(fetch_file('created_with_inkscape.svg'))
-        data = _file.analyze_softwares().get('Composite:Softwares', None)
-        self.assertIn('Inkscape', data)
-
-    def test_created_with_matlab(self):
-        _file = ImageFile(fetch_file('created_with_matlab.png'))
-        data = _file.analyze_softwares().get('Composite:Softwares', None)
-        self.assertIn('MATLAB', data)
-
-    def test_created_with_imagemagick(self):
-        _file = ImageFile(fetch_file('created_with_imagemagick.png'))
-        data = _file.analyze_softwares().get('Composite:Softwares', None)
-        self.assertIn('ImageMagick', data)
-
-    def test_created_with_adobe_imageready(self):
-        _file = ImageFile(fetch_file('created_with_adobe_imageready.png'))
-        data = _file.analyze_softwares().get('Composite:Softwares', None)
-        self.assertIn('Adobe ImageReady', data)
-
-    def test_created_with_adobe_photoshop(self):
-        _file = ImageFile(fetch_file('created_with_adobe_photoshop.jpg'))
-        data = _file.analyze_softwares().get('Composite:Softwares', None)
-        self.assertIn('Adobe Photoshop', data)
-
-    def test_created_with_adobe_photoshop_express(self):
-        _file = ImageFile(fetch_file(
-            'created_with_adobe_photoshop_express.jpg'))
-        data = _file.analyze_softwares().get('Composite:Softwares', None)
-        self.assertIn('Adobe Photoshop Express', data)
-
-    def test_created_with_adobe_photoshop_elements(self):
-        _file = ImageFile(fetch_file(
-            'created_with_adobe_photoshop_elements.jpg'))
-        data = _file.analyze_softwares().get('Composite:Softwares', None)
-        self.assertIn('Adobe Photoshop Elements', data)
-
-    def test_created_with_photoshop_photomerge(self):
-        _file = ImageFile(fetch_file(
-            'created_with_photoshop_photomerge.jpg'))
-        data = _file.analyze_softwares().get('Composite:Softwares', None)
-        if float(_file.exiftool()['ExifTool:ExifToolVersion']) >= 10:
-            # Older versions of exiftool do not detect this correctly. Hence
-            # we only do the test in newer versions.
-            self.assertIn('Photoshop Photomerge', data)
-
-    def test_created_with_picasa(self):
-        _file = ImageFile(fetch_file('created_with_picasa.jpg'))
-        data = _file.analyze_softwares().get('Composite:Softwares', None)
-        self.assertIn('Picasa', data)
-
-    def test_created_with_gimp(self):
-        _file = ImageFile(fetch_file('created_with_gimp.jpg'))
-        data = _file.analyze_softwares().get('Composite:Softwares', None)
-        self.assertIn('GIMP', data)
-
-    def test_created_with_gimp_comment(self):
-        _file = ImageFile(fetch_file('created_with_gimp_comment.jpg'))
-        data = _file.analyze_softwares().get('Composite:Softwares', None)
-        self.assertIn('GIMP', data)
-
-    def test_created_with_gnu_octave(self):
-        _file = ImageFile(fetch_file('created_with_gnu_octave.svg'))
-        data = _file.analyze_softwares().get('Composite:Softwares', None)
-        self.assertIn('GNU Plot', data)
-
-    def test_created_with_gnuplot(self):
-        _file = ImageFile(fetch_file('created_with_gnuplot.svg'))
-        data = _file.analyze_softwares().get('Composite:Softwares', None)
-        self.assertIn('GNU Plot', data)
-
-    def test_created_with_chemtool(self):
-        _file = ImageFile(fetch_file('created_with_chemtool.svg'))
-        data = _file.analyze_softwares().get('Composite:Softwares', None)
-        self.assertIn('Chemtool', data)
-
-    def test_created_with_vectorfieldplot(self):
-        _file = ImageFile(fetch_file('created_with_vectorfieldplot.svg'))
-        data = _file.analyze_softwares().get('Composite:Softwares', None)
-        self.assertIn('VectorFieldPlot', data)
-
-    def test_created_with_stella(self):
-        _file = ImageFile(fetch_file('created_with_stella.png'))
-        data = _file.analyze_softwares().get('Composite:Softwares', None)
-        self.assertIn('Stella', data)
-
-    def test_created_with_microsoft_image_composite_editor(self):
-        _file = ImageFile(fetch_file(
-            'created_with_microsoft_image_composite_editor.jpg'))
-        data = _file.analyze_softwares().get('Composite:Softwares', None)
-        self.assertIn('Microsoft ICE', data)
-
-    def test_created_with_paint_net(self):
-        _file = ImageFile(fetch_file(
-            'created_with_paint_net.jpg'))
-        data = _file.analyze_softwares().get('Composite:Softwares', None)
-        self.assertIn('Paint.NET', data)
-
-    def test_screenshot_with_gnome_screenshot(self):
-        _file = ImageFile(fetch_file('screenshot_with_gnome_screenshot.png'))
-        data = _file.analyze_softwares()
-        self.assertEqual(data.get('Composite:ScreenshotSoftwares', None),
-                         ('GNOME Screenshot',))
-
-
 class ImageFileGeoLocation(unittest.TestCase):
 
     def test_geolocation_osaka(self):
         _file = ImageFile(fetch_file('geotag_osaka.jpg'))
-        data = _file.analyze_geolocation()
+        data = _file.analyze_geolocation(use_nominatim=False)
         self.assertIn('Composite:GPSLatitude', data)
         self.assertEqual(int(data.get('Composite:GPSLatitude', 0) * 1e6),
                          34748261)
@@ -144,7 +33,7 @@ class ImageFileGeoLocation(unittest.TestCase):
 
     def test_geolocation_nominatim_osaka(self):
         _file = ImageFile(fetch_file('geotag_osaka.jpg'))
-        data = _file.analyze_geolocation(use_nominatim=True)
+        data = _file.analyze_geolocation()
         self.assertIn('Composite:GPSCountry', data)
         self.assertEqual(data.get('Composite:GPSCountry'), 'Japan')
         self.assertEqual(data.get('Composite:GPSState'), None)

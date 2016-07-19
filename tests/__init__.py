@@ -88,28 +88,6 @@ file_download_links = {
     'blank.xcf': 'https://upload.wikimedia.org/wikipedia/commons/e/e2/Blank_file.xcf',
     'example.tiff': 'https://upload.wikimedia.org/wikipedia/commons/b/b0/Dabigatran_binding_pockets.tiff',
 
-    # Files created by some software
-    'bitmap_from_inkscape.png': 'https://upload.wikimedia.org/wikipedia/commons/4/41/Joetsu_Shinkansen_icon.png',
-    'created_with_inkscape.svg': 'https://upload.wikimedia.org/wikipedia/commons/9/9a/Db-omega.svg',
-    'created_with_matlab.png': 'https://upload.wikimedia.org/wikipedia/commons/d/d1/Fat_absoprtion.png',
-    'created_with_imagemagick.png': 'https://upload.wikimedia.org/wikipedia/commons/9/99/Groz-01.PNG',
-    'created_with_adobe_imageready.png': 'https://upload.wikimedia.org/wikipedia/commons/2/29/Holtz.png',
-    'created_with_adobe_photoshop.jpg': 'https://upload.wikimedia.org/wikipedia/commons/6/64/Cervicomanubriotomie.jpg',
-    'created_with_adobe_photoshop_express.jpg': 'https://upload.wikimedia.org/wikipedia/commons/b/b5/Politecnico_di_Milano_Bovisa_4.jpg',
-    'created_with_adobe_photoshop_elements.jpg': 'https://upload.wikimedia.org/wikipedia/commons/4/49/1010_Bazylika_archikatedralna_%C5%9Bw_Jakuba_Szczecin_sygnaturka_0.jpg',
-    'created_with_photoshop_photomerge.jpg': 'https://upload.wikimedia.org/wikipedia/commons/9/90/01-118_Koenigstein_Panorama.jpg',
-    'created_with_picasa.jpg': 'https://upload.wikimedia.org/wikipedia/commons/1/1f/08_Ny_Alesund_prn.JPG',
-    'created_with_gimp.jpg': 'https://upload.wikimedia.org/wikipedia/commons/d/d5/2013-04-25_21-09-18-ecl-lune-mosaic.jpg',
-    'created_with_gimp_comment.jpg': 'https://upload.wikimedia.org/wikipedia/commons/c/c9/105_H_61-37.jpeg',
-    'created_with_gnu_octave.svg': 'https://upload.wikimedia.org/wikipedia/commons/5/52/Beta_versus_rapidity.svg',
-    'created_with_gnuplot.svg': 'https://upload.wikimedia.org/wikipedia/commons/a/a5/2005_H-1B_admissions_by_country_of_citizenship.svg',
-    'created_with_chemtool.svg': 'https://upload.wikimedia.org/wikipedia/commons/0/00/Chitobiose_glucosamine.svg',
-    'created_with_vectorfieldplot.svg': 'https://upload.wikimedia.org/wikipedia/commons/8/83/VFPt_minus.svg',
-    'created_with_stella.png': 'https://upload.wikimedia.org/wikipedia/commons/e/e8/10-3_deltohedron.png',
-    'created_with_microsoft_image_composite_editor.jpg': 'https://upload.wikimedia.org/wikipedia/commons/7/7c/Bochnia_kopalnia_kaplica_2.jpg',
-    'created_with_paint_net.jpg': 'https://upload.wikimedia.org/wikipedia/commons/1/10/Broadway_Tower_Oil_Painting.jpg',
-    'screenshot_with_gnome_screenshot.png': 'https://upload.wikimedia.org/wikipedia/commons/7/74/LibreOfficePresentationTeluguExample1.png',
-
     # Line drawings
     'simple_line_drawing.jpg': 'https://upload.wikimedia.org/wikipedia/commons/c/c6/Destilacija_rakije.jpg',
     'detailed_line_drawing.jpg': 'https://upload.wikimedia.org/wikipedia/commons/d/db/Compound_Microscope_1876.JPG',
@@ -136,14 +114,9 @@ file_download_links = {
     'it8_bottom_bar.jpg': 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/Two_boys_sitting_in_a_garden_%28NYPL_b11528957-G90F452_008B%29.tiff/lossy-page1-996px-Two_boys_sitting_in_a_garden_%28NYPL_b11528957-G90F452_008B%29.tiff.jpg',
 
     # Application files
-    'created_with_libreoffice.pdf': 'https://upload.wikimedia.org/wikipedia/commons/4/43/2013-09_Introduction_%C3%A0_Wikidata.pdf',
-    'created_with_dopdf.pdf': 'https://upload.wikimedia.org/wikipedia/commons/9/9d/Bengali_Wikipedia_Workshop_Slides1.pdf',
-    'created_with_acdsee.pdf': 'https://upload.wikimedia.org/wikipedia/commons/b/b2/The_Book_of_Aneirin.pdf',
-    'created_with_itext.pdf': 'https://upload.wikimedia.org/wikipedia/commons/b/b2/Agrumi_-_August_Kopisch_-_1838.pdf',
     'text.pdf': 'https://upload.wikimedia.org/wikipedia/commons/a/a7/Life_of_Future.pdf',
     'image.pdf': 'https://upload.wikimedia.org/wikipedia/commons/4/40/AugerTransition1.pdf',
     'empty.djvu': 'https://upload.wikimedia.org/wikipedia/commons/4/42/Vuota.djvu',
-
 }
 
 

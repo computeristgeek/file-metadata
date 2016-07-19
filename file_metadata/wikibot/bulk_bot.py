@@ -20,6 +20,14 @@ Arguments can be:
 -cachefiles    If used, the files are cached into a folder called "cache" in
                current directory. The directory can be given by using
                "-cachefiles:/place/to/cache". It should already exist.
+
+-dry           If used, the output is printed on the terminal and not to the
+               User page.
+
+-skip          If used, all the images in the pagegenerator is not processed.
+               After every image it processes, it skips the number of images
+               provided as the argument.
+               Example: "-skip:1" can be used to only run on alternate images.
 """
 
 from __future__ import (division, absolute_import, unicode_literals,
@@ -51,6 +59,25 @@ except RuntimeError as err:
 from pywikibot import pagegenerators
 
 
+def stringify(val):
+    """
+    Convert to val only if it is not already of type string. This is needed
+    because strings like \xfa (ú) throw error when str() is used on them
+    again.
+    """
+    return val if isinstance(val, string_types) else str(val)
+
+
+def make_link(val):
+    if val.lower().startswith('category:'):
+        return '[[:' + val + ']]'
+    elif val.lower().startswith('{{'):
+        template = re.sub('(^{{|}}$)', '', val)
+        tlx = re.sub('=', '&#61;', template)
+        return '{{tlx|' + tlx + '}}'
+    else:
+        return '[[:' + val + ']]'
+
 def dump_log(data, logname, append=False):
     if isinstance(data, (tuple, list)):
         data = "\n".join(data)
@@ -63,7 +90,10 @@ def dump_log(data, logname, append=False):
                                          name=logname))
     if append:
         data = page.text + '\n' + data
-    page.put(data, "Logged using file-metadata")
+    if options.get('dry'):
+        pywikibot.output(data)
+    else:
+        page.put(data, "Logged using file-metadata")
 
 
 @retry(IOError, tries=3)
@@ -77,7 +107,7 @@ def download_page(page, timeout=None):
 
 def handle_bulk_pages(gen):
     parsed_pages = set()
-    log, categories = [], []
+    log, categories, category_buckets = [], [], []
     count, exception_count = 0, 0
     total_start_time = datetime.now()
     for ipage, page in enumerate(gen):
@@ -86,7 +116,8 @@ def handle_bulk_pages(gen):
                 page.namespace() == "File" and
                 page.title() not in parsed_pages and
                 (page.latest_file_info['size'] / 1024 / 1024 <
-                 options.get('limitsize', float("inf")))):
+                 options.get('limitsize', float("inf"))) and
+                ipage % (options.get('skip', 0) + 1) == 0):
             continue
         parsed_pages.add(page.title())
         try:
@@ -98,8 +129,8 @@ def handle_bulk_pages(gen):
                          page.title(underscore=False))
 
         start_time = datetime.now()
+        _file = GenericFile.create(page_path)
         try:
-            _file = GenericFile.create(page_path)
             meta = _file.analyze()
         except Exception as err:
             logging.exception(err)
@@ -108,7 +139,7 @@ def handle_bulk_pages(gen):
         finally:
             _file.close()
 
-        info, cats, img = [], set(), []
+        info, cats, cat_buckets, img = [], set(), set(), []
         # info - Information analyzed from the file
         # cats - The suggested categories to add to the file
         # im - Image preview with bounding boxes (if applicable)
@@ -137,56 +168,159 @@ def handle_bulk_pages(gen):
         for cat, mimeset in mime_cats.items():
             if mime in mimeset or meta.get('Composite:FileFormat') in mimeset:
                 cats.add('Category:' + cat)
+                cat_buckets.add('Type')
                 break
 
         #################################################################
         # Software analysis
-        softwares = meta.get('Composite:Softwares', [])
-        software_cats = {
-            'Microsoft ICE': 'Microsoft Image Composite Editor',
-            'GNU Plot': 'Gnuplot'
-        }
-        if len(softwares) > 0:
-            for sw in softwares:
-                info.append("* '''Softwares''': " + ", ".join(softwares))
-                cats.add('Category:Created with ' + software_cats.get(sw, sw))
+        # Find more files at https://commons.wikimedia.org/wiki/
+        # Category:Created_with_..._templates
+        if (meta.get('SVG:Output_extension', '') ==
+                'org.inkscape.output.svg.inkscape'):
+            # Example: File:Db-omega.svg , Joetsu_Shinkansen_icon.png
+            cats.add('{{Created with Inkscape}}')
 
-        if 'Chemtool' in softwares:
-            cats.add('Category:Chemical compounds')
-            cats.add('Category:Graphics')
-        if 'VectorFieldPlot' in softwares:
-            cats.add('Category:Field diagrams')
-            cats.add('Category:Graphics')
+        for sw_key in ('PNG:Software', 'EXIF:Software'):
+            sw = stringify(meta.get(sw_key, ''))
+            if re.match('MATLAB', sw, re.I):
+                # Example: File:Fat_absoprtion.png
+                cats.add('{{Created with MATLAB}}')
+            elif re.match('ImageMagick', sw, re.I):
+                # Example: File:Groz-01.PNG
+                match = re.match(r'ImageMagick (?P<ver>[\d\.]+)', sw, re.I)
+                ver = '|version=' + match.groupdict()['ver'] if match else ''
+                cats.add('{{Created with ImageMagick' + ver + '}}')
+            elif re.match('Adobe ImageReady', sw, re.I):
+                # Example: File:Holtz.png
+                cats.add('{{Created with Adobe ImageReady}}')
+            elif re.match('Adobe Photoshop', sw, re.I):
+                if re.match('Elements', sw, re.I):
+                    # Example: File:1010_Bazylika_archikatedralna_%C5%9
+                    #               Bw_Jakuba_Szczecin_sygnaturka_0.jpg
+                    cats.add('{{Created with Adobe Photoshop Elements}}')
+                elif re.match('Express', sw, re.I):
+                    # Example: File:Politecnico_di_Milano_Bovisa_4.jpg
+                    cats.add('{{Created with Adobe Photoshop Express}}')
+                elif re.match(r'Photoshop CS\d?', sw, re.I):
+                    match = re.match(r'Photoshop CS\d?', sw, re.I)
+                    if match:
+                        # Example: File:Cervicomanubriotomie.jpg
+                        cats.add('{{Created with Adobe ' +
+                                 match.group().strip() + '}}')
+                else:
+                    # Example: File:Cervicomanubriotomie.jpg
+                    cats.add('{{Created with Adobe Photoshop}}')
+                # Check if photomerge was used
+                if (stringify(meta.get('Photoshop:HasRealMergedData',
+                                       '')).lower()
+                        in ('1', 'yes')):
+                    # Example:01-118_Koenigstein_Panorama.jpg
+                    cats.add('{{Created with Photoshop Photomerge}}')
+                    cats.add('Category:Panoramics')
+            elif re.match('Picasa', sw, re.I):
+                # Example: File:08_Ny_Alesund_prn.JPG
+                match = re.match(r'Picasa (?P<ver>[\d\.]+)', sw, re.I)
+                ver = '|version=' + match.groupdict()['ver'] if match else ''
+                cats.add('{{Created with Picasa' + ver + '}}')
+            elif re.match('GIMP', sw, re.I):
+                # Example: File:2013-04-25_21-09-18-ecl-lune-mosaic.jpg
+                match = re.match(r'GIMP (?P<ver>[\d\.]+)', sw, re.I)
+                ver = '|version=' + match.groupdict()['ver'] if match else ''
+                cats.add('{{Created with GIMP' + ver + '}}')
+            elif re.match('Microsoft ICE', sw, re.I):
+                # Example: File:Bochnia_kopalnia_kaplica_2.jpg
+                match = re.match(r'ICE v(?P<ver>[\d\.]+)', sw, re.I)
+                ver = '|version=' + match.groupdict()['ver'] if match else ''
+                cats.add('{{Created with Microsoft Image Composite '
+                         'Editor' + ver + '}}')
+            elif re.match(r'Paint\.NET', sw, re.I):
+                # Example: File:
+                match = re.match(r'Paint\.NET v(?P<ver>[\d\.]+)', sw, re.I)
+                ver = '|version=' + match.groupdict()['ver'] if match else ''
+                cats.add('{{Created with Paint.NET' + ver + '}}')
+            elif re.match('gnome-screenshot', sw, re.I):
+                # Example: File:LibreOfficePresentationTeluguExample1.png
+                cats.add('Category:Screenshots')
+                cat_buckets.add('Content')
 
-        # Screenshot:
-        screenshot_softwares = meta.get('Composite:ScreenshotSoftwares', [])
-        if len(screenshot_softwares) > 0:
-            info.append('* Category:Screenshots')
-            for sw in screenshot_softwares:
-                info.append("* '''Screenshot Softwares''': " +
-                            ", ".join(screenshot_softwares))
+        for desc_key in ('SVG:Desc',):
+            desc = stringify(meta.get(desc_key, '')).lower()
+            if re.match('GNUPLOT', desc, re.I):
+                # Example: File:Beta_versus_rapidity.svg
+                match = re.match(r'GNUPLOT (?P<ver>[\d\.]+)', sw, re.I)
+                ver = '|version=' + match.groupdict()['ver'] if match else ''
+                cats.add('{{Created with GNU Plot' + ver + '}}')
+            elif re.match('Chemtool', desc, re.I):
+                # Example: File:Chitobiose_glucosamine.svg
+                match = re.match(r'Chemtool (?P<ver>[\d\.]+)', sw, re.I)
+                ver = '|version=' + match.groupdict()['ver'] if match else ''
+                cats.add('{{Created with Chemtool' + ver + '}}')
+                cats.add('Category:Chemical compounds')
+                cats.add('Category:Graphics')
+                cat_buckets.add('Content')
+            elif re.match('VectorFieldPlot', desc, re.I):
+                # Example: File:VFPt_minus.svg
+                match = re.match(r'VectorFieldPlot (?P<ver>[\d\.]+)', sw, re.I)
+                ver = '|version=' + match.groupdict()['ver'] if match else ''
+                cats.add('{{Created with VectorFieldPlot' + ver + '}}')
+                cats.add('Category:Field diagrams')
+                cats.add('Category:Graphics')
+                cat_buckets.add('Content')
+
+        for comment_key in ('PNG:Comment', 'File:Comment'):
+            comment = stringify(meta.get(comment_key, '')).lower()
+            if re.match('Stella4D', comment, re.I):
+                # Example: File:10-3_deltohedron.png
+                match = re.match(r'Stella4D (?P<ver>[\d\.]+)', sw, re.I)
+                ver = '|version=' + match.groupdict()['ver'] if match else ''
+                cats.add('{{Created with Stella' + ver + '}}')
+            elif re.match('GIMP', comment, re.I):
+                # Example: File:105_H_61-37.jpeg
+                cats.add('{{Created with GIMP}}')
+
+        for prod_key in ('PDF:Producer',):
+            prod = stringify(meta.get(prod_key, ''))
+            if re.match(r'Libre ?Office', prod, re.I):
+                match = re.match(r'Libre ?Office (?P<ver>[\d\.]+)', prod, re.I)
+                ver = '|version=' + match.groupdict()['ver'] if match else ''
+                if meta.get('PDF:Creator'):
+                    cats.add('{{Created with LibreOffice ' +
+                             meta['PDF:Creator'] + ver + '}}')
+                else:
+                    cats.add('{{Created with LibreOffice' + ver + '}}')
+            elif re.match(r'doPDF', prod, re.I):
+                cats.add('{{Created with doPDF}}')
+            elif re.match(r'ACDSee', prod, re.I):
+                cats.add('{{Created with ACDSee}}')
+            elif re.match(r'iText', prod, re.I):
+                cats.add('{{Created with iText}}')
 
         #################################################################
         # Device analysis
-        model = meta.get('EXIF:Model', '')
-        make = meta.get('EXIF:Make', '')
+        model = stringify(meta.get('EXIF:Model', ''))
+        make = stringify(meta.get('EXIF:Make', ''))
         if model:
             # Modify the model so that it conforms to the category names
-            if make in ('FUJIFILM', 'Xiaomi'):
-                # Category is named as make + model
-                model = make + model
-            elif make == 'i2S DigiBook Scanner':
+            for _make in ('NIKON', 'FUJIFILM', 'Xiaomi', 'Panasonic', 'SONY',
+                          'Nokia'):
+                if make == _make and not re.match(_make, model, re.I):
+                    # Category is named as make + model
+                    model = make + ' ' + model
+            if make == 'i2S DigiBook Scanner':
                 model = 'i2s Digibook ' + model
             # Simple replacements
             model = model.replace('NIKON', 'Nikon')
-            model = model.replace('FUJIFILM', 'Nikon')
-            if make.lower() == 'xiaomi':
-                # Some pics have "Note3"
+            model = model.replace('PENTAX', 'Pentax')
+            model = model.replace('FUJIFILM', 'Fujifilm')
+            model = model.replace('SONY', 'Sony')
+            if 'nikon' in make.lower():
+                model = model.replace('COOLPIX', 'Coolpix')
+            if 'xiaomi' in make.lower():
                 model = model.replace('Note3', 'Note 3')
-            if make.lower().startswith('samsung'):
+            if 'samsung' in make.lower():
                 # In samsung, the cameras have multiple names like:
                 # "<Digimax S600 / Kenox S600 / Digimax Cyber 630>" or
-                # "Digimax A4/Kenox D4". THe categories are only named as
+                # "Digimax A4/Kenox D4". The categories are only named as
                 # "Taken with Samsung S600", "Taken with Samsung A4" though.
                 samsung_model = ''
                 possible_models = re.sub('[<>]', '', model).split('/')
@@ -203,14 +337,25 @@ def handle_bulk_pages(gen):
                                        flags=re.IGNORECASE).strip()
 
                 model = 'Samsung ' + samsung_model
+            if 'olympus' in make.lower():
+                model = 'Olympus ' + model
+            if 'motorola' in make.lower():
+                model = model.replace('MotoG2', 'Moto G2')
+                model = model.replace('MotoG3', 'Moto G3')
+                model = model.replace('MotoG4', 'Moto G4')
+            if 'sanyo' in make.lower():
+                model = 'Sanyo ' + model
+            if 'canon' in make.lower():
+                model = model.replace('EOS REBEL', 'EOS')
+            if 'casio' in make.lower():
+                model = 'Casio ' + model
 
-            possible_prefixes = ['Sanned with ', 'Taken with ',
-                                 'Taken or Scanned with ']
-            for prefix in possible_prefixes:
+            for prefix in ['Sanned with ', 'Taken with ',
+                           'Taken or Scanned with ']:
                 possible_cat = pywikibot.Page(pywikibot.Site(),
                                               "Category:" + prefix + model)
                 if (possible_cat.exists() or
-                        prefix == len(possible_prefixes) - 1):
+                        prefix == 'Taken or Scanned with '):
                     info.append("* '''Model''': " +
                                 possible_cat.title(underscore=False,
                                                    textlink=True, asLink=True))
@@ -222,14 +367,15 @@ def handle_bulk_pages(gen):
         for key in ['AverageRGB', 'ClosestLabeledColor', 'EdgeRatio',
                     'NumberOfGreyShades', 'PercentFrequentColors',
                     'MeanSquareErrorFromGrey', 'Monochrome', 'UsesAlpha',
-                    'CalibrationTopBar', 'CalibrationBottomBar']:
+                    'IT8TopBar', 'IT8BottomBar', 'IT8TopBarGreyMSE',
+                    'IT8BottomBarGreyMSE']:
             if 'Color:' + key in meta:
                 if isinstance(meta['Color:' + key], (list, tuple)):
                     val = ', '.join(map(str, meta['Color:' + key]))
                 elif isinstance(meta['Color:' + key], float):
                     val = str(round(meta['Color:' + key], 5))
                 else:
-                    val = str(meta['Color:' + key])
+                    val = stringify(meta['Color:' + key])
                 info.append("* '''" + key + "''': " + val)
         greys = meta.get('Color:NumberOfGreyShades')
         edges = meta.get('Color:EdgeRatio')
@@ -244,33 +390,50 @@ def handle_bulk_pages(gen):
         if meta.get('Color:UsesAlpha') is True:
             cats.add('Category:Transparent background')
 
-        if 17 <= meta.get('CalibrationTopBar', -1) <= 23:
-            cats.add('Category:Scans with IT8 target')
-        elif 17 <= meta.get('CalibrationBottomBar', -1) <= 23:
-            cats.add('Category:Scans with IT8 target')
+        for spike, greymse in [('Color:IT8TopBar',
+                                'Color:IT8TopBarGreyMSE'),
+                               ('Color:IT8BottomBar',
+                                'Color:IT8BottomBarGreyMSE')]:
+            if (18 <= meta.get(spike, -1) <= 22 and
+                    meta.get(greymse, 999) < 15):
+                cats.add('Category:Scans with IT8 target')
+                break
+
+        if meta.get('Misc:StereoCardMSE'):
+            info.append("* '''Stereo Card MSE''': " +
+                        str(meta.get('Misc:StereoCardMSE')))
+        if meta.get('Misc:StereoCardHistogramMSE'):
+            info.append("* '''Stereo Card Histogram MSE''': " +
+                        str(meta.get('Misc:StereoCardHistogramMSE')))
 
         #################################################################
         # Location analysis
-        found_location_category = False
         for key in ['GPSCity', 'GPSState', 'GPSCountry']:
             val = meta.get('Composite:' + key)
             if val is not None:
                 info.append("* '''" + key + "''': " + val)
+        for val in [(meta.get('Composite:GPSCity', '') + ', ' +
+                     meta.get('Composite:GPSState', '')),
+                    (meta.get('Composite:GPSCity', '') + ', ' +
+                     meta.get('Composite:GPSCountry', '')),
+                    meta.get('Composite:GPSCity', ''),
+                    (meta.get('Composite:GPSState', '') + ', ' +
+                     meta.get('Composite:GPSCountry', '')),
+                    meta.get('Composite:GPSState', ''),
+                    meta.get('Composite:GPSCountry', '')]:
+            if val:
                 if pywikibot.Page(
                         pywikibot.Site(), "Category:" + val).exists():
-                    found_location_category = val
                     cats.add('Category:' + val)
                     break
 
         if (meta.get('Composite:GPSLatitude') and
                 meta.get('Composite:GPSLongitude')):
-            cats.add('Category:Media with locations')
+            cats.add('{{GPS EXIF}}')
+            cat_buckets.add('Location')
             info.append("* '''GPS Coordinates''': {0}, {1}"
                         .format(meta.get('Composite:GPSLatitude'),
                                 meta.get('Composite:GPSLongitude')))
-            if not found_location_category:
-                cats.add('Category:Media with geo-coordinates '
-                         'needing categories')
 
         #################################################################
         # Author analysis
@@ -313,14 +476,18 @@ def handle_bulk_pages(gen):
             # Analysis for very specific images: Icons, Football kits, etc
             if height == width and height in (16, 32, 48, 96):
                 cats.add('Category:Icons')
-            elif width == 36 and height == 100:
+            elif width == 100 and height == 36:
                 cats.add('Category:Football kit shorts')
-            elif width == 25 and height == 100:
+                cat_buckets.add('Content')
+            elif width == 100 and height == 25:
                 cats.add('Category:Football kit socks')
+                cat_buckets.add('Content')
             elif width == 38 and height == 59:
                 cats.add('Category:Football kit body')
+                cat_buckets.add('Content')
             elif width == 31 and height == 59:
                 cats.add('Category:Football kit sleeves')
+                cat_buckets.add('Content')
 
             #################################################################
             # Barcode analysis
@@ -351,12 +518,18 @@ def handle_bulk_pages(gen):
             # Barcodes from zxing:
             for i, bar in enumerate(meta.get('zxing:Barcodes', [])):
                 info.append("* '''Barcode''' (zxing) #" + str(i))
-                cats = cats.union(print_barcode_data(bar))
+                barcode_cats = print_barcode_data(bar)
+                cats = cats.union(barcode_cats)
+                if len(barcode_cats) > 0:
+                    cat_buckets.add('Content')
 
             # Barcodes from zbar:
             for i, bar in enumerate(meta.get('zbar:Barcodes', [])):
                 info.append("* '''Barcode''' (zbar) #" + str(i))
-                cats = cats.union(print_barcode_data(bar))
+                barcode_cats = print_barcode_data(bar)
+                cats = cats.union(barcode_cats)
+                if len(barcode_cats) > 0:
+                    cat_buckets.add('Content')
 
             #################################################################
             # Face analysis
@@ -381,6 +554,11 @@ def handle_bulk_pages(gen):
                     if face.get('glasses') is not None:
                         _cats.add('Category:People with glasses')
                         feats.add('Glasses')
+
+                if (face['position']['height'] * face['position']['width'] >
+                        0.55 * height * width):
+                    # If face is very large...
+                    _cats.add('Category:Portrait')
 
                 if _type == 'dlib':
                     info.append("** Score: " + str(round(face['score'], 3)))
@@ -422,23 +600,39 @@ def handle_bulk_pages(gen):
             if len(valid_faces) >= 3:
                 face_cats.add('Category:Groups of people')
 
+            if len(face_cats) > 0:
+                cat_buckets.add('Content')
             cats = cats.union(face_cats)
             img.append('</div>')  # Close the image's div
 
         #################################################################
-        # Unidentified people by Location analysis
-        if 'Category:Unidentified People' in cats:
-            for key in ['GPSState']:
+        # Leaf cats using Location analysis
+        if 'Category:Unidentified people' in cats:
+            for key in ['GPSState', 'GPSCountry']:
                 val = meta.get('Composite:' + key)
                 if val is None:
                     continue
                 cat_val = "Category:Unidentified people in " + val
-                if pywikibot.Page(pywikibot.Site(), cat_val).exists():
+                if (pywikibot.Page(pywikibot.Site(), cat_val).exists() or
+                        key == 'GPSCountry'):
                     cats.add(cat_val)
-                    cats.remove('Category:Unidentified People')
+                    cats.remove('Category:Unidentified people')
+                    break
+
+        if 'Category:Groups of people' in cats:
+            for key in ['GPSState', 'GPSCountry']:
+                val = meta.get('Composite:' + key)
+                if val is None:
+                    continue
+                cat_val = "Category:Groups of people in " + val
+                if (pywikibot.Page(pywikibot.Site(), cat_val).exists() or
+                        key == 'GPSCountry'):
+                    cats.add(cat_val)
+                    cats.remove('Category:Groups of people')
                     break
 
         categories.append(cats)
+        category_buckets.append(cat_buckets)
 
         info.append("* '''Time taken''': {0} sec"
                     .format((datetime.now() - start_time).total_seconds()))
@@ -454,7 +648,7 @@ def handle_bulk_pages(gen):
         if options.get('showinfo', "all") in ('all', 'cats'):
             log.append("* '''Categories''' ({0}): {1}"
                        .format(len(cats),
-                               ", ".join('[[:' + c + ']]' for c in cats)))
+                               ", ".join(make_link(c) for c in cats)))
         log += ['|'] + img + ['|}']
         # Clean up the downloaded file if no need to cache
         if options.get('cachefiles') is None:
@@ -478,19 +672,22 @@ def handle_bulk_pages(gen):
     stats += ["* '''Number of distinct categories used''': {0}"
               .format(len(cat_counter))]
 
-    stats += ['{{Bar chart',
-              '| title = Histogram of files categorized by category name',
-              '| label_type = Category (% files analyzed in this category)',
-              '| data_type = Number of files in the category',
-              '| data_max = ' + str(count)]
-    for icat, (catname, numfiles) in enumerate(
+    stats += ['{| class="wikitable sortable plainrowheaders"',
+              '|+ Data of files categorized by category name',
+              '! Category name',
+              '! Number of files',
+              '! colspan=2 | Percent of files in the category',
+              ]
+    for icat , (catname, numfiles) in enumerate(
             sorted(cat_counter.items(), key=lambda x: x[1], reverse=True)):
-        stats += ['| label{0} = {1} ({2:.4f} %)'.format(
-                  icat + 1, "[[:" + catname + "]]", 100 * numfiles / count),
-                  '| data{0} = {1}'.format(icat + 1, numfiles)]
-    stats.append('}}')
+        stats.append('|-')
+        stats.append('! scope=row | ' + make_link(catname))
+        stats.append('| ' + str(numfiles))
+        stats.append('| {{bartable| ' +
+                     str(round(100 * numfiles / count, 2)) + '}}')
+    stats.append('|}')
 
-    stats += ['{{Bar chart',
+    stats += ['{{User:AbdealiJK/Templates/Bar chart',
               '| title = Histogram of number of categories found per file',
               '| label_type = Number of categories found',
               '| data_type = Number of files with that many categories',
@@ -500,6 +697,35 @@ def handle_bulk_pages(gen):
         stats += ['| label{0} = {1} ({2:.4f} %)'.format(
                   icat + 1, numcats, 100 * numfiles / count),
                   '| data{0} = {1}'.format(icat + 1, numfiles)]
+    stats.append('}}')
+
+    stats += ['{{User:AbdealiJK/Templates/Bar chart',
+              '| title = Histogram of number of categories found per file '
+              '(without file-type categories)',
+              '| label_type = Number of categories found',
+              '| data_type = Number of files with that many categories',
+              '| data_max = ' + str(count)]
+    file_type_cats = set('Category:' + c for c in mime_cats.keys())
+    non_file_type_counter = Counter(
+        len(cats - file_type_cats) for cats in categories)
+    for icat, (numcats, numfiles) in enumerate(non_file_type_counter.items()):
+        stats += ['| label{0} = {1} ({2:.4f} %)'.format(
+                  icat + 1, numcats, 100 * numfiles / count),
+                  '| data{0} = {1}'.format(icat + 1, numfiles)]
+    stats.append('}}')
+
+    stats += ['{{User:AbdealiJK/Templates/Bar chart',
+              '| title = Histogram of buckets',
+              '| label_type = Bucket name',
+              '| data_type = Number of files in bucket',
+              '| data_max = ' + str(count)]
+    bucket_counter = Counter(
+        b for fbuckets in category_buckets for b in fbuckets)
+    for ibucket, (bucketname, numfiles) in enumerate(
+            sorted(bucket_counter.items(), key=lambda x: x[1], reverse=True)):
+        stats += ['| label{0} = {1} ({2:.4f} %)'.format(
+                  ibucket + 1, bucketname, 100 * numfiles / count),
+                  '| data{0} = {1}'.format(ibucket + 1, numfiles)]
     stats.append('}}')
 
     log = stats + ['\n'] + log
@@ -522,7 +748,7 @@ def main(*args):
         if arg == '-showinfo':
             options[arg[1:]] = value or "all"
             if value not in ("cats", "info", "all"):
-                pywikibot.error("Invalid alue for -showinfo. It can only be "
+                pywikibot.error("Invalid value for -showinfo. It can only be "
                                 "cats, info, or all.")
                 sys.exit(1)
         elif arg == '-limitsize':
@@ -531,12 +757,16 @@ def main(*args):
             options[arg[1:]] = value or 'cache'
         elif arg == '-logname':
             options[arg[1:]] = value
+        elif arg == '-dry':
+            options[arg[1:]] = True
+        elif arg == '-skip':
+            options[arg[1:]] = int(value) or 0
         else:
             pywikibot.error('Unknown argument: ' + local_arg)
             sys.exit(1)
 
-    if 'logname' not in options:
-        pywikibot.error('-logname required to decide the page to write to.')
+    if not options.get('dry') and not options.get('logname'):
+        pywikibot.error('-logname is required to decide the page to write to.')
         sys.exit(2)
 
     gen = gen_factory.getCombinedGenerator()

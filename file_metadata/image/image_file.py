@@ -135,92 +135,7 @@ class ImageFile(GenericFile):
                 a_min=0, a_max=255)
         return new_img
 
-    def analyze_softwares(self):
-        """
-        Find the software used to create the given file with. It uses the exif
-        data to find the softare that was used to create the file. It gives out
-        a curated a list of softwares.
-
-        :return: dict with the keys:
-
-             - Composite:Softwares - Tuple with the names of the softwares
-                detected that have been used with this file.
-                The possible softwares that can be found are:
-                    Inkscape, MATLAB, ImageMagick, Adobe ImageReady,
-                    Adobe Photoshop Elements, Adobe Photoshop Express,
-                    Adobe Photoshop, Photoshop Photomerge, Picasa, GIMP,
-                    Microsoft ICE, Paint.NET, GNU Plot,
-                    Chemtool, VectorFieldPlot, and Stella.
-             - Composite:ScreenshotSoftwares - Tuple with the names of the
-                softwares detected that was used.
-                The possible softwares that can be found are:
-                    GNOME Screenshot
-        """
-        # Find more files at https://commons.wikimedia.org/wiki/
-        # Category:Created_with_..._templates
-        exif = self.exiftool()
-        data = {}
-
-        softwares = set()
-        screenshots = set()
-
-        if (str(exif.get('SVG:Output_extension', '')) ==
-                'org.inkscape.output.svg.inkscape'):
-            softwares.add('Inkscape')
-
-        for sw_key in ('PNG:Software', 'EXIF:Software'):
-            sw = str(exif.get(sw_key, '')).lower()
-            if sw.startswith('matlab'):
-                softwares.add('MATLAB')
-            elif sw.startswith('imagemagick'):
-                softwares.add('ImageMagick')
-            elif sw.startswith('adobe imageready'):
-                softwares.add('Adobe ImageReady')
-            elif sw.startswith('adobe photoshop'):
-                if sw.startswith('adobe photoshop elements'):
-                    softwares.add('Adobe Photoshop Elements')
-                elif sw.startswith('adobe photoshop express'):
-                    softwares.add('Adobe Photoshop Express')
-                else:
-                    softwares.add('Adobe Photoshop')
-                # Check if photomerge was used
-                if (str(exif.get('Photoshop:HasRealMergedData', '')).lower()
-                        in ('1', 'yes')):
-                    softwares.add('Photoshop Photomerge')
-            elif sw.startswith('picasa'):
-                softwares.add('Picasa')
-            elif sw.startswith('gimp'):
-                softwares.add('GIMP')
-            elif sw.startswith('microsoft ice '):
-                softwares.add('Microsoft ICE')
-            elif sw.startswith('paint.net'):
-                softwares.add('Paint.NET')
-            elif sw.startswith('gnome-screenshot'):
-                screenshots.add('GNOME Screenshot')
-
-        desc = str(exif.get('SVG:Desc', '')).lower()
-        if ' gnuplot ' in desc:
-            softwares.add('GNU Plot')
-        elif ' chemtool ' in desc:
-            softwares.add('Chemtool')
-        elif ' vectorfieldplot ' in desc:
-            softwares.add('VectorFieldPlot')
-
-        for comment_key in ('PNG:Comment', 'File:Comment'):
-            comment = str(exif.get(comment_key, '')).lower()
-            if ' stella4d ' in comment:
-                softwares.add('Stella')
-            elif 'created with gimp' in comment:
-                softwares.add('GIMP')
-
-        if len(softwares) > 0:
-            data['Composite:Softwares'] = tuple(softwares)
-        if len(screenshots) > 0:
-            data['Composite:ScreenshotSoftwares'] = tuple(screenshots)
-
-        return data
-
-    def analyze_geolocation(self, use_nominatim=False):
+    def analyze_geolocation(self, use_nominatim=True):
         """
         Find the location where the photo was taken initially. This is
         information which is got using the latitude/longitude in EXIF data.
@@ -283,9 +198,10 @@ class ImageFile(GenericFile):
             try:
                 response = urlopen(url)
                 location = json.loads(response.read().decode('utf-8'))
-            except URLError:
+            except URLError as err:
                 logging.warn('An issue occured while querying nominatim '
                              'with: ' + url)
+                logging.exception(err)
                 return data
 
             if isinstance(location, list) and len(location) == 0:
@@ -303,19 +219,23 @@ class ImageFile(GenericFile):
         Find whether there is a color calibration strip on top of the image.
         """
         grey_array = self.fetch('ndarray_grey')
+        image_array = self.fetch('ndarray')
         if grey_array is None:
             return {}
 
         # For the images we're testing, the IT8 bar takes about 20% of the
         # image and also in the 20% we need the mid area
         bary = int(0.2 * grey_array.shape[0])
-        sampley = max(int(0.1 * bary), 1)
-        topbar = (grey_array[:bary, :]
-                  [bary // 2 - sampley // 2:bary // 2 + sampley // 2, :]
-                  .mean(axis=0))
-        botbar = (grey_array[-bary:, :]
-                  [bary // 2 - sampley // 2:bary // 2 + sampley // 2, :]
-                  .mean(axis=0))
+
+        def bar_intensity(x):
+            sampley = max(int(0.1 * x.shape[0]), 2)
+            return numpy.mean(
+                x[(x.shape[0] - sampley) // 2:(x.shape[0] + sampley) // 2,
+                  :, ...],
+                axis=0)
+
+        topbar = bar_intensity(grey_array[:bary, :, ...])
+        botbar = bar_intensity(grey_array[-bary:, :, ...])
 
         def _merge_near(arr):
             out = []
@@ -331,13 +251,53 @@ class ImageFile(GenericFile):
         # Hence, we set a smaller threshold for peaks in bottom bars.
         bot_spikes = _merge_near((numpy.diff(botbar)) > -2.5).sum()
         top_spikes = _merge_near((numpy.diff(topbar)) < 3).sum()
+        top_grey_mse, bot_grey_mse = 0, 0
+        if image_array.ndim == 3:
+            for chan in range(image_array.shape[2]):
+                top_grey_mse += (
+                    (image_array[bary:, :, chan] -
+                     grey_array[bary:]) ** 2).mean()
+                bot_grey_mse += (
+                    (image_array[-bary, :, chan] -
+                     grey_array[-bary]) ** 2).mean()
+            top_grey_mse /= 3.0
+            bot_grey_mse /= 3.0
+
         data = {}
         if 15 < top_spikes < 25:
-            data['Color:IT8CalibrationTopBar'] = top_spikes
+            data['Color:IT8TopBar'] = top_spikes
+            data['Color:IT8TopBarGreyMSE'] = top_grey_mse
         if 15 < bot_spikes < 25:
-            data['Color:IT8CalibrationBottomBar'] = bot_spikes
+            data['Color:IT8BottomBar'] = bot_spikes
+            data['Color:IT8BottomBarGreyMSE'] = bot_grey_mse
 
         return data
+
+    def analyze_stereo_card(self):
+        """
+        Find whether the given image is a stereo card or not.
+        """
+        image_array = self.fetch('ndarray_grey')
+        if image_array is None:
+            return {}
+
+        def _full_histogram(img):
+            return numpy.histogram(img, bins=range(256))[0]
+
+        h, w = image_array.shape[:2]
+        # Remove corners as that's probably the edges and gradient etc.
+        roi = image_array[int(0.1 * h):int(0.9 * h),
+                          int(0.1 * w):int(0.9 * w), ...]
+        _, width = roi.shape[:2]
+        left = roi[:, :width // 2]
+        right = roi[:, width // 2 + (width % 2):]
+        mean_square_err = ((left - right) ** 2).mean()
+        histogram_mse = (
+            ((_full_histogram(left) - _full_histogram(right)) ** 2).mean() /
+            left.size)
+
+        return {'Misc:StereoCardMSE': mean_square_err,
+                'Misc:StereoCardHistogramMSE': histogram_mse}
 
     def analyze_color_info(self,
                            grey_shade_threshold=0.05,
@@ -457,7 +417,7 @@ class ImageFile(GenericFile):
 
         uses_alpha = None
         nd_array = self.fetch('ndarray')
-        if self.is_type('alpha') and nd_array.ndim == 3:
+        if self.is_type('alpha') and nd_array.ndim == 4:
             uses_alpha = (nd_array[:, :, 3] < 255).any()
 
         return DictNoNone({
