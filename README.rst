@@ -85,11 +85,11 @@ and then execute::
 Build status
 ------------
 
-.. image:: https://travis-ci.org/AbdealiJK/file-metadata.svg?branch=master
-   :target: https://travis-ci.org/AbdealiJK/file-metadata
+.. image:: https://travis-ci.org/pywikibot-catfiles/file-metadata.svg?branch=master
+   :target: https://travis-ci.org/pywikibot-catfiles/file-metadata
 
-.. image:: https://codecov.io/gh/AbdealiJK/file-metadata/branch/master/graph/badge.svg
-  :target: https://codecov.io/gh/AbdealiJK/file-metadata
+.. image:: https://codecov.io/gh/pywikibot-catfiles/file-metadata/branch/master/graph/badge.svg
+  :target: https://codecov.io/gh/pywikibot-catfiles/file-metadata
 
 Credits
 -------
@@ -104,7 +104,7 @@ is the original author of this package.
 LICENSE
 =======
 
-.. image:: https://img.shields.io/github/license/AbdealiJK/file-metadata.svg
+.. image:: https://img.shields.io/github/license/pywikibot-catfiles/file-metadata.svg
    :target: https://opensource.org/licenses/MIT
 
 This code falls under the
