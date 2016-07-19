@@ -289,7 +289,7 @@ class ImageFile(GenericFile):
                 return data
 
             if isinstance(location, list) and len(location) == 0:
-                return {}  # No location found
+                return data  # No location found
 
             addr = location.get('address', {})
             data['Composite:GPSCountry'] = addr.get('country')
