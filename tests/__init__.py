@@ -132,7 +132,11 @@ file_download_links = {
     'blackwhite_monochrome.jpg': 'https://upload.wikimedia.org/wikipedia/commons/2/27/0218_-_Taormina_-_Badia_Vecchia_-_Foto_Giovanni_Dall%27Orto%2C_20-May-2008.jpg',
     'blue_monochrome.jpg': 'https://upload.wikimedia.org/wikipedia/commons/9/9f/Paolo_Monti_-_Serie_fotografica_-_BEIC_6358396.jpg',
     'green_monochrome.jpg': 'https://upload.wikimedia.org/wikipedia/commons/e/ea/Edvard-dawkins.jpg',
-    'sepia_monochrome.jpg': 'https://upload.wikimedia.org/wikipedia/commons/c/c7/1926_Hupmobile.jpg'
+    'sepia_monochrome.jpg': 'https://upload.wikimedia.org/wikipedia/commons/c/c7/1926_Hupmobile.jpg',
+
+    # Color calibrations
+    'it8_top_bar.jpg': 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/97/Waterfall_at_Schooner_Head_house_%28NYPL_b11707223-G89F198_003B%29.tiff/lossy-page1-1280px-Waterfall_at_Schooner_Head_house_%28NYPL_b11707223-G89F198_003B%29.tiff.jpg',
+    'it8_bottom_bar.jpg': 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/Two_boys_sitting_in_a_garden_%28NYPL_b11528957-G90F452_008B%29.tiff/lossy-page1-996px-Two_boys_sitting_in_a_garden_%28NYPL_b11528957-G90F452_008B%29.tiff.jpg',
 }
 
 

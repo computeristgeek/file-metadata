@@ -298,6 +298,47 @@ class ImageFile(GenericFile):
 
         return data
 
+    def analyze_color_calibration_target(self):
+        """
+        Find whether there is a color calibration strip on top of the image.
+        """
+        grey_array = self.fetch('ndarray_grey')
+        if grey_array is None:
+            return {}
+
+        # For the images we're testing, the IT8 bar takes about 20% of the
+        # image and also in the 20% we need the mid area
+        bary = int(0.2 * grey_array.shape[0])
+        sampley = max(int(0.1 * bary), 1)
+        topbar = (grey_array[:bary, :]
+                  [bary // 2 - sampley // 2:bary // 2 + sampley // 2, :]
+                  .mean(axis=0))
+        botbar = (grey_array[-bary:, :]
+                  [bary // 2 - sampley // 2:bary // 2 + sampley // 2, :]
+                  .mean(axis=0))
+
+        def _merge_near(arr):
+            out = []
+            last_elem = arr[0]
+            out.append(last_elem)
+            for elem in arr[1:]:
+                if elem != last_elem:
+                    out.append(elem)
+                last_elem = elem
+            return numpy.asarray(out)
+
+        # Bottom bars seem to have smaller intensity because of the background
+        # Hence, we set a smaller threshold for peaks in bottom bars.
+        bot_spikes = _merge_near((numpy.diff(botbar)) > -2.5).sum()
+        top_spikes = _merge_near((numpy.diff(topbar)) < 3).sum()
+        data = {}
+        if 15 < top_spikes < 25:
+            data['Color:IT8CalibrationTopBar'] = top_spikes
+        if 15 < bot_spikes < 25:
+            data['Color:IT8CalibrationBottomBar'] = bot_spikes
+
+        return data
+
     def analyze_color_info(self,
                            grey_shade_threshold=0.05,
                            freq_colors_threshold=0.1,
