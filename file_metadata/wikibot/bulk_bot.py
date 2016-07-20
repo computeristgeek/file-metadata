@@ -94,7 +94,8 @@ def handle_bulk_pages(gen):
         except URLError:  # Download timed out
             continue
 
-        print(count + 1, '. Analyzing', page.title(underscore=False))
+        pywikibot.output(str(count + 1) + '. Analyzing ' +
+                         page.title(underscore=False))
 
         start_time = datetime.now()
         try:

@@ -232,8 +232,8 @@ def main(*args):
         for i, page in enumerate(pregenerator):
             if page.exists():
                 log = handle_page(page)
-                print('\n'.join(log))
-                print("")
+                pywikibot.output('\n'.join(log))
+                pywikibot.output("")
 
 
 if __name__ == "__main__":
