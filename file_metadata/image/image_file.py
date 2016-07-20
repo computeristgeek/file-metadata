@@ -490,11 +490,17 @@ class ImageFile(GenericFile):
                          'dependency OpenCV to be installed.')
             return []
 
-        directory = (
-            directory if directory is not None
-            else os.path.abspath(os.path.join(
+        haar_paths = [
+            os.path.abspath(os.path.join(
                 os.path.realpath(cv2.__file__),
-                *([os.pardir] * 4 + ['share', 'OpenCV', 'haarcascades']))))
+                *([os.pardir] * 4 + ['share', 'OpenCV', 'haarcascades']))),
+            os.path.abspath(os.path.join(
+                os.path.realpath(cv2.__file__),
+                *([os.pardir] * 4 + ['share', 'opencv', 'haarcascades'])))]
+        for _dir in [directory] + haar_paths:
+            if _dir is not None and os.path.exists(_dir):
+                directory = _dir
+                break
         cascade = cv2.CascadeClassifier(os.path.join(directory, filename),)
         features = cascade.detectMultiScale(image, **kwargs)
         return features
