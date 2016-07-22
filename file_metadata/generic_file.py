@@ -97,6 +97,10 @@ class GenericFile(object):
         elif _type == 'audio':
             from file_metadata.audio.audio_file import AudioFile
             return AudioFile.create(*args, **kwargs)
+        elif _type == 'application':
+            from file_metadata.application.application_file import (
+                ApplicationFile)
+            return ApplicationFile.create(*args, **kwargs)
         elif _type == 'video':
             from file_metadata.video.video_file import VideoFile
             return VideoFile.create(*args, **kwargs)

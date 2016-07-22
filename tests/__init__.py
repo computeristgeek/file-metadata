@@ -87,9 +87,6 @@ file_download_links = {
 
     'blank.xcf': 'https://upload.wikimedia.org/wikipedia/commons/e/e2/Blank_file.xcf',
     'example.tiff': 'https://upload.wikimedia.org/wikipedia/commons/b/b0/Dabigatran_binding_pockets.tiff',
-    'text.pdf': 'https://upload.wikimedia.org/wikipedia/commons/a/a7/Life_of_Future.pdf',
-    'image.pdf': 'https://upload.wikimedia.org/wikipedia/commons/4/40/AugerTransition1.pdf',
-    'empty.djvu': 'https://upload.wikimedia.org/wikipedia/commons/4/42/Vuota.djvu',
 
     # Files created by some software
     'bitmap_from_inkscape.png': 'https://upload.wikimedia.org/wikipedia/commons/4/41/Joetsu_Shinkansen_icon.png',
@@ -137,6 +134,16 @@ file_download_links = {
     # Color calibrations
     'it8_top_bar.jpg': 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/97/Waterfall_at_Schooner_Head_house_%28NYPL_b11707223-G89F198_003B%29.tiff/lossy-page1-1280px-Waterfall_at_Schooner_Head_house_%28NYPL_b11707223-G89F198_003B%29.tiff.jpg',
     'it8_bottom_bar.jpg': 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/Two_boys_sitting_in_a_garden_%28NYPL_b11528957-G90F452_008B%29.tiff/lossy-page1-996px-Two_boys_sitting_in_a_garden_%28NYPL_b11528957-G90F452_008B%29.tiff.jpg',
+
+    # Application files
+    'created_with_libreoffice.pdf': 'https://upload.wikimedia.org/wikipedia/commons/4/43/2013-09_Introduction_%C3%A0_Wikidata.pdf',
+    'created_with_dopdf.pdf': 'https://upload.wikimedia.org/wikipedia/commons/9/9d/Bengali_Wikipedia_Workshop_Slides1.pdf',
+    'created_with_acdsee.pdf': 'https://upload.wikimedia.org/wikipedia/commons/b/b2/The_Book_of_Aneirin.pdf',
+    'created_with_itext.pdf': 'https://upload.wikimedia.org/wikipedia/commons/b/b2/Agrumi_-_August_Kopisch_-_1838.pdf',
+    'text.pdf': 'https://upload.wikimedia.org/wikipedia/commons/a/a7/Life_of_Future.pdf',
+    'image.pdf': 'https://upload.wikimedia.org/wikipedia/commons/4/40/AugerTransition1.pdf',
+    'empty.djvu': 'https://upload.wikimedia.org/wikipedia/commons/4/42/Vuota.djvu',
+
 }
 
 
