@@ -63,13 +63,8 @@ script:
   - python setup.py sdist bdist bdist_wheel
 
 after_success:
-  - curl -s -X POST \
-      -H "Content-Type: application/json" \
-      -H "Accept: application/json" \
-      -H "Travis-API-Version: 3" \
-      -H "Authorization: token $TRAVIS_TOKEN" \
-      -d "{\"request\": {\"branch\":\"master\"}}" \
-      https://api.travis-ci.org/repo/pywikibot-catfiles%2Fdocker-file-metadata/requests
+  - |-
+    curl -s -X POST -H "Content-Type: application/json" -H "Accept: application/json" -H "Travis-API-Version: 3" -H "Authorization: token $TRAVIS_TOKEN" -d "{\"request\": {\"branch\":\"master\"}}" https://api.travis-ci.org/repo/pywikibot-catfiles%2Fdocker-file-metadata/requests
 
 after_script:
   - bash <(curl -s https://codecov.io/bash)
