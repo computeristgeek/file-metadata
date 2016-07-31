@@ -91,6 +91,9 @@ Build status
 .. image:: https://codecov.io/gh/pywikibot-catfiles/file-metadata/branch/master/graph/badge.svg
   :target: https://codecov.io/gh/pywikibot-catfiles/file-metadata
 
+.. image:: https://travis-ci.org/pywikibot-catfiles/docker-file-metadata.svg?branch=master
+   :target: https://travis-ci.org/pywikibot-catfiles/docker-file-metadata
+
 Credits
 -------
 
