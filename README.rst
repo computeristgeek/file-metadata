@@ -87,7 +87,7 @@ Docker
 
 To pull the ``latest`` docker image use::
 
-    $ docker pull pywikibotcatfiles/docker-file-metadata
+    $ docker pull pywikibotcatfiles/file-metadata
 
 Supported tags and respective ``Dockerfile`` links:
  * ``latest``, ``ubuntu-14.04`` (`docker/Dockerfile <https://github.com/pywikibot-catfiles/docker-file-metadata/blob/master/Dockerfile.ubuntu>`__)
@@ -114,7 +114,7 @@ Build status
 .. image:: https://travis-ci.org/pywikibot-catfiles/docker-file-metadata.svg?branch=master
    :target: https://travis-ci.org/pywikibot-catfiles/docker-file-metadata
 
-`:whale:(docker) <https://hub.docker.com/r/pywikibotcatfiles/docker-file-metadata/builds/>`__
+`:whale:(docker) <https://hub.docker.com/r/pywikibotcatfiles/file-metadata/builds/>`__
 
 Credits
 -------
