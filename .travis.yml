@@ -64,7 +64,9 @@ script:
 
 after_success:
   - |-
-    curl -s -X POST -H "Content-Type: application/json" -H "Accept: application/json" -H "Travis-API-Version: 3" -H "Authorization: token $TRAVIS_TOKEN" -d "{\"request\": {\"branch\":\"master\"}}" https://api.travis-ci.org/repo/pywikibot-catfiles%2Fdocker-file-metadata/requests
+    if [[ "$TRAVIS_BRANCH" == "master" && "$TRAVIS_PULL_REQUEST" == "false" ]] ; then
+      curl -s -X POST -H "Content-Type: application/json" -H "Accept: application/json" -H "Travis-API-Version: 3" -H "Authorization: token $TRAVIS_TOKEN" -d "{\"request\": {\"branch\":\"master\"}}" https://api.travis-ci.org/repo/pywikibot-catfiles%2Fdocker-file-metadata/requests ;
+    fi
 
 after_script:
   - bash <(curl -s https://codecov.io/bash)
