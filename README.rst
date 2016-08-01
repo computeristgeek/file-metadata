@@ -93,6 +93,7 @@ Supported tags and respective ``Dockerfile`` links:
  * ``latest``, ``ubuntu-14.04`` (`docker/Dockerfile <https://github.com/pywikibot-catfiles/docker-file-metadata/blob/master/Dockerfile.ubuntu>`__)
  * ``ubuntu-16.04`` (`docker/Dockerfile <https://github.com/pywikibot-catfiles/docker-file-metadata/blob/master/Dockerfile.ubuntu-16.04>`__)
  * ``centos-7`` (`docker/Dockerfile <https://github.com/pywikibot-catfiles/docker-file-metadata/blob/master/Dockerfile.centos>`__)
+ * `show all... <https://hub.docker.com/r/pywikibotcatfiles/file-metadata/tags/>`__
 
 For more information about this image and its history, please see
 ``pywikibotcatfiles/file-metadata`` (`on docker-hub <https://hub.docker.com/r/pywikibotcatfiles/file-metadata/builds/>`__).
@@ -113,8 +114,6 @@ Build status
 
 .. image:: https://travis-ci.org/pywikibot-catfiles/docker-file-metadata.svg?branch=master
    :target: https://travis-ci.org/pywikibot-catfiles/docker-file-metadata
-
-`:whale:(docker) <https://hub.docker.com/r/pywikibotcatfiles/file-metadata/tags/>`__
 
 Credits
 -------
