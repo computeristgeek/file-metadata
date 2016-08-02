@@ -27,12 +27,19 @@ from six.moves.urllib.error import URLError
 
 try:
     import pywikibot
+except ImportError:
+    logging.error("To run the script, pywikibot is required. Please install "
+                  "it and try again. The nightly version of pywikibot can be "
+                  "installed with `pip install git+https://"
+                  "gerrit.wikimedia.org/r/pywikibot/core.git#egg=pywikibot1")
+    sys.exit(1)
 except RuntimeError as err:
-    if (len(err.args) > 1 and
-            "No user-config.py found in director" in err.args[0]):
-        print("A user-config.py is require to run the pywikibot script. To"
-              "create the user-config.py run the command "
-              "`wikibot-create-config`.")
+    if (len(err.args) > 0 and
+            "No user-config.py found in directory" in err.args[0]):
+        logging.error("A user-config.py is require to run the pywikibot "
+                      "script. To create the user-config.py run the "
+                      "command `wikibot-create-config`.")
+        sys.exit(1)
 from pywikibot import pagegenerators
 
 from file_metadata.utilities import download, retry

@@ -50,12 +50,19 @@ from file_metadata.utilities import download, retry
 
 try:
     import pywikibot
+except ImportError:
+    logging.error("To run the script, pywikibot is required. Please install "
+                  "it and try again. The nightly version of pywikibot can be "
+                  "installed with `pip install git+https://"
+                  "gerrit.wikimedia.org/r/pywikibot/core.git#egg=pywikibot`")
+    sys.exit(1)
 except RuntimeError as err:
-    if (len(err.args) > 1 and
-            "No user-config.py found in director" in err.args[0]):
-        print("A user-config.py is require to run the pywikibot script. To"
-              "create the user-config.py run the command "
-              "`wikibot-create-config`.")
+    if (len(err.args) > 0 and
+            "No user-config.py found in directory" in err.args[0]):
+        logging.error("A user-config.py is require to run the pywikibot "
+                      "script. To create the user-config.py run the "
+                      "command `wikibot-create-config`.")
+        sys.exit(1)
 from pywikibot import pagegenerators
 
 
@@ -749,7 +756,8 @@ def main(*args):
             options[arg[1:]] = value or "all"
             if value not in ("cats", "info", "all"):
                 pywikibot.error("Invalid value for -showinfo. It can only be "
-                                "cats, info, or all.")
+                                "cats, info, or all.\nUse -help for further "
+                                "information.")
                 sys.exit(1)
         elif arg == '-limitsize':
             options[arg[1:]] = int(value) if value != "" else 100
@@ -761,12 +769,10 @@ def main(*args):
             options[arg[1:]] = True
         elif arg == '-skip':
             options[arg[1:]] = int(value) or 0
-        else:
-            pywikibot.error('Unknown argument: ' + local_arg)
-            sys.exit(1)
 
     if not options.get('dry') and not options.get('logname'):
-        pywikibot.error('-logname is required to decide the page to write to.')
+        pywikibot.error('-logname is required to decide the page to write '
+                        'to.\nUse -help for further information.')
         sys.exit(2)
 
     gen = gen_factory.getCombinedGenerator()
