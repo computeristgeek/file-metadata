@@ -2,3 +2,4 @@ include README.*
 include LICENSE
 include test-requirements.txt
 include setup.cfg
+include setupdeps.py
