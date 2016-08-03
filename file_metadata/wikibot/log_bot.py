@@ -85,6 +85,7 @@ def make_link(val):
     else:
         return '[[:' + val + ']]'
 
+
 def dump_log(data, logname, append=False):
     if isinstance(data, (tuple, list)):
         data = "\n".join(data)
@@ -685,7 +686,7 @@ def handle_bulk_pages(gen):
               '! Number of files',
               '! colspan=2 | Percent of files in the category',
               ]
-    for icat , (catname, numfiles) in enumerate(
+    for icat, (catname, numfiles) in enumerate(
             sorted(cat_counter.items(), key=lambda x: x[1], reverse=True)):
         stats.append('|-')
         stats.append('! scope=row | ' + make_link(catname))

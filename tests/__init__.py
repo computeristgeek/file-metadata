@@ -63,6 +63,7 @@ file_download_links = {
 
     # Images with special exifdata:
     'canon_face.jpg': 'https://upload.wikimedia.org/wikipedia/commons/7/7b/Annagrah-2_041.JPG',
+    'nonascii_exifdata.jpg': 'https://upload.wikimedia.org/wikipedia/commons/d/d5/2013-04-25_21-09-18-ecl-lune-mosaic.jpg',
 
     # Images of faces
     'mona_lisa.jpg': 'https://upload.wikimedia.org/wikipedia/commons/7/7d/Mona_Lisa_color_restoration.jpg',

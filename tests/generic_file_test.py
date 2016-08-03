@@ -119,7 +119,7 @@ class GenericFileExiftoolTest(unittest.TestCase):
         self.assertEqual(data['File:FileSize'], '86 kB')
 
     def test_exiftool_encoding(self):
-        _file = GenericFile(fetch_file('created_with_gimp.jpg'))
+        _file = GenericFile(fetch_file('nonascii_exifdata.jpg'))
         # Test with a file that has non-ascii characters in the exif
         # information
         data = _file.analyze_exifdata()

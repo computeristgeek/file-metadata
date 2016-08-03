@@ -417,7 +417,8 @@ class ImageFile(GenericFile):
 
         uses_alpha = None
         nd_array = self.fetch('ndarray')
-        if self.is_type('alpha') and nd_array.ndim == 4:
+        if (self.is_type('alpha') and nd_array.ndim == 3 and
+                nd_array.shape[2] == 4):
             uses_alpha = (nd_array[:, :, 3] < 255).any()
 
         return DictNoNone({

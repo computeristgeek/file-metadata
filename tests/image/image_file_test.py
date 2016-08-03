@@ -45,14 +45,12 @@ class ImageFileColorCalibrationTarget(unittest.TestCase):
     def test_color_it8_target_bottom_bar(self):
         with ImageFile(fetch_file('it8_bottom_bar.jpg')) as _file:
             data = _file.analyze_color_calibration_target()
-            self.assertIn('Color:IT8CalibrationBottomBar', data)
-            self.assertNotIn('Color:IT8CalibrationTopBar', data)
+            self.assertIn('Color:IT8BottomBar', data)
 
     def test_color_it8_target_top_bar(self):
         with ImageFile(fetch_file('it8_top_bar.jpg')) as _file:
             data = _file.analyze_color_calibration_target()
-            self.assertIn('Color:IT8CalibrationTopBar', data)
-            self.assertNotIn('Color:IT8CalibrationBottomBar', data)
+            self.assertIn('Color:IT8TopBar', data)
 
 
 class ImageFileColorInfoTest(unittest.TestCase):

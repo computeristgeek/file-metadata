@@ -19,8 +19,10 @@ from __future__ import (division, absolute_import, unicode_literals,
                         print_function)
 
 import datetime
+import logging
 import os
 import ssl
+import sys
 from itertools import chain
 
 from six.moves.urllib.error import URLError
