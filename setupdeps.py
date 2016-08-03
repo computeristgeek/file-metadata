@@ -203,7 +203,6 @@ class SetupPackage(object):
         return message
 
 
-
 class PkgConfig(SetupPackage):
     """
     This is a class for communicating with pkg-config.
