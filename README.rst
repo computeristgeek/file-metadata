@@ -10,7 +10,9 @@ Installation
 Before installing file-metadata, a few dependencies need to be
 installed. For Ubuntu, these can be installed with::
 
-    $ sudo apt-get install perl openjdk-7-jre python-dev pkg-config libfreetype6-dev libpng12-dev liblapack-dev libblas-dev gfortran cmake libboost-python-dev libzbar-dev
+    $ sudo apt-get install perl openjdk-7-jre python-dev pkg-config \
+    > libfreetype6-dev libpng12-dev liblapack-dev libblas-dev gfortran \
+    > cmake libboost-python-dev libzbar-dev
 
 Next, use ``pip`` to install the library. To install the latest stable
 version, use::
@@ -118,10 +120,11 @@ Build status
 Credits
 -------
 
-This package has been derived from
-`pywikibot-compat <https://gerrit.wikimedia.org/r/#/admin/projects/pywikibot/compat>`__.
+This package has been derived from `pywikibot-compat
+<https://gerrit.wikimedia.org/r/#/admin/projects/pywikibot/compat>`__.
 Specifically, the script ``catimages.py`` which can be found at
-`pywikibot-compat/catimages.py <https://phabricator.wikimedia.org/diffusion/PWBO/browse/master/catimages.py>`__.
+`pywikibot-compat/catimages.py
+<https://phabricator.wikimedia.org/diffusion/PWBO/browse/master/catimages.py>`__.
 These packages were created by `DrTrigon <mailto:dr.trigon@surfeu.ch>`__ who
 is the original author of this package.
 
