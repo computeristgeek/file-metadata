@@ -369,7 +369,7 @@ class Six(SetupPackage):
 class ExifTool(SetupPackage):
     name = 'exiftool'
     pkg_names = {
-        "apt-get": 'libimage-exiftool-perl',
+        "apt-get": 'exiftool',
         "yum": 'perl-Image-ExifTool',
         "dnf": 'perl-Image-ExifTool',
         "pacman": None,
@@ -507,7 +507,7 @@ class ZBar(SetupPackage):
 class JavaJRE(SetupPackage):
     name = 'java'
     pkg_names = {
-        "apt-get": 'openjdk-7-jre',
+        "apt-get": 'default-jre',
         "yum": 'java',
         "dnf": 'java',
         "pacman": None,
