@@ -13,6 +13,7 @@ import os
 import subprocess
 import sys
 from distutils import sysconfig
+from distutils.errors import DistutilsSetupError
 
 try:
     from urllib.request import urlopen
@@ -104,62 +105,6 @@ class CheckFailed(Exception):
     pass
 
 
-class PkgConfig(object):
-    """
-    This is a class for communicating with pkg-config.
-    """
-    def __init__(self):
-        if sys.platform == 'win32':
-            self.has_pkgconfig = False
-        else:
-            self.pkg_config = os.environ.get('PKG_CONFIG', 'pkg-config')
-            self.set_pkgconfig_path()
-
-            try:
-                with open(os.devnull) as nul:
-                    subprocess.check_call([self.pkg_config, "--help"],
-                                          stdout=nul, stderr=nul)
-                self.has_pkgconfig = True
-            except (subprocess.CalledProcessError, OSError):
-                self.has_pkgconfig = False
-                print("IMPORTANT WARNING: pkg-config is not installed.")
-                print("file-metadata may not be able to find some of "
-                      "its dependencies.")
-
-    def set_pkgconfig_path(self):
-        pkgconfig_path = sysconfig.get_config_var('LIBDIR')
-        if pkgconfig_path is None:
-            return
-
-        pkgconfig_path = os.path.join(pkgconfig_path, 'pkgconfig')
-        if not os.path.isdir(pkgconfig_path):
-            return
-
-        os.environ['PKG_CONFIG_PATH'] = ':'.join(
-            [os.environ.get('PKG_CONFIG_PATH', ""), pkgconfig_path])
-
-    def get_version(self, package):
-        """
-        Get the version of the package from pkg-config.
-        """
-        if not self.has_pkgconfig:
-            return None
-
-        try:
-            output = subprocess.check_output(
-                [self.pkg_config, package, "--modversion"],
-                stderr=subprocess.STDOUT)
-        except subprocess.CalledProcessError:
-            return None
-        else:
-            output = output.decode(sys.getfilesystemencoding())
-            return output.strip()
-
-
-# The PkgConfig class should be used through this singleton
-pkg_config = PkgConfig()
-
-
 class SetupPackage(object):
     name = None
     optional = False
@@ -222,7 +167,7 @@ class SetupPackage(object):
                         msg += ' Note: ' + pkg_note
                     return msg
 
-        message = None
+        message = ""
         if sys.platform == "win32":
             url = self.pkg_names.get("windows_url", None)
             if url:
@@ -256,6 +201,75 @@ class SetupPackage(object):
                 if manager_message:
                     return manager_message
         return message
+
+
+
+class PkgConfig(SetupPackage):
+    """
+    This is a class for communicating with pkg-config.
+    """
+    name = "pkg-config"
+    pkg_names = {
+        "apt-get": 'pkg-config',
+        "yum": None,
+        "dnf": None,
+        "pacman": None,
+        "zypper": None,
+        "brew": 'pkg-config',
+        "port": None,
+        "windows_url": None
+    }
+
+    def __init__(self):
+        if sys.platform == 'win32':
+            self.has_pkgconfig = False
+        else:
+            self.pkg_config = os.environ.get('PKG_CONFIG', 'pkg-config')
+            self.set_pkgconfig_path()
+
+            try:
+                with open(os.devnull) as nul:
+                    subprocess.check_call([self.pkg_config, "--help"],
+                                          stdout=nul, stderr=nul)
+                self.has_pkgconfig = True
+            except (subprocess.CalledProcessError, OSError):
+                self.has_pkgconfig = False
+                raise DistutilsSetupError("pkg-config is not installed. "
+                                          "Please install it to continue.\n" +
+                                          self.install_help_msg())
+
+    def set_pkgconfig_path(self):
+        pkgconfig_path = sysconfig.get_config_var('LIBDIR')
+        if pkgconfig_path is None:
+            return
+
+        pkgconfig_path = os.path.join(pkgconfig_path, 'pkgconfig')
+        if not os.path.isdir(pkgconfig_path):
+            return
+
+        os.environ['PKG_CONFIG_PATH'] = ':'.join(
+            [os.environ.get('PKG_CONFIG_PATH', ""), pkgconfig_path])
+
+    def get_version(self, package):
+        """
+        Get the version of the package from pkg-config.
+        """
+        if not self.has_pkgconfig:
+            return None
+
+        try:
+            output = subprocess.check_output(
+                [self.pkg_config, package, "--modversion"],
+                stderr=subprocess.STDOUT)
+        except subprocess.CalledProcessError:
+            return None
+        else:
+            output = output.decode(sys.getfilesystemencoding())
+            return output.strip()
+
+
+# The PkgConfig class should be used through this singleton
+pkg_config = PkgConfig()
 
 
 class Distro(SetupPackage):
