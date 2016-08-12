@@ -118,6 +118,23 @@ def handle_bulk_pages(gen):
     log, categories, category_buckets = [], [], []
     count, exception_count = 0, 0
     total_start_time = datetime.now()
+
+    mime_cats = {
+        "JPEG files": {'image/jpeg'},
+        "GIF files": {'image/gif'},
+        "PNG files": {'image/png'},
+        "TIFF files": {'image/tiff'},
+        "XCF files": {'image/x-xcf', 'application/x-xcf'},
+        "FLAC files": {'audio/x-flac'},
+        "WAV files": {'audio/x-wav'},
+        "MIDI files": {'audio/midi'},
+        "DjVu files": {'image/vnd-djvu', 'image/vnd.djvu'},
+        "PDF files": {'application/pdf'},
+        "SVG files": {'svg'},
+        "Ogg sound files": {'ogg'},
+        "Ogv videos": {'ogv'},
+        'WebM videos': {'video/webm'},
+    }
     for ipage, page in enumerate(gen):
         if not (page.exists() and
                 not page.isRedirectPage() and
@@ -160,22 +177,6 @@ def handle_bulk_pages(gen):
             _type = meta.get('File:FileType', 'ERROR')
             info.append("* '''File type''': " + _type)
 
-        mime_cats = {
-            "JPEG files": {'image/jpeg'},
-            "GIF files": {'image/gif'},
-            "PNG files": {'image/png'},
-            "TIFF files": {'image/tiff'},
-            "XCF files": {'image/x-xcf', 'application/x-xcf'},
-            "FLAC files": {'audio/x-flac'},
-            "WAV files": {'audio/x-wav'},
-            "MIDI files": {'audio/midi'},
-            "DjVu files": {'image/vnd-djvu', 'image/vnd.djvu'},
-            "PDF files": {'application/pdf'},
-            "SVG files": {'svg'},
-            "Ogg sound files": {'ogg'},
-            "Ogv videos": {'ogv'},
-            'WebM videos': {'video/webm'},
-        }
         for cat, mimeset in mime_cats.items():
             if mime in mimeset or meta.get('Composite:FileFormat') in mimeset:
                 cats.add('Category:' + cat)

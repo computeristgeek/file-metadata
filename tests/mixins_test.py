@@ -21,6 +21,21 @@ class FFProbeMixinTest(unittest.TestCase):
         data = _file.analyze_ffprobe()
         self.assertEqual(data, {})
 
+    def test_multiline_value(self, mock_with):
+        _file = FFProbeTestFile(fetch_file('multiline_ffprobe.ogg'))
+        data = _file.analyze_ffprobe()
+        self.assertIn('FFProbe:Format', data)
+        self.assertEqual(data['FFProbe:Format'], 'ogg')
+        self.assertEqual(int(data['FFProbe:Duration']), 224)
+        self.assertEqual(data['FFProbe:NumStreams'], 1)
+
+        stream = data['FFProbe:Streams'][0]
+        self.assertEqual(stream['Format'], 'audio/vorbis')
+        self.assertNotIn('Width', stream)
+        self.assertNotIn('Height', stream)
+        self.assertIn('44100', stream['Rate'])
+        self.assertEqual(int(stream['Duration']), 224)
+
     def test_ogg(self, mock_which):
         _file = FFProbeTestFile(fetch_file('wikiexample.ogg'))
         data = _file.analyze_ffprobe()

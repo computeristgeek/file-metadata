@@ -27,9 +27,15 @@ def ffprobe_parser(output):
 
     def parse_section(section):
         section_dict = {}
+        last_key = None
         for line in section.strip().splitlines():
-            key, val = line.strip().split("=", 1)
-            section_dict[key.strip()] = val.strip()
+            keyval = line.strip().split("=", 1)
+            if len(keyval) == 2:
+                key, val = keyval
+                section_dict[key.strip()] = val.strip()
+                last_key = key.strip()
+            elif len(keyval) == 1:
+                section_dict[last_key.strip()] = keyval[0].strip()
         return section_dict
 
     data = {}
