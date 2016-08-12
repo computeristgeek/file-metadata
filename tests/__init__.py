@@ -38,6 +38,7 @@ file_download_links = {
     # Videos
     'veins.ogv': 'https://upload.wikimedia.org/wikipedia/commons/f/f2/POROS_3.ogv',
     'ogg_video.ogg': 'https://upload.wikimedia.org/wikipedia/commons/e/e3/2010-06-06-V-German-Flag.ogg',
+    'sample.webm': 'https://upload.wikimedia.org/wikipedia/commons/a/a5/02_Punktion_des_ausgebildeten_Knopflochs%281%29.webm',
 
     # Images
     'ball.png': 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/1-ball.svg/226px-1-ball.svg.png',

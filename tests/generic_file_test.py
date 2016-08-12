@@ -175,6 +175,13 @@ class GenericFileCreateTest(unittest.TestCase):
                 GenericFile.create(fetch_file(fname)), TIFFFile),
                 'File "{0}" was not of type {1}'.format(fname, TIFFFile))
 
+    def test_create_ogg_file(self):
+        from file_metadata.audio.ogg_file import OGGFile
+        for fname in ['bell.ogg', 'bell.oga']:
+            self.assertTrue(isinstance(
+                GenericFile.create(fetch_file(fname)), OGGFile),
+                'File "{0}" was not of type {1}'.format(fname, OGGFile))
+
     def test_create_audio_file(self):
         from file_metadata.audio.audio_file import AudioFile
         for fname in ['drums.mid', 'bell.flac', 'bell.wav', 'bell.ogg',
@@ -183,9 +190,16 @@ class GenericFileCreateTest(unittest.TestCase):
                 GenericFile.create(fetch_file(fname)), AudioFile),
                 'File "{0}" was not of type {1}'.format(fname, AudioFile))
 
+    def test_create_ogv_file(self):
+        from file_metadata.video.ogv_file import OGVFile
+        for fname in ['veins.ogv', 'ogg_video.ogg']:
+            self.assertTrue(isinstance(
+                GenericFile.create(fetch_file(fname)), OGVFile),
+                'File "{0}" was not of type {1}'.format(fname, OGVFile))
+
     def test_create_video_file(self):
         from file_metadata.video.video_file import VideoFile
-        for fname in ['veins.ogv', 'ogg_video.ogg']:
+        for fname in ['sample.webm']:
             self.assertTrue(isinstance(
                 GenericFile.create(fetch_file(fname)), VideoFile),
                 'File "{0}" was not of type {1}'.format(fname, VideoFile))

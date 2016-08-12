@@ -199,8 +199,9 @@ class GenericFile(object):
                      exif.get('File:FileType').lower() == 'ogg'))
         elif key == "ogv":
             exif = self.exiftool()
-            return (exif.get('File:MIMEType') == 'application/ogg' and
-                    exif.get('File:FileType').lower() == 'ogv')
+            return (exif.get('File:MIMEType') == 'video/x-ogg' or
+                    (exif.get('File:MIMEType') == 'application/ogg' and
+                     exif.get('File:FileType').lower() == 'ogv'))
 
     def analyze_os_stat(self):
         """

@@ -12,4 +12,8 @@ class AudioFile(FFProbeMixin, GenericFile):
 
     @classmethod
     def create(cls, *args, **kwargs):
+        cls_file = cls(*args, **kwargs)
+        if cls_file.is_type('ogg'):
+            from file_metadata.audio.ogg_file import OGGFile
+            return OGGFile.create(*args, **kwargs)
         return cls(*args, **kwargs)

@@ -171,7 +171,10 @@ def handle_bulk_pages(gen):
             "MIDI files": {'audio/midi'},
             "DjVu files": {'image/vnd-djvu', 'image/vnd.djvu'},
             "PDF files": {'application/pdf'},
-            "SVG files": {'svg'}
+            "SVG files": {'svg'},
+            "Ogg sound files": {'ogg'},
+            "Ogv videos": {'ogv'},
+            'WebM videos': {'video/webm'},
         }
         for cat, mimeset in mime_cats.items():
             if mime in mimeset or meta.get('Composite:FileFormat') in mimeset:

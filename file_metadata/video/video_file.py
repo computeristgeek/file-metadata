@@ -12,4 +12,8 @@ class VideoFile(FFProbeMixin, GenericFile):
 
     @classmethod
     def create(cls, *args, **kwargs):
+        cls_file = cls(*args, **kwargs)
+        if cls_file.is_type('ogv'):
+            from file_metadata.video.ogv_file import OGVFile
+            return OGVFile.create(*args, **kwargs)
         return cls(*args, **kwargs)
