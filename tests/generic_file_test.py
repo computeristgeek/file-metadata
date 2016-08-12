@@ -177,10 +177,18 @@ class GenericFileCreateTest(unittest.TestCase):
 
     def test_create_audio_file(self):
         from file_metadata.audio.audio_file import AudioFile
-        for fname in ['drums.mid', 'bell.flac', 'bell.wav']:
+        for fname in ['drums.mid', 'bell.flac', 'bell.wav', 'bell.ogg',
+                      'bell.oga']:
             self.assertTrue(isinstance(
                 GenericFile.create(fetch_file(fname)), AudioFile),
                 'File "{0}" was not of type {1}'.format(fname, AudioFile))
+
+    def test_create_video_file(self):
+        from file_metadata.video.video_file import VideoFile
+        for fname in ['veins.ogv', 'ogg_video.ogg']:
+            self.assertTrue(isinstance(
+                GenericFile.create(fetch_file(fname)), VideoFile),
+                'File "{0}" was not of type {1}'.format(fname, VideoFile))
 
     def test_create_application_file(self):
         from file_metadata.application.application_file import ApplicationFile

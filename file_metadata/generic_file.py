@@ -94,16 +94,16 @@ class GenericFile(object):
                 subtype not in ('vnd-djvu', 'vnd.djvu')):
             from file_metadata.image.image_file import ImageFile
             return ImageFile.create(*args, **kwargs)
-        elif _type == 'audio':
+        elif _type == 'audio' or cls_file.is_type('ogg'):
             from file_metadata.audio.audio_file import AudioFile
             return AudioFile.create(*args, **kwargs)
+        elif _type == 'video' or cls_file.is_type('ogv'):
+            from file_metadata.video.video_file import VideoFile
+            return VideoFile.create(*args, **kwargs)
         elif _type == 'application':
             from file_metadata.application.application_file import (
                 ApplicationFile)
             return ApplicationFile.create(*args, **kwargs)
-        elif _type == 'video':
-            from file_metadata.video.video_file import VideoFile
-            return VideoFile.create(*args, **kwargs)
 
         return cls_file
 
@@ -192,6 +192,15 @@ class GenericFile(object):
         """
         if key == "svg":
             return bool(is_svg(self))
+        elif key == "ogg":
+            exif = self.exiftool()
+            return (exif.get('File:MIMEType') == 'audio/x-ogg' or
+                    (exif.get('File:MIMEType') == 'application/ogg' and
+                     exif.get('File:FileType').lower() == 'ogg'))
+        elif key == "ogv":
+            exif = self.exiftool()
+            return (exif.get('File:MIMEType') == 'application/ogg' and
+                    exif.get('File:FileType').lower() == 'ogv')
 
     def analyze_os_stat(self):
         """
