@@ -133,7 +133,12 @@ if __name__ == '__main__':
               "console_scripts": [
                   ("wikibot-filemeta-simple = "
                    "file_metadata.wikibot.simple_bot:main"),
-                  "wikibot-filemeta-log = file_metadata.wikibot.log_bot:main",
+                  ("wikibot-filemeta-log = "
+                   "file_metadata.wikibot.log_bot:main"),
+                  ("wikibot-filemeta-auto = "
+                   "file_metadata.wikibot.auto_bot:main"),
+                  ("wikibot-filemeta-manual = "
+                   "file_metadata.wikibot.manual_bot:main"),
                   ("wikibot-create-config = "
                    "file_metadata.wikibot.generate_user_files:main")]},
           # from http://pypi.python.org/pypi?%3Aaction=list_classifiers
