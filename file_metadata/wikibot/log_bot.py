@@ -7,7 +7,7 @@ developmental and possible messy script.
 
 Syntax:
 
-    wikibot-filemeta-bulk [-arguments ...]
+    wikibot-filemeta-log [-arguments ...]
 
 Arguments can be:
 
