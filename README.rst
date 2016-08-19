@@ -120,6 +120,8 @@ Build status
 .. image:: https://images.microbadger.com/badges/image/pywikibotcatfiles/file-metadata.svg
    :target: https://microbadger.com/images/pywikibotcatfiles/file-metadata
 
+Version
+-------
 
 .. image:: https://img.shields.io/pypi/v/file-metadata.svg
    :target: https://img.shields.io/pypi/v/file-metadata.svg
@@ -127,6 +129,8 @@ Build status
 .. image:: https://img.shields.io/github/release/qubyte/file-metadata.svg
    :target: ttps://img.shields.io/github/release/qubyte/file-metadata.svg
 
+Use
+---
 
 .. image:: https://img.shields.io/pypi/dm/file-metadata.svg
    :target: https://img.shields.io/pypi/dm/file-metadata.svg
@@ -134,6 +138,8 @@ Build status
 .. image:: https://img.shields.io/docker/pulls/pywikibotcatfiles/file-metadata.svg
    :target: https://img.shields.io/docker/pulls/pywikibotcatfiles/file-metadata.svg
 
+PyPI status
+-----------
 
 .. image:: https://img.shields.io/pypi/format/file-metadata.svg
    :target: https://img.shields.io/pypi/format/file-metadata.svg
