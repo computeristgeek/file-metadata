@@ -484,12 +484,14 @@ def handle_bulk_pages(gen):
                 info.append("** Position : " + _str_bbox(bar['bounding box']))
                 box_kwargs = {k: int(v * scale)
                               for k, v in bar['bounding box'].items()}
-                box_kwargs["color"] = "ff0000"
                 box_kwargs["css_class"] = "barcode"
-                img.append(img_bbox.format(**box_kwargs))
                 if (bar['bounding box']['height'] < 5 and
                         bar['bounding box']['width'] < 5):
+                    box_kwargs["color"] = "ff0000"
+                    img.append(img_bbox.format(**box_kwargs))
                     return set()
+                box_kwargs["color"] = "00ff00"
+                img.append(img_bbox.format(**box_kwargs))
                 for cat, formats in bar_cats.items():
                     if bar['format'].lower() in formats:
                         return {'Category:' + cat, 'Category:Barcode'}
@@ -547,12 +549,14 @@ def handle_bulk_pages(gen):
                     info.append("** Other features: " + ", ".join(feats))
                 box_kwargs = {k: int(v * scale)
                               for k, v in face['position'].items()}
-                box_kwargs["color"] = "ff0000"
                 box_kwargs["css_class"] = "barcode"
-                img.append(img_bbox.format(**box_kwargs))
                 if ((_type == 'opencv' and len(feats) > 2) or
                         (_type == 'dlib' and face['score'] > 0.045)):
+                    box_kwargs["color"] = "00ff00"
+                    img.append(img_bbox.format(**box_kwargs))
                     return _cats
+                box_kwargs["color"] = "ff0000"
+                img.append(img_bbox.format(**box_kwargs))
                 return set()
 
             # Save all face categories in this set, ad add it later if it
