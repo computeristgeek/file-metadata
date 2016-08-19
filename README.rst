@@ -98,7 +98,7 @@ Supported tags and respective ``Dockerfile`` links:
  * `show all... <https://hub.docker.com/r/pywikibotcatfiles/file-metadata/tags/>`__
 
 For more information about this image and its history, please see
-``pywikibotcatfiles/file-metadata`` (`on docker-hub <https://hub.docker.com/r/pywikibotcatfiles/file-metadata/builds/>`__).
+``pywikibotcatfiles/file-metadata`` (`on docker-hub <https://hub.docker.com/r/pywikibotcatfiles/file-metadata/tags/>`__).
 This image is updated via push to the ``pywikibot-catfiles/docker-file-metadata``
 `GitHub repo <https://github.com/pywikibot-catfiles/docker-file-metadata>`__
 or the ``pywikibot-catfiles/file-metadata``
@@ -116,6 +116,36 @@ Build status
 
 .. image:: https://travis-ci.org/pywikibot-catfiles/docker-file-metadata.svg?branch=master
    :target: https://travis-ci.org/pywikibot-catfiles/docker-file-metadata
+
+.. image:: https://images.microbadger.com/badges/image/pywikibotcatfiles/file-metadata.svg
+   :target: https://microbadger.com/images/pywikibotcatfiles/file-metadata
+
+
+.. image:: https://img.shields.io/pypi/v/file-metadata.svg
+   :target: https://img.shields.io/pypi/v/file-metadata.svg
+
+.. image:: https://img.shields.io/github/release/qubyte/file-metadata.svg
+   :target: ttps://img.shields.io/github/release/qubyte/file-metadata.svg
+
+
+.. image:: https://img.shields.io/pypi/dm/file-metadata.svg
+   :target: https://img.shields.io/pypi/dm/file-metadata.svg
+
+.. image:: https://img.shields.io/docker/pulls/pywikibotcatfiles/file-metadata.svg
+   :target: https://img.shields.io/docker/pulls/pywikibotcatfiles/file-metadata.svg
+
+
+.. image:: https://img.shields.io/pypi/format/file-metadata.svg
+   :target: https://img.shields.io/pypi/format/file-metadata.svg
+
+.. image:: https://img.shields.io/pypi/pyversions/file-metadata.svg
+   :target: https://img.shields.io/pypi/pyversions/file-metadata.svg
+
+.. image:: https://img.shields.io/pypi/implementation/file-metadata.svg
+   :target: https://img.shields.io/pypi/implementation/file-metadata.svg
+
+.. image:: https://img.shields.io/pypi/status/file-metadata.svg
+   :target: https://img.shields.io/pypi/status/file-metadata.svg
 
 Credits
 -------
