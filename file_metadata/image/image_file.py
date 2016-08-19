@@ -444,11 +444,12 @@ class ImageFile(GenericFile):
                           is defined by an array with 4 values i the order:
                           left, top, width, height.
         """
+        warn_msg = ('HAAR Cascade analysis requires the optional dependencies '
+                    'OpenCV and opencv-data to be installed.')
         try:
             import cv2
         except ImportError:
-            logging.warn('HAAR Cascade analysis requires the optional '
-                         'dependency OpenCV to be installed.')
+            logging.warn(warn_msg)
             return []
 
         haar_paths = [
@@ -462,6 +463,9 @@ class ImageFile(GenericFile):
             if _dir is not None and os.path.exists(_dir):
                 directory = _dir
                 break
+        if directory is None:
+            logging.warn(warn_msg)
+            return []
         cascade = cv2.CascadeClassifier(os.path.join(directory, filename),)
         features = cascade.detectMultiScale(image, **kwargs)
         return features
