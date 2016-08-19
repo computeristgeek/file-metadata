@@ -36,6 +36,8 @@ from file_metadata.generic_file import GenericFile
 from file_metadata.wikibot.utilities import (pywikibot, download_page,
                                              put_cats, stringify)
 
+from pywikibot import pagegenerators
+
 
 def handle_bulk_pages(gen):
     parsed_pages = set()
@@ -289,11 +291,15 @@ def handle_bulk_pages(gen):
         if ((greys is not None and greys < 2) or
                 (edges is not None and edges < 0.13) or
                 meta.get('Composite:FileFormat') == 'svg'):
-            cats.add('Category:Graphics')
-        if (meta.get('Color:MeanSquareErrorFromGrey', 999) < 20 and
-                meta.get('EXIF:Make') is not None):
-            # If it's scanned or from a camera and black-white
-            cats.add('Category:Black and white photographs')
+            if meta.get('EXIF:Make') is None:
+                cats.add('Category:Graphics')
+        if meta.get('Color:MeanSquareErrorFromGrey', 999) < 10:
+            if meta.get('EXIF:Make') is None:
+                cats.add('Category:Black and white')
+            else:  # If it's scanned or from a camera and black-white
+                cats.add('Category:Black and white photographs')
+        if meta.get('Color:MeanSquareErrorFromGrey', 999) == 0:
+            cats.add('Category:Grayscale')
         if meta.get('Color:UsesAlpha') is True:
             cats.add('Category:Transparent background')
 
@@ -360,7 +366,6 @@ def handle_bulk_pages(gen):
                     if face.get('mouth') is not None:
                         feats.add('Mouth')
                     if face.get('glasses') is not None:
-                        _cats.add('Category:People with glasses')
                         feats.add('Glasses')
 
                 if (face['position']['height'] * face['position']['width'] >
@@ -442,7 +447,7 @@ options = {}
 
 def main(*args):
     local_args = pywikibot.handle_args(args)
-    gen_factory = pywikibot.pagegenerators.GeneratorFactory()
+    gen_factory = pagegenerators.GeneratorFactory()
 
     for local_arg in local_args:
         if gen_factory.handleArg(local_arg):
@@ -459,7 +464,7 @@ def main(*args):
         return False
     else:
         pywikibot.Site().login()
-        pregenerator = pywikibot.pagegenerators.PreloadingGenerator(gen)
+        pregenerator = pagegenerators.PreloadingGenerator(gen)
         handle_bulk_pages(pregenerator)
         return True
 

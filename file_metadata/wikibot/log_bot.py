@@ -49,6 +49,8 @@ from file_metadata.generic_file import GenericFile
 from file_metadata.wikibot.utilities import (pywikibot, download_page,
                                              stringify)
 
+from pywikibot import pagegenerators
+
 
 def make_link(val):
     if val.lower().startswith('category:'):
@@ -362,11 +364,15 @@ def handle_bulk_pages(gen):
         if ((greys is not None and greys < 2) or
                 (edges is not None and edges < 0.13) or
                 meta.get('Composite:FileFormat') == 'svg'):
-            cats.add('Category:Graphics')
-        if (meta.get('Color:MeanSquareErrorFromGrey', 999) < 22 and
-                meta.get('EXIF:Make') is not None):
-            # If it's scanned or from a camera and black-white
-            cats.add('Category:Black and white photographs')
+            if meta.get('EXIF:Make') is None:
+                cats.add('Category:Graphics')
+        if meta.get('Color:MeanSquareErrorFromGrey', 999) < 20:
+            if meta.get('EXIF:Make') is None:
+                cats.add('Category:Black and white')
+            else:  # If it's scanned or from a camera and black-white
+                cats.add('Category:Black and white photographs')
+        if meta.get('Color:MeanSquareErrorFromGrey', 999) == 0:
+            cats.add('Category:Grayscale')
         if meta.get('Color:UsesAlpha') is True:
             cats.add('Category:Transparent background')
 
@@ -534,11 +540,9 @@ def handle_bulk_pages(gen):
                         # _cats.add('Category:Human mouths')
                         feats.add('Mouth')
                     if face.get('glasses') is not None:
-                        _cats.add('Category:People with glasses')
                         feats.add('Glasses')
 
-                if (face['position']['height'] * face['position']['width'] >
-                        0.55 * height * width):
+                if (_area_bbox(face['position']) > 0.55 * height * width):
                     # If face is very large...
                     _cats.add('Category:Portrait')
 
@@ -550,8 +554,9 @@ def handle_bulk_pages(gen):
                 box_kwargs = {k: int(v * scale)
                               for k, v in face['position'].items()}
                 box_kwargs["css_class"] = "barcode"
-                if ((_type == 'opencv' and len(feats) > 2) or
-                        (_type == 'dlib' and face['score'] > 0.045)):
+                if (((_type == 'opencv' and len(feats) > 2) or
+                        (_type == 'dlib' and face['score'] > 0.045)) and
+                        _area_bbox(face['position']) > width * height * 0):
                     box_kwargs["color"] = "00ff00"
                     img.append(img_bbox.format(**box_kwargs))
                     return _cats
@@ -723,7 +728,7 @@ options = {}
 
 def main(*args):
     local_args = pywikibot.handle_args(args)
-    gen_factory = pywikibot.pagegenerators.GeneratorFactory()
+    gen_factory = pagegenerators.GeneratorFactory()
 
     for local_arg in local_args:
         if gen_factory.handleArg(local_arg):
@@ -758,7 +763,7 @@ def main(*args):
         return False
     else:
         pywikibot.Site().login()
-        pregenerator = pywikibot.pagegenerators.PreloadingGenerator(gen)
+        pregenerator = pagegenerators.PreloadingGenerator(gen)
         handle_bulk_pages(pregenerator)
         return True
 
