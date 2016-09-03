@@ -58,7 +58,7 @@ install:
   - ls -l file_metadata/datafiles
 
 script:
-  - flake8 setup.py setupdeps.py file_metadata tests
+  - flake8 --verbose --show-source --statistics --benchmark --max-complexity 10 setup.py setupdeps.py file_metadata tests
   - python -m pytest --cov ;
   - python setup.py sdist bdist bdist_wheel
 
