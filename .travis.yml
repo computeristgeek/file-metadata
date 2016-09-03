@@ -59,6 +59,7 @@ install:
 
 script:
   - flake8 --verbose --show-source --statistics --benchmark --max-complexity 10 setup.py setupdeps.py file_metadata tests
+  - radon mi setup.py setupdeps.py file_metadata tests
   - python -m pytest --cov --durations=20 --pastebin=failed --mccabe ;
   - python setup.py sdist bdist bdist_wheel
 
