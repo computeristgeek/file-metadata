@@ -21,6 +21,7 @@ addons:
       - ffmpeg
       - libmagickwand-dev
       - libzbar-dev
+      - valgrind
 
 before_install:
   - export PATH="$HOME/miniconda/bin:$PATH"
@@ -61,6 +62,7 @@ script:
   - flake8 --verbose --show-source --statistics --benchmark --max-complexity 10 setup.py setupdeps.py file_metadata tests
   - radon mi setup.py setupdeps.py file_metadata tests
   - python -m pytest --cov --durations=20 --pastebin=failed --mccabe ;
+  - valgrind --tool=massif --massif-out-file=massif.out --log-file=valgrind.log python -m pytest && cat valgrind.log && ms_print massif.out
   - python setup.py sdist bdist bdist_wheel
 
 after_success:
