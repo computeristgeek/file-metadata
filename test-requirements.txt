@@ -15,5 +15,4 @@ flake8-string-format
 pep8-naming
 pep257
 flake8-future-import
-pytest-mccabe
 radon
