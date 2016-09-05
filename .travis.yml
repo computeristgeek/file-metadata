@@ -64,8 +64,8 @@ script:
   # complexity (--mccabe) and time (--profile, --durations) analysis by pytest
   # are too simplistic and buggy currently
   - python -m pytest --cov --pastebin=failed ;
-  - python -m cProfile -s time $(which py.test) ;
-  - valgrind --tool=massif --massif-out-file=massif.out --log-file=valgrind.log python -m pytest || cat valgrind.log && ms_print massif.out
+  - python -m cProfile -s time $(which py.test) > profile.out && head profile.out -n 50 ;
+  - valgrind --tool=massif --massif-out-file=massif.out --log-file=valgrind.log python -m pytest || cat valgrind.log && ms_print massif.out | head -n 50
   - python setup.py sdist bdist bdist_wheel
 
 after_success:
