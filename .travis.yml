@@ -61,7 +61,10 @@ install:
 script:
   - flake8 --verbose --show-source --statistics --benchmark --max-complexity 10 setup.py setupdeps.py file_metadata tests
   - radon mi setup.py setupdeps.py file_metadata tests
-  - python -m pytest --cov --durations=20 --pastebin=failed ;
+  # complexity (--mccabe) and time (--profile, --durations) analysis by pytest
+  # are too simplistic and buggy currently
+  - python -m pytest --cov --pastebin=failed ;
+  - python -m cProfile -s time $(which py.test) ;
   - valgrind --tool=massif --massif-out-file=massif.out --log-file=valgrind.log python -m pytest || cat valgrind.log && ms_print massif.out
   - python setup.py sdist bdist bdist_wheel
 
