@@ -124,7 +124,10 @@ class GenericFile(object):
         methods = methods or sorted(dir(self))
         for method in methods:
             if method.startswith(prefix) and method.endswith(suffix):
-                data.update(getattr(self, method)())
+		try:
+			data.update(getattr(self, method)())
+		except UnicodeDecodeError:
+			pass
         return data
 
     @memoized
